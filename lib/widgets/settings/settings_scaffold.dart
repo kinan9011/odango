@@ -20,6 +20,16 @@ class SettingsScaffold extends StatelessWidget {
   final Widget? bottom;
   final List<Widget>? actions;
   final bool largeTitle;
+  final VoidCallback? onBack;
+  final int? itemCount;
+  final IndexedWidgetBuilder? itemBuilder;
+
+  static const _padding = EdgeInsetsDirectional.fromSTEB(
+    AppSettingsLayout.sideMargin,
+    0,
+    AppSettingsLayout.sideMargin,
+    AppSpacing.huge,
+  );
 
   const SettingsScaffold({
     required this.title,
@@ -28,16 +38,32 @@ class SettingsScaffold extends StatelessWidget {
     this.bottom,
     this.actions,
     this.largeTitle = false,
+    this.onBack,
     super.key,
-  });
+  }) : itemCount = null,
+       itemBuilder = null;
+
+  const SettingsScaffold.builder({
+    required this.title,
+    required int this.itemCount,
+    required IndexedWidgetBuilder this.itemBuilder,
+    this.subtitle,
+    this.actions,
+    this.onBack,
+    super.key,
+  }) : children = const [],
+       bottom = null,
+       largeTitle = false;
 
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final columnMode = FluffyThemes.isColumnMode(context);
     final subtitle = this.subtitle;
+    final itemBuilder = this.itemBuilder;
     final bottom = this.bottom;
     final canPop = Navigator.of(context).canPop();
+    final hasBack = onBack != null || (!columnMode && canPop);
     return Scaffold(
       backgroundColor: tokens.bg,
       appBar: AppBar(
@@ -46,8 +72,8 @@ class SettingsScaffold extends StatelessWidget {
         automaticallyImplyLeading: false,
         centerTitle: false,
         toolbarHeight: 64,
-        titleSpacing: columnMode || !canPop ? AppSpacing.xxxl : 0,
-        leading: columnMode || !canPop
+        titleSpacing: !hasBack ? AppSpacing.xxxl : 0,
+        leading: !hasBack
             ? null
             : Padding(
                 padding: const EdgeInsetsDirectional.only(start: 10),
@@ -62,7 +88,7 @@ class SettingsScaffold extends StatelessWidget {
                       ).backButtonTooltip,
                       child: InkResponse(
                         key: backKey,
-                        onTap: () => Navigator.of(context).maybePop(),
+                        onTap: onBack ?? () => Navigator.of(context).maybePop(),
                         radius: 24,
                         child: Container(
                           width: 44,
@@ -85,7 +111,7 @@ class SettingsScaffold extends StatelessWidget {
                   ),
                 ),
               ),
-        leadingWidth: columnMode || !canPop ? 0 : 64,
+        leadingWidth: !hasBack ? 0 : 64,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -121,15 +147,13 @@ class SettingsScaffold extends StatelessWidget {
                   constraints: const BoxConstraints(
                     maxWidth: AppSettingsLayout.maxWidth,
                   ),
-                  child: ListView(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      AppSettingsLayout.sideMargin,
-                      0,
-                      AppSettingsLayout.sideMargin,
-                      AppSpacing.huge,
-                    ),
-                    children: children,
-                  ),
+                  child: itemBuilder == null
+                      ? ListView(padding: _padding, children: children)
+                      : ListView.builder(
+                          padding: _padding,
+                          itemCount: itemCount,
+                          itemBuilder: itemBuilder,
+                        ),
                 ),
               ),
             ),

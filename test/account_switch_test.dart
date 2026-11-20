@@ -34,6 +34,7 @@ import 'package:odango/widgets/layouts/app_tab.dart';
 import 'package:odango/widgets/layouts/chats_badge.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:odango/widgets/own_avatar.dart';
+import 'package:odango/widgets/shell_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/call_support_fakes.dart';
@@ -1744,7 +1745,7 @@ void main() {
 
     tearDown(setFlags);
 
-    Finder banners() => find.byType(MaterialBanner);
+    Finder banners() => find.byKey(ShellBanner.bannerKey);
 
     for (final width in [400.0, 1280.0]) {
       accountTest(

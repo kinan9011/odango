@@ -5103,5 +5103,64 @@
         "type": "String",
         "description": "Short explanation under the writing and replying settings group.",
         "placeholders": {}
+    },
+    "activeCallIndicator": "{count, plural, =1{1 person in a call} other{{count} people in a call}}",
+    "@activeCallIndicator": {
+        "type": "String",
+        "description": "Spoken label of the call badge on a chat row.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "qrCodeTitle": "QR code",
+    "@qrCodeTitle": {
+        "type": "String",
+        "description": "Title of the sheet that shows a QR code of a person or chat.",
+        "placeholders": {}
+    },
+    "showQrCode": "Show QR code",
+    "@showQrCode": {
+        "type": "String",
+        "description": "Tooltip of the button that opens a QR code.",
+        "placeholders": {}
+    },
+    "profileUnavailableNotice": "This profile could not be loaded. The person may not exist or their server is not answering. You can still try to message them.",
+    "@profileUnavailableNotice": {
+        "type": "String",
+        "description": "Notice in the profile sheet when the profile lookup failed.",
+        "placeholders": {}
+    },
+    "mediaPosition": "{index} of {total}",
+    "@mediaPosition": {
+        "type": "String",
+        "description": "Position of the shown picture or video in the media viewer.",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "roomAddress": "Room address",
+    "@roomAddress": {
+        "type": "String",
+        "description": "Label of the public address or ID of a chat in its profile.",
+        "placeholders": {}
+    },
+    "zoomIn": "Zoom in",
+    "@zoomIn": {
+        "type": "String",
+        "description": "Tooltip of the button that makes the log text bigger.",
+        "placeholders": {}
+    },
+    "zoomOut": "Zoom out",
+    "@zoomOut": {
+        "type": "String",
+        "description": "Tooltip of the button that makes the log text smaller.",
+        "placeholders": {}
     }
 }

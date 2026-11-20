@@ -6,8 +6,9 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/themes.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/pages/image_viewer/image_viewer_view.dart';
+import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/show_scaffold_dialog.dart';
 import 'package:odango/widgets/share_scaffold_dialog.dart';
@@ -30,13 +31,14 @@ class ImageViewer extends StatefulWidget {
   ImageViewerController createState() => ImageViewerController();
 }
 
-class ImageViewerController extends State<ImageViewer> {
+class ImageViewerController extends State<ImageViewer>
+    with SingleTickerProviderStateMixin {
   final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    allEvents =
+    final events =
         widget.timeline?.events
             .where(
               (event) => {
@@ -49,53 +51,63 @@ class ImageViewerController extends State<ImageViewer> {
             .reversed
             .toList() ??
         [widget.event];
+    allEvents = events.isEmpty ? [widget.event] : events;
     var index = allEvents.indexWhere(
       (event) => event.eventId == widget.event.eventId,
     );
     if (index < 0) index = 0;
     pageController = PageController(initialPage: index);
+    this.index = ValueNotifier(index);
   }
 
   late final PageController pageController;
 
+  late final ValueNotifier<int> index;
+
+  final ValueNotifier<bool> chromeVisible = ValueNotifier(true);
+
   late final List<Event> allEvents;
+
+  bool get rtl => Directionality.of(context) == TextDirection.rtl;
 
   void onKeyEvent(KeyEvent event) {
     switch (event.logicalKey) {
       case LogicalKeyboardKey.arrowLeft:
-        if (canGoBack) prevImage();
+        if (rtl ? canGoNext : canGoBack) rtl ? nextImage() : prevImage();
         break;
       case LogicalKeyboardKey.arrowRight:
-        if (canGoNext) nextImage();
+        if (rtl ? canGoBack : canGoNext) rtl ? prevImage() : nextImage();
         break;
     }
   }
 
-  Future<void> prevImage() async {
-    await pageController.previousPage(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-    );
-    if (!mounted) return;
-    setState(() {});
-  }
+  void onPageChanged(int page) => index.value = page;
 
-  Future<void> nextImage() async {
-    await pageController.nextPage(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-    );
-    if (!mounted) return;
-    setState(() {});
-  }
+  void toggleChrome() => chromeVisible.value = !chromeVisible.value;
 
-  int get _index => pageController.page?.toInt() ?? 0;
+  Duration get _pageDuration => motionDuration(context, AppMotion.pageMove);
 
-  Event get currentEvent => allEvents[_index];
+  Future<void> prevImage() => pageController.previousPage(
+    duration: _pageDuration,
+    curve: AppMotion.standard,
+  );
 
-  bool get canGoNext => _index < allEvents.length - 1;
+  Future<void> nextImage() => pageController.nextPage(
+    duration: _pageDuration,
+    curve: AppMotion.standard,
+  );
 
-  bool get canGoBack => _index > 0;
+  Future<void> jumpTo(int page) => pageController.animateToPage(
+    page,
+    duration: _pageDuration,
+    curve: AppMotion.standard,
+  );
+
+  Event get currentEvent => allEvents[index.value];
+
+  bool get canGoNext => index.value < allEvents.length - 1;
+
+  bool get canGoBack => index.value > 0;
 
   /// Forward this image to another room.
   void forwardAction() => showScaffoldDialog(
@@ -110,22 +122,41 @@ class ImageViewerController extends State<ImageViewer> {
   /// Save this file with a system call.
   void shareFileAction(BuildContext context) => currentEvent.shareFile(context);
 
-  static const maxScaleFactor = 1.5;
+  final ValueNotifier<double> dragOffset = ValueNotifier(0);
 
-  /// Go back if user swiped it away
-  void onInteractionEnds(ScaleEndDetails endDetails) {
-    if (PlatformInfos.usesTouchscreen == false) {
-      if (endDetails.velocity.pixelsPerSecond.dy >
-          MediaQuery.sizeOf(context).height * maxScaleFactor) {
-        Navigator.of(context, rootNavigator: false).pop();
-      }
+  late final AnimationController _rest = AnimationController(vsync: this)
+    ..addListener(
+      () => dragOffset.value =
+          _restFrom * (1 - AppViewer.returnCurve.transform(_rest.value)),
+    );
+
+  double _restFrom = 0;
+
+  void onDragUpdate(double dy) {
+    _rest.stop();
+    dragOffset.value = dy;
+  }
+
+  void onDragEnd(double height, {bool cancel = false}) {
+    if (!cancel &&
+        dragOffset.value.abs() > height * AppMotion.dismissFraction) {
+      Navigator.of(context, rootNavigator: false).pop();
+      return;
     }
+    _restFrom = dragOffset.value;
+    if (_restFrom == 0) return;
+    _rest.duration = motionDuration(context, AppViewer.returnToRest);
+    _rest.forward(from: 0);
   }
 
   @override
   void dispose() {
     focusNode.dispose();
     pageController.dispose();
+    index.dispose();
+    chromeVisible.dispose();
+    dragOffset.dispose();
+    _rest.dispose();
     super.dispose();
   }
 

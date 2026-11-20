@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/pages/chat_list/chat_list_item.dart';
 import 'package:odango/pages/chat_list/space_switcher.dart';
+import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/settings/settings_row.dart';
 
 import '../data/environment_constants.dart';
@@ -84,7 +85,7 @@ extension on FluffyChatTester {
     await tapOn('Add to space');
     await tapOn(
       find.descendant(
-        of: find.byType(ListTile),
+        of: find.byType(AppSheet),
         matching: find.text(_spaceName),
       ),
     );

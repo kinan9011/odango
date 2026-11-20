@@ -12,6 +12,7 @@ import 'flows/chat_flows.dart';
 import 'flows/chat_list_flows.dart';
 import 'flows/composer_flows.dart';
 import 'flows/conversation_flows.dart';
+import 'flows/dialog_flows.dart';
 import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
@@ -52,6 +53,8 @@ void main() {
     testWidgets('Topics', topicFlow);
     testWidgets('Disappearing messages', disappearingFlow);
     testWidgets('Direct chat with the default timer', directChatFlow);
+    testWidgets('User profile sheet', userSheetFlow);
+    testWidgets('Own QR sheet', profileQrFlow);
     testWidgets('Search encrypted chats', searchEncryptedFlow);
     testWidgets('Search unencrypted chats', searchServerFlow);
     testWidgets('Search index wiped on logout', searchWipeFlow);

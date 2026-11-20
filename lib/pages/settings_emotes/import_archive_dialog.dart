@@ -111,23 +111,8 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
       final imageCode = entry.value;
 
       if (widget.controller.pack!.images.containsKey(imageCode)) {
-        final completer = Completer<OkCancelResult>();
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-          final result = await showOkCancelAlertDialog(
-            useRootNavigator: false,
-            context: context,
-            title: L10n.of(context).emoteExists,
-            message: imageCode,
-            cancelLabel: L10n.of(context).replace,
-            okLabel: L10n.of(context).skip,
-          );
-          completer.complete(result);
-        });
-
-        final result = await completer.future;
-        if (result == OkCancelResult.ok) {
-          skipKeys.add(entry.key);
-        }
+        final skip = await askSkipDuplicateEmote(context, imageCode);
+        if (skip) skipKeys.add(entry.key);
       }
     }
 
@@ -359,4 +344,23 @@ extension on String {
         // ... replacing unexpected characters
         .replaceAll(RegExp(r'[^-\w]'), '_');
   }
+}
+
+/// Skip or replace an emote that exists. A dismissal skips: it never replaces.
+@visibleForTesting
+Future<bool> askSkipDuplicateEmote(BuildContext context, String code) {
+  final completer = Completer<bool>();
+  WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+    final result = await showOkCancelAlertDialog(
+      useRootNavigator: false,
+      context: context,
+      title: L10n.of(context).emoteExists,
+      message: code,
+      cancelLabel: L10n.of(context).replace,
+      okLabel: L10n.of(context).skip,
+      cancelIsAction: true,
+    );
+    completer.complete(result != OkCancelResult.cancel);
+  });
+  return completer.future;
 }

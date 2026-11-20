@@ -52,6 +52,7 @@ Future<void> pumpGoldenWidget(
   Locale locale = const Locale('en'),
   Size size = const Size(400, 300),
   bool settle = true,
+  Duration afterAssets = Duration.zero,
 }) async {
   SharedPreferences.setMockInitialValues({});
   await AppSettings.init(loadWebConfigFile: false);
@@ -86,6 +87,7 @@ Future<void> pumpGoldenWidget(
   }
   await tester.loadAssets();
   await tester.pump();
+  if (afterAssets > Duration.zero) await tester.pump(afterAssets);
 }
 
 /// Compares [child] against `test/goldens/<name>_<variant>.png` for every
@@ -95,6 +97,7 @@ Future<void> expectGoldenVariants(
   String name,
   Widget child, {
   Size size = const Size(400, 300),
+  Duration afterAssets = Duration.zero,
 }) async {
   for (final variant in goldenVariants) {
     await pumpGoldenWidget(
@@ -104,6 +107,7 @@ Future<void> expectGoldenVariants(
       rtl: variant.rtl,
       locale: variant.locale,
       size: size,
+      afterAssets: afterAssets,
     );
     await expectLater(
       find.byType(MaterialApp),

@@ -114,7 +114,6 @@ abstract class UpdateNotifier {
             actions: [
               AdaptiveDialogAction(
                 bigButtons: true,
-                targetPlatform: TargetPlatform.android,
                 onPressed: () => showSupportDialog(context),
                 child: Row(
                   mainAxisSize: .min,
@@ -135,14 +134,12 @@ abstract class UpdateNotifier {
               ),
               AdaptiveDialogAction(
                 bigButtons: true,
-                targetPlatform: TargetPlatform.android,
                 onPressed: () =>
                     launchWebUrl(RepoLinks.configured.releases.toString()),
                 child: Text(l10n.changelog),
               ),
               AdaptiveDialogAction(
                 bigButtons: true,
-                targetPlatform: TargetPlatform.android,
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(l10n.close),
               ),

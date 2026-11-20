@@ -102,7 +102,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       context: context,
       builder: (context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 256),
-        child: AlertDialog.adaptive(
+        child: AlertDialog(
           title: Text(rule.getPushRuleName(L10n.of(context))),
           content: Padding(
             padding: const EdgeInsetsDirectional.only(top: 16.0),

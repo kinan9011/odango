@@ -346,7 +346,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         break;
     }
 
-    return AlertDialog.adaptive(
+    return AlertDialog(
       title: title,
       content: SizedBox(
         height: 256,

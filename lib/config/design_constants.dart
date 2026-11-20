@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/utils/motion.dart';
 
 /// Shape (DESIGN.md 6.4). Pills use half of the element height.
 abstract class AppRadius {
@@ -183,6 +184,62 @@ abstract class AppTopics {
   static const double chipBarHeight = 44;
   static const double segmentHeight = 34;
   static const int maxChips = 8;
+}
+
+abstract class AppDialog {
+  static const double maxWidth = 356;
+  static const double sideInset = 28;
+  static const double buttonMinWidth = 64;
+  static const double buttonHeight = 44;
+  static const double buttonGap = 8;
+  static const double bigButtonHeight = 54;
+  static const double fieldRadius = 14;
+  static const double fieldFocusWidth = 1.5;
+  static const double actionTileRadius = 14;
+  static const double actionTileMinHeight = 64;
+  static const double actionRowHeight = 50;
+  static const double handleWidth = 40;
+  static const double handleHeight = 4;
+  static const double closeButton = 34;
+  static const double profileAvatar = 104;
+  static const double scrim = 0.35;
+  static const Duration sheetOpen = Duration(milliseconds: 400);
+  static const Duration sheetClose = Duration(milliseconds: 250);
+  static const Curve sheetOpenCurve = Cubic(.23, 1, .32, 1);
+  static const Curve sheetCloseCurve = Cubic(0, 0, .58, 1);
+}
+
+abstract class AppViewer {
+  static const double topBar = 56;
+  static const double stripHeight = 44;
+  static const double stripRadius = 6;
+  static const int stripWindow = 7;
+  static const double actionIcon = 25;
+  static const double captionMaxHeight = 96;
+  static const int maxCaptionUnits = 2000;
+  static const Duration chromeFade = Duration(milliseconds: 200);
+  static const Duration returnToRest = Duration(milliseconds: 250);
+  static const double actionRow = 56;
+  static const Curve returnCurve = DecelerateCurve(1.5);
+  static const double scrimAlpha = .5;
+  static const double muted = .65;
+}
+
+abstract class AppMotion {
+  static const Duration spinnerIn = Duration(milliseconds: 190);
+  static const double spinnerTension = 1.3;
+  static const Duration banner = Duration(milliseconds: 220);
+  static const Duration counterUp = Duration(milliseconds: 220);
+  static const Duration counterDown = Duration(milliseconds: 150);
+  static const Duration select = Duration(milliseconds: 180);
+  static const Duration fab = Duration(milliseconds: 250);
+  static const Duration pageMove = Duration(milliseconds: 250);
+  static const Duration shimmer = Duration(milliseconds: 1400);
+  static const Duration copied = Duration(milliseconds: 150);
+  static const Curve standard = Cubic(.25, .1, .25, 1);
+  static const Curve easeOut = Cubic(0, 0, .58, 1);
+  static const double dismissFraction = 1 / 6;
+  static const double dragStart = 30;
 }
 
 abstract class AppTypography {

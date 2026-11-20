@@ -19,7 +19,7 @@ Future<bool> deleteFolder(
   final l10n = L10n.of(context);
   final confirmed = await showAdaptiveDialog<bool>(
     context: context,
-    builder: (context) => AlertDialog.adaptive(
+    builder: (context) => AlertDialog(
       title: Text(l10n.deleteFolder),
       content: Text(l10n.deleteFolderConfirm(folder.name)),
       actions: [

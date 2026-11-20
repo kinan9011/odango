@@ -552,21 +552,7 @@ class MatrixState extends State<Matrix> {
               FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
               this.context;
           if (!context.mounted) return;
-          final result = await showOkCancelAlertDialog(
-            context: context,
-            title: L10n.of(context).pushNotificationsNotAvailable,
-            message: errorMsg,
-            okLabel: link == null
-                ? L10n.of(context).ok
-                : L10n.of(context).learnMore,
-            cancelLabel: L10n.of(context).doNotShowAgain,
-          );
-          if (result == OkCancelResult.ok && link != null) {
-            launchWebUrl(link.toString(), mode: LaunchMode.externalApplication);
-          }
-          if (result == OkCancelResult.cancel) {
-            await AppSettings.showNoGoogle.setItem(true);
-          }
+          await showPushUnavailableNotice(context, errorMsg, link);
         },
       );
     }
@@ -708,3 +694,25 @@ class MatrixState extends State<Matrix> {
 }
 
 enum CallPosition { fullScreen, top }
+
+@visibleForTesting
+Future<void> showPushUnavailableNotice(
+  BuildContext context,
+  String errorMsg,
+  Uri? link,
+) async {
+  final result = await showOkCancelAlertDialog(
+    context: context,
+    title: L10n.of(context).pushNotificationsNotAvailable,
+    message: errorMsg,
+    okLabel: link == null ? L10n.of(context).ok : L10n.of(context).learnMore,
+    cancelLabel: L10n.of(context).doNotShowAgain,
+    cancelIsAction: true,
+  );
+  if (result == OkCancelResult.ok && link != null) {
+    launchWebUrl(link.toString(), mode: LaunchMode.externalApplication);
+  }
+  if (result == OkCancelResult.cancel) {
+    await AppSettings.showNoGoogle.setItem(true);
+  }
+}

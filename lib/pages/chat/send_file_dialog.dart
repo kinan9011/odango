@@ -245,7 +245,7 @@ class SendFileDialogState extends State<SendFileDialog> {
         final sizeString =
             snapshot.data ?? L10n.of(context).calculatingFileSize;
 
-        return AlertDialog.adaptive(
+        return AlertDialog(
           title: Text(sendStr),
           content: SizedBox(
             width: 256,

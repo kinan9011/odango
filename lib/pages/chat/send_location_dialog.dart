@@ -117,7 +117,7 @@ class SendLocationDialogState extends State<SendLocationDialog> {
         ],
       );
     }
-    return AlertDialog.adaptive(
+    return AlertDialog(
       title: Text(L10n.of(context).shareLocation),
       content: contentWidget,
       actions: [

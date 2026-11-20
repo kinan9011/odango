@@ -435,8 +435,9 @@ class ChatController extends State<ChatPageWithRoom>
         cancelLabel: L10n.of(context).decline,
         okLabel: L10n.of(context).declineAndBlock,
         isDestructive: true,
+        cancelIsAction: true,
       );
-      if (blockConsent == null) return;
+      if (blockConsent == null || blockConsent == .dismissed) return;
       if (!mounted) return;
       if (blockConsent == .ok) {
         final inviteEvent = room.getState(
@@ -1118,7 +1119,7 @@ class ChatController extends State<ChatPageWithRoom>
         okLabel: l10n.sendAsText,
         cancelLabel: l10n.cancel,
       );
-      if (dialogResult == OkCancelResult.cancel) return;
+      if (dialogResult != OkCancelResult.ok) return;
       parseCommands = false;
     }
 
@@ -2078,7 +2079,7 @@ class ChatController extends State<ChatPageWithRoom>
         okLabel: L10n.of(context).ok,
         cancelLabel: L10n.of(context).cancel,
       );
-      if (result == OkCancelResult.cancel) return;
+      if (result != OkCancelResult.ok) return;
     }
 
     cancelReplyEventAction();

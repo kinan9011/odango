@@ -6,6 +6,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,7 @@ void main() {
     late BuildContext context;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(extensions: [AppTokens.light()]),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         home: Scaffold(

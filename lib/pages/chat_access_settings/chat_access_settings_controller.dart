@@ -202,7 +202,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
       message: l10n.roomUpgradeDescription,
       isDestructive: true,
     );
-    if (confirmUpgrade == OkCancelResult.cancel) {
+    if (confirmUpgrade != OkCancelResult.ok) {
       return;
     }
     if (!mounted) return;
@@ -286,8 +286,9 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
       message: alias,
       okLabel: l10n.yes,
       cancelLabel: l10n.no,
+      cancelIsAction: true,
     );
-    if (!mounted) return;
+    if (!mounted || canonicalAliasConsent == OkCancelResult.dismissed) return;
 
     final altAliases =
         room

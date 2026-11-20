@@ -3,8 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:odango/widgets/app_sheet.dart';
 
 Future<T?> showModalActionPopup<T>({
   required BuildContext context,
@@ -13,92 +16,101 @@ Future<T?> showModalActionPopup<T>({
   String? message,
   String? cancelLabel,
   bool useRootNavigator = true,
-}) {
-  final theme = Theme.of(context);
-
-  switch (theme.platform) {
-    case TargetPlatform.android:
-    case TargetPlatform.fuchsia:
-    case TargetPlatform.windows:
-    case TargetPlatform.linux:
-      return showModalBottomSheet(
-        isScrollControlled: true,
-        useRootNavigator: useRootNavigator,
-        context: context,
-        clipBehavior: Clip.hardEdge,
-        constraints: BoxConstraints(
-          maxWidth: 512,
-          maxHeight: MediaQuery.sizeOf(context).height - 32,
-        ),
-        builder: (context) => ListView(
-          shrinkWrap: true,
-          children: [
-            if (title != null || message != null) ...[
-              ListTile(
-                title: title == null
-                    ? null
-                    : Text(title, style: theme.textTheme.labelSmall),
-                subtitle: message == null ? null : Text(message),
-              ),
-              const Divider(height: 1),
-            ],
-            ...actions.map(
-              (action) => ListTile(
-                leading: action.icon,
-                title: Text(
-                  action.label,
-                  maxLines: 1,
-                  style: action.isDestructive
-                      ? TextStyle(
-                          color: theme.colorScheme.error,
-                          fontWeight: action.isDefaultAction
-                              ? FontWeight.bold
-                              : null,
-                        )
-                      : null,
-                ),
-                onTap: () => Navigator.of(context).pop<T>(action.value),
+}) => showAppSheet<T>(
+  context: context,
+  useRootNavigator: useRootNavigator,
+  builder: (context) {
+    final tokens = AppTokens.of(context);
+    return AppSheet(
+      title: title,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (message != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.s),
+              child: Text(
+                message,
+                style: TextStyle(color: tokens.mut, fontSize: 13),
               ),
             ),
-            if (cancelLabel != null) ...[
-              const Divider(height: 1),
-              ListTile(
-                title: Text(cancelLabel),
-                onTap: () => Navigator.of(context).pop(null),
-              ),
-            ],
+          for (final (i, action) in actions.indexed) ...[
+            if (i > 0) Divider(height: 1, color: tokens.line),
+            _ActionRow<T>(
+              action: action,
+              onTap: () => Navigator.of(context).pop<T>(action.value),
+            ),
           ],
-        ),
-      );
-    case TargetPlatform.iOS:
-    case TargetPlatform.macOS:
-      return showCupertinoModalPopup<T>(
-        context: context,
-        useRootNavigator: useRootNavigator,
-        builder: (context) => ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 512),
-          child: CupertinoActionSheet(
-            title: title == null ? null : Text(title),
-            message: message == null ? null : Text(message),
-            cancelButton: cancelLabel == null
-                ? null
-                : CupertinoActionSheetAction(
-                    onPressed: () => Navigator.of(context).pop(null),
-                    child: Text(cancelLabel),
+          if (cancelLabel != null) ...[
+            const SizedBox(height: AppSpacing.m),
+            AdaptiveDialogInkWell(
+              onTap: () => Navigator.of(context).pop(null),
+              child: Text(cancelLabel),
+            ),
+          ],
+        ],
+      ),
+    );
+  },
+);
+
+class _ActionRow<T> extends StatelessWidget {
+  final AdaptiveModalAction<T> action;
+  final VoidCallback onTap;
+
+  const _ActionRow({required this.action, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final color = action.isDestructive ? tokens.red : tokens.fg;
+    final icon = action.icon;
+    return Semantics(
+      button: true,
+      label: action.label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppDialog.actionTileRadius),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppDialog.actionRowHeight,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            child: Row(
+              spacing: AppSpacing.xl,
+              children: [
+                if (icon != null)
+                  IconTheme.merge(
+                    data: IconThemeData(
+                      size: 22,
+                      color: action.isDestructive ? tokens.red : tokens.mut,
+                    ),
+                    child: icon,
                   ),
-            actions: actions
-                .map(
-                  (action) => CupertinoActionSheetAction(
-                    isDestructiveAction: action.isDestructive,
-                    isDefaultAction: action.isDefaultAction,
-                    onPressed: () => Navigator.of(context).pop<T>(action.value),
-                    child: Text(action.label, maxLines: 1),
+                Expanded(
+                  child: Text(
+                    action.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 15.5,
+                      fontWeight: action.isDefaultAction
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                    ),
                   ),
-                )
-                .toList(),
+                ),
+              ],
+            ),
           ),
         ),
-      );
+      ),
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_config.dart';
 import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/utils/oklch.dart';
@@ -245,4 +246,39 @@ void main() {
       expect(store.getKeys(), isEmpty);
     });
   });
+
+  for (final brightness in Brightness.values) {
+    final tokens = brightness == Brightness.dark
+        ? AppTokens.dark()
+        : AppTokens.light();
+    testWidgets('${brightness.name}: dialog, sheet and snack bar theme', (
+      tester,
+    ) async {
+      final theme = await build(tester, brightness);
+      final dialog = theme.dialogTheme;
+      expect(dialog.backgroundColor, tokens.surf);
+      expect(
+        dialog.shape,
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+      );
+      expect(dialog.barrierColor, AppTokens.overlay(AppDialog.scrim));
+      expect(dialog.titleTextStyle?.fontSize, 20);
+      expect(dialog.titleTextStyle?.fontWeight, FontWeight.w700);
+      expect(dialog.titleTextStyle?.color, tokens.fg);
+
+      final sheet = theme.bottomSheetTheme;
+      expect(sheet.backgroundColor, tokens.surf);
+      expect(
+        sheet.dragHandleSize,
+        const Size(AppDialog.handleWidth, AppDialog.handleHeight),
+      );
+
+      expect(
+        theme.snackBarTheme.shape,
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      );
+    });
+  }
 }

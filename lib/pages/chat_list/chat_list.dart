@@ -232,7 +232,7 @@ class ChatListController extends State<ChatList>
       cancelLabel: L10n.of(context).cancel,
       isDestructive: true,
     );
-    if (confirmed == OkCancelResult.cancel) return;
+    if (confirmed != OkCancelResult.ok) return;
     if (!mounted) return;
     await showFutureLoadingDialog(context: context, future: room.leave);
   }
