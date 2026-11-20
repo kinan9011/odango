@@ -33,6 +33,7 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
   }
 
   String? errorText;
+  int attempt = 0;
 
   void ignoreUser(BuildContext context) {
     final userId = controller.text.trim();
@@ -40,6 +41,7 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
     if (!userId.isValidMatrixIdStrict() || userId.sigil != '@') {
       setState(() {
         errorText = L10n.of(context).invalidInput;
+        attempt++;
       });
       return;
     }

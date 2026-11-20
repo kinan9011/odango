@@ -22,7 +22,11 @@ import 'test_client.dart';
 /// The whole app on a fake server, opened on a chat. Shared by the conversation
 /// widget tests.
 class ChatPageHarness {
-  ChatPageHarness({this.httpClient});
+  ChatPageHarness({this.httpClient, this.clientName});
+
+  /// A client with its own database, for tests that wipe the account
+  /// (`ignoreUser` clears the cache and every room).
+  final String? clientName;
 
   /// A recording fake server for tests that assert on the requests.
   final BaseClient? httpClient;
@@ -52,7 +56,10 @@ class ChatPageHarness {
           (_) async =>
               const StandardMessageCodec().encodeMessage(<Object?>[null]),
         );
-    client = await prepareTestClient(httpClient: httpClient);
+    client = await prepareTestClient(
+      httpClient: httpClient,
+      clientName: clientName,
+    );
     client.backgroundSync = false;
     fixtureRoom = client.rooms.firstWhere(
       (room) => room.membership == Membership.join,

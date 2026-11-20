@@ -33,6 +33,14 @@ class OvershootCurve extends Curve {
 AnimationStyle? dialogAnimationStyle(BuildContext context) =>
     MediaQuery.disableAnimationsOf(context) ? AnimationStyle.noAnimation : null;
 
+// Android's AccelerateDecelerateInterpolator, the default of ObjectAnimator.
+class AccelerateDecelerateCurve extends Curve {
+  const AccelerateDecelerateCurve();
+
+  @override
+  double transformInternal(double t) => math.cos((t + 1) * math.pi) / 2 + .5;
+}
+
 // Android's DecelerateInterpolator maths: 1 - (1 - t)^(2 * factor).
 class DecelerateCurve extends Curve {
   final double factor;

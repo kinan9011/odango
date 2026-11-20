@@ -5,10 +5,18 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_3pid/settings_3pid.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/animated_row_list.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
 
 class Settings3PidView extends StatelessWidget {
   final Settings3PidController controller;
@@ -17,92 +25,96 @@ class Settings3PidView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final l10n = L10n.of(context);
     controller.request ??= Matrix.of(context).client.getAccount3PIDs();
-    return Scaffold(
-      appBar: AppBar(
-        leading: const Center(child: BackButton()),
-        title: Text(L10n.of(context).passwordRecovery),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_outlined),
-            onPressed: controller.add3PidAction,
-            tooltip: L10n.of(context).addEmail,
-          ),
-        ],
-      ),
-      body: MaxWidthBody(
-        withScrolling: false,
-        child: FutureBuilder<List<ThirdPartyIdentifier>?>(
+    return SettingsScaffold(
+      title: l10n.passwordRecovery,
+      children: [
+        SettingsGroup(
+          rows: [
+            SettingsRow(
+              key: const ValueKey('add_3pid'),
+              icon: Icons.add_rounded,
+              title: l10n.addEmail,
+              showChevron: false,
+              onTap: controller.add3PidAction,
+            ),
+          ],
+        ),
+        FutureBuilder<List<ThirdPartyIdentifier>?>(
           future: controller.request,
-          builder:
-              (
-                BuildContext context,
-                AsyncSnapshot<List<ThirdPartyIdentifier>?> snapshot,
-              ) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      snapshot.error.toString(),
-                      textAlign: TextAlign.center,
+          builder: (context, snapshot) {
+            final error = snapshot.error;
+            if (error != null) {
+              return SettingsGroup(
+                rows: [
+                  SettingsNotice(
+                    tone: SettingsNoticeTone.error,
+                    icon: Icons.error_outline_rounded,
+                    text: error.toLocalizedString(context),
+                  ),
+                ],
+              );
+            }
+            final identifier = snapshot.data;
+            if (identifier == null) {
+              return const Padding(
+                padding: EdgeInsets.all(AppSpacing.huge),
+                child: Center(
+                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                ),
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SettingsGroup(
+                  rows: [
+                    SettingsNotice(
+                      tone: identifier.isEmpty
+                          ? SettingsNoticeTone.warn
+                          : SettingsNoticeTone.info,
+                      icon: identifier.isEmpty
+                          ? Icons.warning_amber_rounded
+                          : Icons.info_outline_rounded,
+                      text: identifier.isEmpty
+                          ? l10n.noPasswordRecoveryDescription
+                          : l10n.withTheseAddressesRecoveryDescription,
                     ),
-                  );
-                }
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                  );
-                }
-                final identifier = snapshot.data!;
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.scaffoldBackgroundColor,
-                        foregroundColor: identifier.isEmpty
-                            ? Colors.orange
-                            : Colors.grey,
-                        child: Icon(
-                          identifier.isEmpty
-                              ? Icons.warning_outlined
-                              : Icons.info_outlined,
-                        ),
-                      ),
-                      title: Text(
-                        identifier.isEmpty
-                            ? L10n.of(context).noPasswordRecoveryDescription
-                            : L10n.of(
-                                context,
-                              ).withTheseAddressesRecoveryDescription,
-                      ),
-                    ),
-                    const Divider(),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: identifier.length,
-                        itemBuilder: (BuildContext context, int i) => ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: theme.scaffoldBackgroundColor,
-                            foregroundColor: Colors.grey,
-                            child: Icon(identifier[i].iconData),
+                  ],
+                ),
+                SettingsGroup(
+                  rows: [
+                    AnimatedRowList<ThirdPartyIdentifier>(
+                      items: identifier,
+                      keyOf: (item) => '${item.medium.name}|${item.address}',
+                      itemBuilder: (context, item) => SettingsRow(
+                        key: ValueKey('3pid_${item.address}'),
+                        icon: item.iconData,
+                        neutralTile: true,
+                        title: visibleId(item.address),
+                        showChevron: false,
+                        trailing: IconButton(
+                          tooltip: l10n.delete,
+                          constraints: const BoxConstraints(
+                            minWidth: AppChat.tapTarget,
+                            minHeight: AppChat.tapTarget,
                           ),
-                          title: Text(identifier[i].address),
-                          trailing: IconButton(
-                            tooltip: L10n.of(context).delete,
-                            icon: const Icon(Icons.delete_forever_outlined),
-                            color: Colors.red,
-                            onPressed: () =>
-                                controller.delete3Pid(identifier[i]),
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            color: AppTokens.of(context).red,
                           ),
+                          onPressed: () => controller.delete3Pid(item),
                         ),
                       ),
                     ),
                   ],
-                );
-              },
+                ),
+              ],
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 }

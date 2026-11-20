@@ -6,15 +6,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
-import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_notifications/push_rule_extensions.dart';
 import 'package:odango/utils/background_push.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/push_helper.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
-import 'package:odango/widgets/settings_switch_list_tile.dart';
+import 'package:odango/utils/visible_id.dart';
+import 'package:odango/widgets/settings/animated_row_list.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
@@ -29,7 +35,9 @@ class SettingsNotificationsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pushRules = Matrix.of(context).client.globalPushRules;
+    final l10n = L10n.of(context);
+    final client = Matrix.of(context).client;
+    final pushRules = client.globalPushRules;
     final pushCategories = [
       if (pushRules?.override?.isNotEmpty ?? false)
         (rules: pushRules?.override ?? [], kind: PushRuleKind.override),
@@ -41,15 +49,11 @@ class SettingsNotificationsView extends StatelessWidget {
         (rules: pushRules?.underride ?? [], kind: PushRuleKind.underride),
     ];
     final pushService = Matrix.of(context).backgroundPush;
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !FluffyThemes.isColumnMode(context),
-        centerTitle: FluffyThemes.isColumnMode(context),
-        title: Text(L10n.of(context).notifications),
-      ),
-      body: MaxWidthBody(
-        child: StreamBuilder(
-          stream: Matrix.of(context).client.onSync.stream.where(
+    return SettingsScaffold(
+      title: l10n.notifications,
+      children: [
+        StreamBuilder(
+          stream: client.onSync.stream.where(
             (syncUpdate) =>
                 syncUpdate.accountData?.any(
                   (accountData) => accountData.type == 'm.push_rules',
@@ -57,88 +61,66 @@ class SettingsNotificationsView extends StatelessWidget {
                 false,
           ),
           builder: (BuildContext context, _) {
-            final theme = Theme.of(context);
             final lastReceivedPush =
-                lastReceivedPushNotification[Matrix.of(
-                  context,
-                ).client.clientName];
+                lastReceivedPushNotification[client.clientName];
+            final headerless = [
+              if (kDebugMode && lastReceivedPush != null)
+                SettingsRow(
+                  icon: Icons.bug_report_outlined,
+                  title: 'Last received push notification',
+                  subtitle: lastReceivedPush.toIso8601String(),
+                  showChevron: false,
+                ),
+              if (kIsWeb)
+                AppSettingToggleRow(
+                  setting: AppSettings.webNotificationSound,
+                  title: l10n.playSoundOnNotification,
+                  defaultValue: true,
+                ),
+            ];
             return SelectionArea(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (kDebugMode && lastReceivedPush != null)
-                    ListTile(
-                      title: Text('Last received push notification'),
-                      subtitle: Text(lastReceivedPush.toIso8601String()),
-                    ),
-                  if (kIsWeb)
-                    SettingsSwitchListTile.adaptive(
-                      title: L10n.of(context).playSoundOnNotification,
-                      setting: AppSettings.webNotificationSound,
-                    ),
+                  if (headerless.isNotEmpty) SettingsGroup(rows: headerless),
                   if (pushRules != null)
-                    for (final category in pushCategories) ...[
-                      ListTile(
-                        title: Text(
-                          category.kind.localized(L10n.of(context)),
-                          style: TextStyle(
-                            color: theme.colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      for (final rule in category.rules)
-                        ListTile(
-                          onTap: () =>
-                              controller.editPushRule(rule, category.kind),
-                          title: Text(rule.getPushRuleName(L10n.of(context))),
-                          subtitle: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: rule.getPushRuleDescription(
-                                    L10n.of(context),
-                                  ),
-                                ),
-                                const TextSpan(text: ' '),
-                                TextSpan(
-                                  text: L10n.of(context).more,
-                                  style: TextStyle(
-                                    color: theme.colorScheme.primary,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          trailing: Semantics(
-                            label: rule.getPushRuleName(L10n.of(context)),
-                            child: Switch.adaptive(
+                    for (final category in pushCategories)
+                      SettingsGroup(
+                        header: category.kind.localized(l10n),
+                        dividerInset: AppSettingsLayout.rowPadding,
+                        rows: [
+                          for (final rule in category.rules)
+                            SettingsToggleRow(
+                              key: ValueKey(
+                                'rule_${category.kind.name}_${rule.ruleId}',
+                              ),
+                              title: rule.getPushRuleName(l10n),
+                              subtitle: rule.getPushRuleDescription(l10n),
                               value: rule.enabled,
+                              rowHint: l10n.more,
+                              onTapRow: () =>
+                                  controller.editPushRule(rule, category.kind),
                               onChanged: controller.isLoading
                                   ? null
                                   : rule.ruleId != '.m.rule.master' &&
-                                        Matrix.of(
-                                          context,
-                                        ).client.allPushNotificationsMuted
+                                        client.allPushNotificationsMuted
                                   ? null
                                   : (_) => controller.togglePushRule(
                                       category.kind,
                                       rule,
                                     ),
                             ),
-                          ),
-                        ),
-                      Divider(color: theme.dividerColor),
-                    ],
-
-                  if (pushService?.firebaseEnabled != true)
-                    ListTile(
-                      title: Text(L10n.of(context).buildDoesNotSupportFirebase),
-                      leading: Icon(
-                        Icons.close,
-                        color: theme.colorScheme.error,
+                        ],
                       ),
+                  if (pushService?.firebaseEnabled != true)
+                    SettingsGroup(
+                      rows: [
+                        SettingsNotice(
+                          tone: SettingsNoticeTone.error,
+                          icon: Icons.close_rounded,
+                          text: l10n.buildDoesNotSupportFirebase,
+                        ),
+                      ],
                     ),
                   if (PlatformInfos.isAndroid)
                     FutureBuilder(
@@ -148,105 +130,105 @@ class SettingsNotificationsView extends StatelessWidget {
                         if (distributors == null || distributors.isEmpty) {
                           if (pushService?.firebaseEnabled == true &&
                               pushService?.fcmToken == null) {
-                            return ListTile(
-                              title: Text(
-                                L10n.of(
-                                  context,
-                                ).unableToRegisterDeviceForFirebase,
-                              ),
-                              leading: Icon(
-                                Icons.close,
-                                color: theme.colorScheme.error,
-                              ),
+                            return SettingsGroup(
+                              rows: [
+                                SettingsNotice(
+                                  tone: SettingsNoticeTone.error,
+                                  icon: Icons.close_rounded,
+                                  text: l10n.unableToRegisterDeviceForFirebase,
+                                ),
+                              ],
                             );
                           }
-                          return SizedBox.shrink();
+                          return const SizedBox.shrink();
                         }
-                        return ListTile(
-                          title: Text(L10n.of(context).unifiedPushDistributors),
-                          leading: Icon(Icons.info_outlined),
-                          subtitle: SelectableText(distributors.join(', ')),
-                          trailing: distributors.length >= 2
-                              ? IconButton(
-                                  onPressed: () => UnifiedPushUi(
-                                    context: context,
-                                    instances: ['default'],
-                                    unifiedPushFunctions: UPFunctions(),
-                                    showNoDistribDialog: false,
-                                    onNoDistribDialogDismissed:
-                                        () {}, // TODO: Implement me
-                                  ).registerAppWithDialog(),
-                                  icon: Icon(Icons.edit_outlined),
-                                  style: IconButton.styleFrom(
-                                    backgroundColor:
-                                        theme.colorScheme.primaryContainer,
-                                    foregroundColor:
-                                        theme.colorScheme.onPrimaryContainer,
-                                  ),
-                                )
-                              : null,
+                        return SettingsGroup(
+                          rows: [
+                            SettingsRow(
+                              icon: Icons.info_outline_rounded,
+                              title: l10n.unifiedPushDistributors,
+                              subtitle: distributors.join(', '),
+                              showChevron: false,
+                              trailing: distributors.length >= 2
+                                  ? IconButton(
+                                      tooltip: l10n.edit,
+                                      constraints: const BoxConstraints(
+                                        minWidth: AppChat.tapTarget,
+                                        minHeight: AppChat.tapTarget,
+                                      ),
+                                      onPressed: () => UnifiedPushUi(
+                                        context: context,
+                                        instances: ['default'],
+                                        unifiedPushFunctions: UPFunctions(),
+                                        showNoDistribDialog: false,
+                                        onNoDistribDialogDismissed:
+                                            () {}, // TODO: Implement me
+                                      ).registerAppWithDialog(),
+                                      icon: Icon(
+                                        Icons.edit_outlined,
+                                        color: AppTokens.of(context).acc,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                          ],
                         );
                       },
                     ),
-                  ListTile(
-                    title: Text(
-                      L10n.of(context).devices,
-                      style: TextStyle(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  FutureBuilder<List<Pusher>?>(
-                    future: controller.pusherFuture ??= Matrix.of(
-                      context,
-                    ).client.getPushers(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        Center(
-                          child: Text(
-                            snapshot.error!.toLocalizedString(context),
-                          ),
-                        );
-                      }
-                      if (snapshot.connectionState != ConnectionState.done) {
-                        const Center(
-                          child: CircularProgressIndicator.adaptive(
-                            strokeWidth: 2,
-                          ),
-                        );
-                      }
-                      final pushers = snapshot.data ?? [];
-                      if (pushers.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              bottom: 16.0,
+                  SettingsGroup(
+                    header: l10n.devices,
+                    rows: [
+                      FutureBuilder<List<Pusher>?>(
+                        future: controller.pusherFuture ??= client.getPushers(),
+                        builder: (context, snapshot) {
+                          final error = snapshot.error;
+                          if (error != null) {
+                            return SettingsNotice(
+                              tone: SettingsNoticeTone.error,
+                              text: error.toLocalizedString(context),
+                            );
+                          }
+                          if (snapshot.connectionState !=
+                              ConnectionState.done) {
+                            return const SizedBox(
+                              height: AppSettingsLayout.rowHeight,
+                              child: Center(
+                                child: CircularProgressIndicator.adaptive(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          }
+                          final pushers = snapshot.data ?? [];
+                          if (pushers.isEmpty) {
+                            return SettingsNotice(
+                              text: l10n.noOtherDevicesFound,
+                            );
+                          }
+                          return AnimatedRowList<Pusher>(
+                            items: pushers,
+                            keyOf: (pusher) =>
+                                '${pusher.appId}|${pusher.pushkey}',
+                            itemBuilder: (context, pusher) => SettingsRow(
+                              key: ValueKey(
+                                'pusher_${pusher.appId}_${pusher.pushkey}',
+                              ),
+                              icon: Icons.phone_android_rounded,
+                              title: visibleId(pusher.appId),
+                              subtitle: visibleId(pusher.data.url.toString()),
+                              onTap: () => controller.onPusherTap(pusher),
                             ),
-                            child: Text(L10n.of(context).noOtherDevicesFound),
-                          ),
-                        );
-                      }
-                      return SelectionArea(
-                        child: ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: pushers.length,
-                          itemBuilder: (_, i) => ListTile(
-                            title: Text(pushers[i].appId),
-                            subtitle: Text(pushers[i].data.url.toString()),
-                            onTap: () => controller.onPusherTap(pushers[i]),
-                          ),
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             );
           },
         ),
-      ),
+      ],
     );
   }
 }

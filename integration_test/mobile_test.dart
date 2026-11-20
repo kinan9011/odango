@@ -61,6 +61,9 @@ void main() {
     testWidgets('Space community', communityFlow);
     testWidgets('Settings appearance', settingsAppearanceFlow);
     testWidgets('Settings chat', settingsChatFlow);
+    testWidgets('Settings notifications', settingsNotificationsFlow);
+    testWidgets('Settings blocked users', settingsBlockedUsersFlow);
+    testWidgets('Settings double-tap reaction', settingsDoubleTapReactionFlow);
     testWidgets('Settings homeserver features', settingsHomeserverFlow);
     testWidgets('Settings export chat', settingsExportFlow);
     // Signs out every other session of the user: keep it after the flows that

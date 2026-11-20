@@ -4,13 +4,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
-import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_folders/folder_editor.dart';
 import 'package:odango/utils/chat_list/folder_store.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
+import 'package:odango/utils/visible_id.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/settings/animated_row_list.dart';
+import 'package:odango/widgets/settings/settings_check_row.dart';
+import 'package:odango/widgets/settings/settings_field_row.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 class FolderEditorView extends StatelessWidget {
   final FolderEditorController controller;
@@ -20,134 +31,161 @@ class FolderEditorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
-    final theme = Theme.of(context);
     final client = controller.client;
     final readOnly = controller.readOnly;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(controller.isNew ? l10n.createFolder : l10n.editFolder),
-        automaticallyImplyLeading: !FluffyThemes.isColumnMode(context),
-        centerTitle: FluffyThemes.isColumnMode(context),
-        actions: [
-          ListenableBuilder(
-            listenable: controller.nameController,
-            builder: (context, _) => TextButton(
-              key: const ValueKey('save_folder'),
-              onPressed: controller.canSave ? controller.save : null,
-              child: Text(l10n.save),
+    final locals = MatrixLocals(l10n);
+    return SettingsScaffold(
+      title: controller.isNew ? l10n.createFolder : l10n.editFolder,
+      actions: [
+        ListenableBuilder(
+          listenable: controller.nameController,
+          builder: (context, _) => Padding(
+            padding: const EdgeInsetsDirectional.only(
+              end: AppSettingsLayout.sideMargin,
+            ),
+            child: Center(
+              child: SettingsPillButton(
+                key: const ValueKey('save_folder'),
+                label: l10n.save,
+                height: AppDialog.buttonHeight,
+                expand: false,
+                onPressed: controller.canSave ? controller.save : null,
+              ),
             ),
           ),
-        ],
-      ),
-      body: MaxWidthBody(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (controller.limitReached)
-              ListTile(
+        ),
+      ],
+      children: [
+        if (controller.limitReached)
+          SettingsGroup(
+            rows: [
+              SettingsNotice(
                 key: const ValueKey('folder_limit'),
-                leading: const Icon(Icons.info_outline),
-                title: Text(l10n.folderLimitReached(FolderStore.maxFolders)),
+                tone: SettingsNoticeTone.warn,
+                icon: Icons.info_outline_rounded,
+                text: l10n.folderLimitReached(FolderStore.maxFolders),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
+            ],
+          ),
+        SettingsGroup(
+          rows: [
+            SettingsFieldRow(
+              child: DialogTextField(
                 key: const ValueKey('folder_name'),
                 controller: controller.nameController,
-                enabled: !readOnly,
+                readOnly: readOnly,
                 maxLength: FolderStore.maxNameLength,
-                decoration: InputDecoration(labelText: l10n.folderName),
+                labelText: l10n.folderName,
               ),
             ),
-            ListTile(
-              title: Text(
-                l10n.folderChatTypes,
-                style: TextStyle(
-                  color: theme.colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            CheckboxListTile.adaptive(
+          ],
+        ),
+        SettingsGroup(
+          header: l10n.folderChatTypes,
+          rows: [
+            SettingsCheckRow(
+              key: const ValueKey('folder_type_dm'),
+              title: l10n.personal,
               value: controller.types.contains(FolderChatType.dm),
-              title: Text(l10n.personal),
               onChanged: readOnly
                   ? null
-                  : (value) =>
-                        controller.setType(FolderChatType.dm, value == true),
+                  : (value) => controller.setType(FolderChatType.dm, value),
             ),
-            CheckboxListTile.adaptive(
+            SettingsCheckRow(
+              key: const ValueKey('folder_type_group'),
+              title: l10n.groups,
               value: controller.types.contains(FolderChatType.group),
-              title: Text(l10n.groups),
               onChanged: readOnly
                   ? null
-                  : (value) =>
-                        controller.setType(FolderChatType.group, value == true),
+                  : (value) => controller.setType(FolderChatType.group, value),
             ),
-            SwitchListTile.adaptive(
+            SettingsToggleRow(
+              title: l10n.excludeMutedChats,
               value: controller.excludeMuted,
-              title: Text(l10n.excludeMutedChats),
               onChanged: readOnly ? null : controller.setExcludeMuted,
             ),
-            SwitchListTile.adaptive(
+            SettingsToggleRow(
+              title: l10n.excludeReadChats,
               value: controller.excludeRead,
-              title: Text(l10n.excludeReadChats),
               onChanged: readOnly ? null : controller.setExcludeRead,
             ),
-            const Divider(),
-            ListTile(
-              title: Text(
-                l10n.chats,
-                style: TextStyle(
-                  color: theme.colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
+          ],
+        ),
+        SettingsGroup(
+          header: l10n.chats,
+          rows: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AnimatedRowList<String>(
+                  items: controller.rooms,
+                  keyOf: (id) => id,
+                  motion: RowListMotion.folders,
+                  itemBuilder: (context, id) {
+                    final room = client.getRoomById(id);
+                    final name =
+                        room?.getLocalizedDisplayname(locals) ??
+                        AppTypography.ltr(visibleId(id));
+                    return SettingsRow(
+                      key: ValueKey('folder_room_$id'),
+                      leading: Avatar(
+                        mxContent: room?.avatar,
+                        client: client,
+                        name: name,
+                        colorSeed: room?.avatarColorSeed ?? id,
+                        size: AppSettingsLayout.tile,
+                      ),
+                      title: name,
+                      showChevron: false,
+                      trailing: IconButton(
+                        tooltip: l10n.remove,
+                        constraints: const BoxConstraints(
+                          minWidth: AppChat.tapTarget,
+                          minHeight: AppChat.tapTarget,
+                        ),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: AppTokens.of(context).mut,
+                        ),
+                        onPressed: readOnly
+                            ? null
+                            : () => controller.removeRoom(id),
+                      ),
+                    );
+                  },
                 ),
-              ),
+                if (!readOnly) ...[
+                  if (controller.rooms.isNotEmpty) const SettingsDivider(),
+                  SettingsRow(
+                    key: const ValueKey('add_chats'),
+                    icon: Icons.add_rounded,
+                    title: l10n.addChats,
+                    showChevron: false,
+                    onTap:
+                        controller.rooms.length < FolderStore.maxRoomsPerFolder
+                        ? controller.addChats
+                        : null,
+                  ),
+                ],
+              ],
             ),
-            for (final id in controller.rooms)
-              ListTile(
-                key: ValueKey('folder_room_$id'),
-                title: Text(
-                  client
-                          .getRoomById(id)
-                          ?.getLocalizedDisplayname(MatrixLocals(l10n)) ??
-                      AppTypography.ltr(id),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: IconButton(
-                  tooltip: l10n.remove,
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: readOnly ? null : () => controller.removeRoom(id),
-                ),
-              ),
-            if (!readOnly)
-              ListTile(
-                key: const ValueKey('add_chats'),
-                leading: const Icon(Icons.add_rounded),
-                title: Text(l10n.addChats),
-                enabled:
-                    controller.rooms.length < FolderStore.maxRoomsPerFolder,
-                onTap: controller.addChats,
-              ),
-            if (!readOnly && !controller.isNew) ...[
-              const Divider(),
-              ListTile(
+          ],
+        ),
+        if (!readOnly && !controller.isNew)
+          SettingsGroup(
+            rows: [
+              SettingsRow(
                 key: const ValueKey('delete_folder'),
-                leading: Icon(
-                  Icons.delete_outlined,
-                  color: theme.colorScheme.error,
-                ),
-                title: Text(
-                  l10n.deleteFolder,
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
+                icon: Icons.delete_outline_rounded,
+                destructive: true,
+                title: l10n.deleteFolder,
+                showChevron: false,
                 onTap: controller.delete,
               ),
             ],
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }

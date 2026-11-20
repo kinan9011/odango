@@ -2473,7 +2473,7 @@
     "pause": "Pause",
     "resume": "Resume",
     "removeFromSpaceDescription": "The chat will be removed from the space but still appear in your chat list.",
-    "countChats": "{chats} chats",
+    "countChats": "{chats, plural, =1{1 chat} other{{chats} chats}}",
     "@countChats": {
         "type": "String",
         "placeholders": {
@@ -5162,5 +5162,64 @@
         "type": "String",
         "description": "Tooltip of the button that makes the log text smaller.",
         "placeholders": {}
+    },
+    "noBlockedUsers": "You have not blocked anyone.",
+    "@noBlockedUsers": {
+        "type": "String",
+        "description": "Shown in the blocked users list when it is empty.",
+        "placeholders": {}
+    },
+    "unblockUser": "Unblock",
+    "@unblockUser": {
+        "type": "String",
+        "description": "Tooltip of the button that removes a person from the blocked users list.",
+        "placeholders": {}
+    },
+    "showPassword": "Show password",
+    "@showPassword": {
+        "type": "String",
+        "description": "Tooltip of the eye button that shows the text of a password field.",
+        "placeholders": {}
+    },
+    "hidePassword": "Hide password",
+    "@hidePassword": {
+        "type": "String",
+        "description": "Tooltip of the eye button that hides the text of a password field.",
+        "placeholders": {}
+    },
+    "moveUp": "Move up",
+    "@moveUp": {
+        "type": "String",
+        "description": "Screen reader action that moves a list entry one place up.",
+        "placeholders": {}
+    },
+    "moveDown": "Move down",
+    "@moveDown": {
+        "type": "String",
+        "description": "Screen reader action that moves a list entry one place down.",
+        "placeholders": {}
+    },
+    "countOfTotal": "{count} of {total}",
+    "@countOfTotal": {
+        "type": "String",
+        "description": "A progress or selection count such as 3 of 500.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "entriesNotShown": "{count, plural, =1{1 more entry is not shown} other{{count} more entries are not shown}}",
+    "@entriesNotShown": {
+        "type": "String",
+        "description": "Shown under a list that was cut short to a safe size.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
     }
 }

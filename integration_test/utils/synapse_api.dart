@@ -277,6 +277,18 @@ class SynapseUser {
     token: _token,
   );
 
+  /// Whether the global push rule of [kind] and [ruleId] is on.
+  Future<bool> pushRuleEnabled(String kind, String ruleId) async {
+    final json =
+        await _request(
+              'GET',
+              '/pushrules/global/$kind/${Uri.encodeComponent(ruleId)}',
+              token: _token,
+            )
+            as Map<String, Object?>;
+    return json['enabled'] == true;
+  }
+
   /// Ids of every device (session) of this user.
   Future<List<String>> deviceIds() async {
     final json =

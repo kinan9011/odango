@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/setting_keys.dart';
@@ -13,7 +14,9 @@ import 'package:odango/pages/export/export_page.dart';
 import 'package:odango/utils/appearance/chat_appearance.dart';
 import 'package:odango/utils/export/export_model.dart';
 import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 import '../data/environment_constants.dart';
 import '../utils/fluffy_chat_tester.dart';
@@ -29,6 +32,17 @@ Future<void> settingsHomeserverFlow(WidgetTester widgetTester) =>
 
 Future<void> settingsChatFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._chatSettings());
+
+Future<void> settingsNotificationsFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then(
+      (tester) => tester._notifications(),
+    );
+
+Future<void> settingsBlockedUsersFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._blockedUsers());
+
+Future<void> settingsDoubleTapReactionFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._doubleTap());
 
 Future<void> settingsExportFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._export());
@@ -106,6 +120,99 @@ extension on FluffyChatTester {
     await waitFor('Custom emojis and stickers');
     await goBack();
     await waitFor('Chat backup');
+    await openTab('Chats');
+  }
+
+  Future<void> _notifications() async {
+    await ensureLoggedIn();
+    final alice = await SynapseUser.login(user1Name, user1Pw);
+    const rule = 'Suppress Automated Messages';
+    final wasOn = await alice.pushRuleEnabled(
+      'override',
+      '.m.rule.suppress_notices',
+    );
+    await openTab('Settings');
+    await tapOn('Notifications');
+    await waitFor('GENERAL NOTIFICATION SETTINGS');
+    expect(find.byType(SwitchListTile), findsNothing);
+    final toggle = find.descendant(
+      of: find.widgetWithText(SettingsToggleRow, rule),
+      matching: find.byKey(SettingsToggleRow.switchKey),
+    );
+    await tapOn(toggle);
+    await _untilTrue(
+      () async =>
+          await alice.pushRuleEnabled('override', '.m.rule.suppress_notices') !=
+          wasOn,
+      reason: 'the switch writes the push rule',
+    );
+    await tapOn(toggle);
+    await _untilTrue(
+      () async =>
+          await alice.pushRuleEnabled('override', '.m.rule.suppress_notices') ==
+          wasOn,
+      reason: 'the switch writes the push rule back',
+    );
+    await tapOn(find.text(rule));
+    await waitFor('Close');
+    await tapOn('Close');
+    await goBack();
+    await openTab('Chats');
+  }
+
+  Future<void> _blockedUsers() async {
+    await ensureLoggedIn();
+    final alice = await SynapseUser.login(user1Name, user1Pw);
+    await openTab('Settings');
+    await tapOn('Privacy and security');
+    await scrollUntilVisible('Blocked users');
+    await tapOn('Blocked users');
+    await waitFor('You have not blocked anyone.');
+    expect(find.byKey(const ValueKey('block_user')), findsOneWidget);
+    await enterText(find.byType(TextField), 'not a matrix id');
+    await tapOn(find.byKey(const ValueKey('block_user')));
+    await waitFor('Invalid input!');
+    expect(find.text('You have not blocked anyone.'), findsOneWidget);
+    Object? data;
+    try {
+      data = await alice.getAccountData('m.ignored_user_list');
+    } catch (_) {
+      data = null;
+    }
+    expect(
+      data is Map ? (data['ignored_users'] as Map?) ?? const {} : const {},
+      isEmpty,
+      reason: 'an invalid id is never sent to the server',
+    );
+    await goBack();
+    await goBack();
+    await openTab('Chats');
+  }
+
+  Future<void> _doubleTap() async {
+    await ensureLoggedIn();
+    await openTab('Settings');
+    await tapOn(find.widgetWithText(SettingsRow, 'Chats'));
+    await scrollUntilVisible('Double-tap reaction');
+    await tapOn('Double-tap reaction');
+    await waitFor(find.byType(AppSheet));
+    await waitFor(
+      find.descendant(of: find.byType(EmojiPicker), matching: find.text('😀')),
+    );
+    await tapOn(
+      find.descendant(of: find.byType(EmojiPicker), matching: find.text('😀')),
+    );
+    await waitForGone(find.byType(AppSheet));
+    expect(AppSettings.doubleTapReaction.value, '😀');
+    expect(
+      find.descendant(
+        of: find.widgetWithText(SettingsRow, 'Double-tap reaction'),
+        matching: find.text('😀'),
+      ),
+      findsOneWidget,
+    );
+    await AppSettings.doubleTapReaction.setItem('👍');
+    await goBack();
     await openTab('Chats');
   }
 

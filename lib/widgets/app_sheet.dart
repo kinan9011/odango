@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
@@ -37,6 +39,11 @@ Future<T?> showAppSheet<T>({
     builder: builder,
   );
 }
+
+double _bottomInset(BuildContext context) => math.max(
+  MediaQuery.paddingOf(context).bottom,
+  MediaQuery.viewInsetsOf(context).bottom,
+);
 
 class AppSheet extends StatelessWidget {
   final Widget child;
@@ -118,7 +125,7 @@ class AppSheet extends StatelessWidget {
               start: AppSpacing.xxl,
               top: AppSpacing.l,
               end: AppSpacing.xxl,
-              bottom: AppSpacing.xxl + MediaQuery.paddingOf(context).bottom,
+              bottom: AppSpacing.xxl + _bottomInset(context),
             ),
             child: child,
           ),

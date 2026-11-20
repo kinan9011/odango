@@ -34,6 +34,11 @@ abstract class AppSettingsLayout {
   static const double knob = 22;
   static const double sideMargin = 14;
   static const double maxWidth = 600;
+  static const double toggleHit = 76;
+  static const double checkBox = 22;
+  static const double checkRadius = 7;
+  static const double dragHandle = AppChat.tapTarget;
+  static const double fieldGap = 8;
 }
 
 /// Spacing scale (DESIGN.md 6.4).
@@ -240,6 +245,24 @@ abstract class AppMotion {
   static const Curve easeOut = Cubic(0, 0, .58, 1);
   static const double dismissFraction = 1 / 6;
   static const double dragStart = 30;
+  static const Duration switchToggle = Duration(milliseconds: 200);
+  static const Curve switchCurve = AccelerateDecelerateCurve();
+  static const Duration checkToggle = Duration(milliseconds: 200);
+  static const Curve easeOutQuint = Cubic(.23, 1, .32, 1);
+  static const Duration listRemove = Duration(milliseconds: 120);
+  static const Duration listMove = Duration(milliseconds: 250);
+  static const Duration folderList = Duration(milliseconds: 350);
+  static const Duration dragLift = Duration(milliseconds: 420);
+  static const double dragInset = 8;
+  static const double dragRadius = 12;
+  static const double dragShadowBlur = 12;
+  static const double dragShadowOffset = 3;
+  static const double dragShadowAlpha = 0x12 / 255;
+  static const double shakeShift = 5;
+  static const double shakeStiffness = 600;
+  static const double shakeDamping = .5;
+  static const Duration buttonSwap = Duration(milliseconds: 150);
+  static const Duration saveBar = Duration(milliseconds: 250);
 }
 
 abstract class AppTypography {

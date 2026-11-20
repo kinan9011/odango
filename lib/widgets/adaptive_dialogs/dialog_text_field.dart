@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/services.dart' show TextInputFormatter;
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
@@ -17,6 +18,7 @@ class DialogTextField extends StatelessWidget {
   final String? suffixText;
   final String? errorText;
   final bool obscureText;
+  final bool password;
   final int? minLines;
   final int? maxLines;
   final TextInputType? keyboardType;
@@ -24,6 +26,12 @@ class DialogTextField extends StatelessWidget {
   final bool readOnly;
   final bool autofocus;
   final TextStyle? textStyle;
+  final Widget? suffixIcon;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool autocorrect;
 
   const DialogTextField({
     super.key,
@@ -40,9 +48,16 @@ class DialogTextField extends StatelessWidget {
     this.counterText,
     this.errorText,
     this.obscureText = false,
+    this.password = false,
     this.readOnly = false,
     this.autofocus = false,
     this.textStyle,
+    this.suffixIcon,
+    this.onChanged,
+    this.onSubmitted,
+    this.textInputAction,
+    this.inputFormatters,
+    this.autocorrect = true,
   });
 
   OutlineInputBorder _border(BorderSide side) => OutlineInputBorder(
@@ -53,6 +68,7 @@ class DialogTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
+    final secret = obscureText || password;
     final focused = BorderSide(
       color: tokens.acc,
       width: AppDialog.fieldFocusWidth,
@@ -67,13 +83,19 @@ class DialogTextField extends StatelessWidget {
       autofocus: autofocus,
       obscureText: obscureText,
       minLines: minLines,
-      maxLines: obscureText ? 1 : maxLines,
+      maxLines: secret ? 1 : maxLines,
       maxLength: maxLength,
-      keyboardType: keyboardType,
-      autocorrect: !obscureText,
-      enableSuggestions: !obscureText,
-      enableIMEPersonalizedLearning: !obscureText,
+      keyboardType: password && !obscureText
+          ? TextInputType.visiblePassword
+          : keyboardType,
+      autocorrect: autocorrect && !secret,
+      enableSuggestions: !secret,
+      enableIMEPersonalizedLearning: !secret,
       style: textStyle,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: textInputAction,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         filled: true,
         fillColor: tokens.surf2,
@@ -88,6 +110,7 @@ class DialogTextField extends StatelessWidget {
         labelText: labelText,
         prefixText: prefixText,
         suffixText: suffixText,
+        suffixIcon: suffixIcon,
         counterText: counterText,
       ),
     );
