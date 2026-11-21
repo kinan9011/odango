@@ -5,6 +5,10 @@
 
 final _bidiControls = RegExp(r'[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]');
 
+/// Maths is TeX: a bidi control in it has no meaning, only a way to reorder
+/// the text around it.
+String stripBidiControls(String text) => text.replaceAll(_bidiControls, '');
+
 /// A room alias is chosen by someone else and may carry bidi controls that
 /// reorder it on screen. Shown text gets a visible marker instead; copy, QR
 /// data and join keep the raw value.

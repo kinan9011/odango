@@ -15,6 +15,7 @@ import 'package:odango/utils/export/export_runner.dart';
 import 'package:odango/utils/export/export_sink.dart';
 import 'package:odango/utils/matrix_room_id.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/retention/retention_policy.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -82,7 +83,7 @@ class ExportController extends State<ExportPage> {
       timeline: SdkExportTimeline(timeline),
       roomId: room.id,
       roomName: safeDisplayText(
-        room.getLocalizedDisplayname(MatrixLocals(l10n)),
+        room.safeLocalizedDisplayname(MatrixLocals(l10n)),
         maxGraphemes: 128,
       ),
       topic: room.topic.isEmpty

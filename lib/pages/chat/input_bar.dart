@@ -13,7 +13,10 @@ import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/mention_suggestion_tile.dart';
 import 'package:odango/pages/chat/trust_user_key_dialog.dart';
+import 'package:odango/utils/chat/room_mention.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/markdown_context_builder.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/widgets/mxc_image.dart';
 import 'package:pasteboard/pasteboard.dart';
@@ -160,6 +163,14 @@ class InputBar extends StatelessWidget {
       }
     }
     final userMatch = RegExp(r'(?:\s|^)@([-\w]+)$').firstMatch(searchText);
+    final roomMentionMatch = RegExp(
+      r'(?:\s|^)@([-\w]*)$',
+    ).firstMatch(searchText);
+    if (roomMentionMatch != null &&
+        canMentionRoom(room) &&
+        matchesRoomMention(roomMentionMatch[1]!)) {
+      ret.add({'type': 'room_mention', 'mention': roomMentionToken});
+    }
     if (userMatch != null) {
       final userSearch = userMatch[1]!.toLowerCase();
       for (final user in room.getParticipants()) {
@@ -207,7 +218,7 @@ class InputBar extends StatelessWidget {
           ret.add({
             'type': 'room',
             'mxid': (r.canonicalAlias.isNotEmpty) ? r.canonicalAlias : r.id,
-            'displayname': r.getLocalizedDisplayname(),
+            'displayname': r.safeLocalizedDisplayname(),
             'avatar_url': r.avatar?.toString(),
           });
         }
@@ -305,6 +316,19 @@ class InputBar extends StatelessWidget {
         ),
       );
     }
+    if (suggestion['type'] == 'room_mention') {
+      return MentionSuggestionTile(
+        suggestion: {
+          ...suggestion,
+          'displayname': roomMentionToken,
+          'subtitle': L10n.of(context).mentionEveryoneSubtitle,
+        },
+        client: client,
+        size: size,
+        leadingIcon: Icons.groups_rounded,
+        onTap: () => onSelected(suggestion),
+      );
+    }
     if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
       return MentionSuggestionTile(
         suggestion: suggestion,
@@ -365,6 +389,13 @@ class InputBar extends StatelessWidget {
         (Match m) => '${m[1]}$insertText',
       );
     }
+    if (suggestion['type'] == 'room_mention') {
+      insertText = '$roomMentionToken ';
+      startText = replaceText.replaceAllMapped(
+        RegExp(r'(\s|^)(@[-\w]*)$'),
+        (Match m) => '${m[1]}$insertText',
+      );
+    }
     if (suggestion['type'] == 'user') {
       insertText = '${suggestion['mention']!} ';
       startText = replaceText.replaceAllMapped(
@@ -395,68 +426,72 @@ class InputBar extends StatelessWidget {
         data: MediaQuery.of(context).copyWith(
           textScaler: TextScaler.linear(AppSettings.fontSizeFactor.value),
         ),
-        child: TextField(
-          controller: controller,
-          focusNode: focusNode,
-          readOnly: readOnly,
-          onEditingComplete: () {
-            // To not lose focus on iOS:
-            // https://github.com/krille-chan/fluffychat/issues/2784
-          },
-          contextMenuBuilder: (c, e) => MarkdownContextBuilder(
-            editableTextState: e,
+        child: ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => TextField(
             controller: controller,
-            onPasteImage: PlatformInfos.isIOS && onSubmitImage != null
-                ? () async {
-                    final scaffoldMessenger = ScaffoldMessenger.of(context);
-                    final l10n = L10n.of(context);
-                    final image = await Pasteboard.image;
-                    if (image == null) {
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(content: Text(l10n.noImageInClipboard)),
-                      );
-                      return;
-                    }
-                    onSubmitImage!(image);
-                  }
-                : null,
-          ),
-          contentInsertionConfiguration: ContentInsertionConfiguration(
-            onContentInserted: (KeyboardInsertedContent content) async {
-              final proceed = await showTrustUserInRoomDialog(context, room);
-              if (!proceed) return;
-              final data = content.data;
-              if (data == null) return;
-
-              final file = MatrixFile(
-                mimeType: content.mimeType,
-                bytes: data,
-                name: content.uri.split('/').last,
-              );
-              room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+            focusNode: focusNode,
+            textDirection: firstStrongDirection(controller.text),
+            readOnly: readOnly,
+            onEditingComplete: () {
+              // To not lose focus on iOS:
+              // https://github.com/krille-chan/fluffychat/issues/2784
             },
+            contextMenuBuilder: (c, e) => MarkdownContextBuilder(
+              editableTextState: e,
+              controller: controller,
+              onPasteImage: PlatformInfos.isIOS && onSubmitImage != null
+                  ? () async {
+                      final scaffoldMessenger = ScaffoldMessenger.of(context);
+                      final l10n = L10n.of(context);
+                      final image = await Pasteboard.image;
+                      if (image == null) {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(content: Text(l10n.noImageInClipboard)),
+                        );
+                        return;
+                      }
+                      onSubmitImage!(image);
+                    }
+                  : null,
+            ),
+            contentInsertionConfiguration: ContentInsertionConfiguration(
+              onContentInserted: (KeyboardInsertedContent content) async {
+                final proceed = await showTrustUserInRoomDialog(context, room);
+                if (!proceed) return;
+                final data = content.data;
+                if (data == null) return;
+
+                final file = MatrixFile(
+                  mimeType: content.mimeType,
+                  bytes: data,
+                  name: content.uri.split('/').last,
+                );
+                room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+              },
+            ),
+            minLines: minLines,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            autofocus: autofocus!,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
+            ],
+            onSubmitted: (text) {
+              // fix for library for now
+              // it sets the types for the callback incorrectly
+              onSubmitted!(text);
+            },
+            maxLength: AppSettings.textMessageMaxLength.value,
+            decoration: decoration,
+            onChanged: (text) {
+              // fix for the library for now
+              // it sets the types for the callback incorrectly
+              onChanged!(text);
+            },
+            textCapitalization: TextCapitalization.sentences,
           ),
-          minLines: minLines,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          autofocus: autofocus!,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
-          ],
-          onSubmitted: (text) {
-            // fix for library for now
-            // it sets the types for the callback incorrectly
-            onSubmitted!(text);
-          },
-          maxLength: AppSettings.textMessageMaxLength.value,
-          decoration: decoration,
-          onChanged: (text) {
-            // fix for the library for now
-            // it sets the types for the callback incorrectly
-            onChanged!(text);
-          },
-          textCapitalization: TextCapitalization.sentences,
         ),
       ),
       optionsViewBuilder: (c, onSelected, s) {

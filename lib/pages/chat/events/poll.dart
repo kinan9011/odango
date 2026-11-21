@@ -9,6 +9,7 @@ import 'package:matrix/matrix.dart' hide Result;
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/events/message_bubble.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/polls/poll_content.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -187,7 +188,7 @@ class PollView extends StatelessWidget {
           children: [
             if (quiz) _QuizBadge(label: l10n.pollQuizBadge, colors: colors),
             Linkify(
-              text: question,
+              text: stripBidiOverrides(question),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
@@ -272,10 +273,11 @@ class _Option extends StatelessWidget {
       PollQuizMark.wrong => l10n.pollWrongAnswer,
       PollQuizMark.none => null,
     };
+    final text = stripBidiOverrides(option.text);
     return Semantics(
       button: onTap != null,
       checked: option.selected,
-      label: markLabel == null ? option.text : '${option.text}, $markLabel',
+      label: markLabel == null ? text : '$text, $markLabel',
       excludeSemantics: true,
       onTap: onTap,
       child: InkWell(
@@ -297,7 +299,7 @@ class _Option extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      option.text,
+                      text,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

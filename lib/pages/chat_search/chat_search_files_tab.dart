@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_config.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_search/search_footer.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
 
@@ -45,10 +46,11 @@ class ChatSearchFilesTab extends StatelessWidget {
             );
           }
           final event = events[i];
-          final filename =
-              event.content.tryGet<String>('filename') ??
-              event.content.tryGet<String>('body') ??
-              L10n.of(context).unknownEvent('File');
+          final filename = stripBidiOverrides(
+            event.content.tryGet<String>('filename') ??
+                event.content.tryGet<String>('body') ??
+                L10n.of(context).unknownEvent('File'),
+          );
           final filetype = (filename.contains('.')
               ? filename.split('.').last.toUpperCase()
               : event.content

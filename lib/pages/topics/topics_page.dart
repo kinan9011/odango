@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/pages/topics/topic_create_sheet.dart';
 import 'package:odango/pages/topics/topics_view.dart';
+import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/server_capabilities/server_capabilities.dart';
 import 'package:odango/utils/topics/topic.dart';
 import 'package:odango/utils/topics/topics_model.dart';
@@ -79,6 +80,14 @@ class TopicsController extends State<TopicsPage> {
   }
 
   void openGeneral() => context.go('/rooms/${widget.roomId}');
+
+  Future<void> setHidden(Topic topic, {required bool hidden}) async {
+    final room = this.room;
+    if (room == null) return;
+    await HiddenTopicsStore.of(
+      room.client,
+    ).setHidden(room.id, topic.rootEventId, hidden: hidden);
+  }
 
   void openTopic(Topic topic) => context.go(
     '/rooms/${widget.roomId}?thread=${Uri.encodeQueryComponent(topic.rootEventId)}',

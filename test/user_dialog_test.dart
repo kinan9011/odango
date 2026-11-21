@@ -20,6 +20,7 @@ import 'package:odango/widgets/adaptive_dialogs/user_dialog.dart';
 import 'package:odango/widgets/qr_code_viewer.dart';
 
 import 'utils/chat_page_harness.dart';
+import 'utils/reason_field.dart';
 import 'utils/recording_api.dart';
 
 void main() {
@@ -230,6 +231,14 @@ void main() {
     await tester.tap(find.byTooltip('Show QR code'));
     await harness.settle(tester, rounds: 3);
     expect(find.byType(QrCodeViewer), findsOneWidget);
+    await harness.finish(tester);
+  });
+
+  testWidgets('the report reason takes several lines', (tester) async {
+    await show(tester, carol);
+    await tester.tap(find.text('report'));
+    await harness.settle(tester, rounds: 3);
+    await expectMultilineReasonField(tester);
     await harness.finish(tester);
   });
 }

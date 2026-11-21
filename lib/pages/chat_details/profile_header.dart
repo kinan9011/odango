@@ -13,6 +13,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_details/chat_details.dart';
 import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/profile_header_geometry.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -237,7 +238,7 @@ class _HeaderAvatar extends StatelessWidget {
               : 'content_banner',
           child: Avatar(
             mxContent: roomAvatar,
-            name: room.getLocalizedDisplayname(MatrixLocals(l10n)),
+            name: room.safeLocalizedDisplayname(MatrixLocals(l10n)),
             colorSeed: room.avatarColorSeed,
             size: AppProfile.avatarExpanded,
             animated: true,
@@ -251,8 +252,8 @@ class _HeaderAvatar extends StatelessWidget {
         ),
         if (canEdit)
           PositionedDirectional(
-            bottom: -(AppChat.tapTarget - AppProfile.editBadge) / 2,
-            end: -(AppChat.tapTarget - AppProfile.editBadge) / 2,
+            bottom: 0,
+            end: 0,
             child: Opacity(
               opacity: badgeOpacity,
               child: IgnorePointer(
@@ -269,7 +270,8 @@ class _HeaderAvatar extends StatelessWidget {
                       radius: AppChat.tapTarget / 2,
                       child: SizedBox.square(
                         dimension: AppChat.tapTarget,
-                        child: Center(
+                        child: Align(
+                          alignment: AlignmentDirectional.bottomEnd,
                           child: Container(
                             width: AppProfile.editBadge,
                             height: AppProfile.editBadge,
@@ -321,7 +323,7 @@ class _NameBlock extends StatelessWidget {
         !room.isDirectChat && room.canChangeStateEvent(EventTypes.RoomName);
     final name = visibleId(
       cappedText(
-        room.getLocalizedDisplayname(MatrixLocals(l10n)),
+        room.safeLocalizedDisplayname(MatrixLocals(l10n)),
         maxUnits: AppProfile.nameCap,
       ),
     );

@@ -11,6 +11,7 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -206,7 +207,7 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
               itemCount: rooms.length,
               itemBuilder: (context, i) {
                 final room = rooms[i];
-                final displayname = room.getLocalizedDisplayname(
+                final displayname = room.safeLocalizedDisplayname(
                   MatrixLocals(l10n),
                 );
                 final selected = selectedRoomId == room.id;

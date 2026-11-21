@@ -7,7 +7,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/widgets/auto_direction.dart';
 
 import 'message_bubble.dart';
 
@@ -70,48 +72,59 @@ class ReplyQuoteView extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final colors = BubbleColors.of(tokens, outgoing: outgoing);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(outgoing ? 12 : 10),
-      child: ColoredBox(
-        color: outgoing
-            ? tokens.outFg.withValues(alpha: 0.16)
-            : tokens.acc.withValues(alpha: 0.14),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              if (!outgoing)
-                ColoredBox(color: tokens.acc, child: const SizedBox(width: 3)),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+    final name = stripBidiOverrides(this.name);
+    final text = stripBidiOverrides(this.text);
+    return AutoDirection(
+      text: '$text $name',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(outgoing ? 12 : 10),
+        child: ColoredBox(
+          color: outgoing
+              ? tokens.outFg.withValues(alpha: 0.16)
+              : tokens.acc.withValues(alpha: 0.14),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                if (!outgoing)
+                  ColoredBox(
+                    color: tokens.acc,
+                    child: const SizedBox(width: 3),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: outgoing ? tokens.outFg : tokens.acc,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: outgoing ? tokens.outFg : tokens.acc,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        text,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: colors.secondary, fontSize: 13),
-                      ),
-                    ],
+                        Text(
+                          text,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colors.secondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

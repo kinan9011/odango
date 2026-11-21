@@ -257,4 +257,49 @@ void main() {
       expect(path.contains(const Offset(-6, 50)), isTrue);
     });
   });
+
+  group('constraints', () {
+    Future<void> pumpIn(WidgetTester tester, List<Widget> children) =>
+        tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Theme(
+              data: ThemeData(extensions: [AppTokens.light()]),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: children,
+                ),
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('a tight parent is filled, not shrunk to the content', (
+      tester,
+    ) async {
+      await pumpIn(tester, const [
+        SizedBox(
+          width: 100,
+          height: 120,
+          child: GlassSurface(solid: true, child: SizedBox(height: 10)),
+        ),
+      ]);
+      expect(
+        tester.getSize(find.byKey(GlassSurface.surfaceKey)),
+        const Size(100, 120),
+      );
+    });
+
+    testWidgets('a loose parent still shrink-wraps', (tester) async {
+      await pumpIn(tester, const [
+        GlassSurface(solid: true, child: SizedBox(width: 30, height: 10)),
+      ]);
+      expect(
+        tester.getSize(find.byKey(GlassSurface.surfaceKey)),
+        const Size(30, 10),
+      );
+    });
+  });
 }

@@ -5,6 +5,7 @@
 
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/design_constants.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 
 abstract class ViewerStrip {
   static List<int> window(
@@ -31,7 +32,7 @@ abstract class ViewerCaption {
     if (filename is! String || body is! String || filename == body) {
       return null;
     }
-    return clip(body);
+    return clip(stripBidiOverrides(body));
   }
 
   static String? clip(String text, {int max = AppViewer.maxCaptionUnits}) {

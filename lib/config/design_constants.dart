@@ -87,6 +87,13 @@ abstract class AppElevation {
   ];
 }
 
+/// Title island motion, from Telegram's ChatAvatarContainer (title swaps use
+/// EASE_OUT_QUINT for 320 ms).
+abstract class AppTitleMotion {
+  static const Duration duration = Duration(milliseconds: 320);
+  static const Curve curve = Curves.easeOutQuint;
+}
+
 /// Conversation layout constants (DESIGN.md 5.2, 7.5-7.12).
 abstract class AppChat {
   static const double headerButton = 48;
@@ -94,6 +101,8 @@ abstract class AppChat {
   static const double headerGap = 8;
   static const double headerTopGap = 4;
   static const double headerAvatar = 38;
+  static const double headerClampedTextScale = 1.5;
+  static const double threadPillMinWidth = 100;
   static const double composerHeight = 52;
   static const double actionButton = 52;
   static const double jumpButton = 46;
@@ -200,6 +209,8 @@ abstract class AppDialog {
   static const double bigButtonHeight = 54;
   static const double fieldRadius = 14;
   static const double fieldFocusWidth = 1.5;
+  static const int reasonMinLines = 2;
+  static const int reasonMaxLines = 6;
   static const double actionTileRadius = 14;
   static const double actionTileMinHeight = 64;
   static const double actionRowHeight = 50;
@@ -336,6 +347,7 @@ abstract class AppTypography {
 
 /// Bounds for composing, parsing and rendering formatted messages.
 abstract class RichLimits {
+  static const int maxDirectionParagraphs = 100;
   static const int maxBlocks = 500;
   static const int maxLinks = 100;
   static const int maxMaths = 50;

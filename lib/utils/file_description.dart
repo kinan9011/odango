@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 
 extension FileDescriptionExtension on Event {
   String? get fileDescription {
@@ -17,10 +18,12 @@ extension FileDescriptionExtension on Event {
       return null;
     }
     final filename = content.tryGet<String>('filename');
-    final body = calcUnlocalizedBody(hideReply: true, plaintextBody: true);
+    final body = stripBidiOverrides(
+      calcUnlocalizedBody(hideReply: true, plaintextBody: true),
+    );
 
-    if (filename != body &&
-        filename != null &&
+    if (filename != null &&
+        stripBidiOverrides(filename) != body &&
         content.tryGet<String>('body')?.isNotEmpty == true) {
       return body;
     }

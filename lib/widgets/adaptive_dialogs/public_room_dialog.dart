@@ -10,6 +10,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/fluffy_share.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
@@ -119,6 +120,8 @@ class _PublicRoomDialogState extends State<PublicRoomDialog> {
       okLabel: l10n.report,
       cancelLabel: l10n.cancel,
       hintText: l10n.reason,
+      minLines: AppDialog.reasonMinLines,
+      maxLines: AppDialog.reasonMaxLines,
     );
     if (reason == null || reason.isEmpty) return;
     if (!rootContext.mounted) return;
@@ -157,9 +160,15 @@ class _PublicRoomDialogState extends State<PublicRoomDialog> {
           builder: (context, snapshot) {
             final profile = snapshot.data;
             final avatar = profile?.avatarUrl;
-            final topic = profile?.topic;
+            final rawTopic = profile?.topic;
+            final topic = rawTopic == null
+                ? null
+                : stripBidiOverrides(rawTopic);
+            final profileName = profile?.name;
             final name =
-                profile?.name ??
+                (profileName == null
+                    ? null
+                    : stripBidiOverrides(profileName)) ??
                 (roomLink == null ? null : visibleId(roomLink)) ??
                 profile?.roomId ??
                 ' - ';

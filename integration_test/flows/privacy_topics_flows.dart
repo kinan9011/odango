@@ -176,11 +176,31 @@ extension on FluffyChatTester {
     final roots = await bob.threadRootIds(roomId);
     expect(roots, hasLength(1));
 
+    // Inside the topic: a Thread island, no "Reply in thread" bar.
+    expect(find.byKey(const ValueKey('thread_island')), findsOneWidget);
+    expect(find.text('Reply in thread'), findsNothing);
+
     await tapOn(const ValueKey('topic_chip_general'));
+    await waitForGone(find.byKey(const ValueKey('thread_island')));
     await waitFor(const ValueKey('topic_chip_all'));
+
+    // Hide the topic from the bar: a Hidden chip takes its place, the topic
+    // stays in the list and on the server.
+    final chip = find.byKey(ValueKey('topic_chip_${roots.first}'));
+    await longPressOn(chip);
+    await tapOn('Hide thread');
+    await waitForGone(chip);
+    await waitFor('Hidden (1)');
+    expect(await bob.threadRootIds(roomId), roots);
+
     await tapOn(const ValueKey('topic_chip_all'));
     await waitFor(find.text('Releases'));
+    expect(find.byKey(const ValueKey('topic_hidden_marker')), findsOneWidget);
+    await longPressOn(find.byKey(ValueKey('topic_${roots.first}')));
+    await tapOn('Show thread');
+    await waitForGone(find.byKey(const ValueKey('topic_hidden_marker')));
     await goBack();
+    await waitFor(chip);
     await openTab('Chats');
   }
 

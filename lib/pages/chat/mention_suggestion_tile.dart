@@ -5,6 +5,7 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/widgets/avatar.dart';
 
 /// A user or room in the mention suggestions. The avatar colour comes from the
@@ -15,27 +16,41 @@ class MentionSuggestionTile extends StatelessWidget {
   final double size;
   final VoidCallback onTap;
 
+  /// Replaces the avatar, for entries that are not a person or a room.
+  final IconData? leadingIcon;
+
   const MentionSuggestionTile({
     required this.suggestion,
     required this.client,
     required this.size,
     required this.onTap,
+    this.leadingIcon,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final mxid = suggestion['mxid'];
+    final subtitle = suggestion['subtitle'];
+    final icon = leadingIcon;
+    final tokens = AppTokens.of(context);
     return ListTile(
       onTap: onTap,
-      leading: Avatar(
-        mxContent: Uri.tryParse(suggestion['avatar_url'] ?? ''),
-        name: suggestion['displayname'] ?? mxid,
-        colorSeed: mxid,
-        size: size,
-        client: client,
-      ),
+      leading: icon != null
+          ? CircleAvatar(
+              radius: size / 2,
+              backgroundColor: tokens.accs,
+              child: Icon(icon, size: size * 0.6, color: tokens.acc),
+            )
+          : Avatar(
+              mxContent: Uri.tryParse(suggestion['avatar_url'] ?? ''),
+              name: suggestion['displayname'] ?? mxid,
+              colorSeed: mxid,
+              size: size,
+              client: client,
+            ),
       title: Text(suggestion['displayname'] ?? mxid ?? ''),
+      subtitle: subtitle == null ? null : Text(subtitle),
     );
   }
 }

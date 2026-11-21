@@ -23,6 +23,7 @@ import 'package:odango/utils/chat_list/archive_policy.dart';
 import 'package:odango/utils/client_manager.dart';
 import 'package:odango/utils/draft_migration.dart';
 import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/init_with_restore.dart';
 import 'package:odango/utils/launch_web_url.dart';
 import 'package:odango/utils/logout_cleanup.dart';
@@ -259,6 +260,7 @@ class MatrixState extends State<Matrix> {
     ScheduledQueue.forget(c);
     ScheduledStore.forget(c);
     DraftStore.forget(c);
+    HiddenTopicsStore.forget(c);
     IndexFeeder.forget(c);
     MessageIndex.forget(c);
     if (identical(_activeClientRef, c)) _activeClientRef = null;

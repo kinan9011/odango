@@ -5,6 +5,7 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/widgets/permission_slider_dialog.dart';
 
@@ -293,6 +294,8 @@ Future<void> showMemberActionsPopupMenu({
         okLabel: l10n.report,
         cancelLabel: l10n.cancel,
         hintText: l10n.reason,
+        minLines: AppDialog.reasonMinLines,
+        maxLines: AppDialog.reasonMaxLines,
       );
       if (reason == null || reason.isEmpty) return;
       if (!context.mounted) return;

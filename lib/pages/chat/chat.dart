@@ -5,18 +5,21 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
@@ -31,9 +34,13 @@ import 'package:odango/pages/chat/typing_notifier.dart';
 import 'package:odango/pages/chat/utils/web_file_to_x_file.dart';
 import 'package:odango/pages/chat_details/chat_details.dart';
 import 'package:odango/utils/chat/mention_jump.dart';
+import 'package:odango/utils/chat/room_mention.dart';
+import 'package:odango/utils/chat/thread_root.dart';
+import 'package:odango/utils/chat/visible_mentions.dart';
 import 'package:odango/utils/draft_store.dart';
 import 'package:odango/utils/error_reporter.dart';
 import 'package:odango/utils/file_selector.dart';
+import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -255,11 +262,10 @@ class ChatController extends State<ChatPageWithRoom>
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
-  final mentionJump = MentionJump();
+  late final mentionJump = MentionJump.forRoom(room)..rearm();
 
-  String? _mentionFullyRead;
-
-  int? _mentionHighlightCount;
+  /// The header and everything under it that covers the top of the list.
+  final GlobalKey headerKey = GlobalKey();
 
   List<String> get unreadMentionIds {
     final timeline = this.timeline;
@@ -283,7 +289,8 @@ class ChatController extends State<ChatPageWithRoom>
       ownUserId: room.client.userID,
       fullyReadEventId: room.fullyRead,
       isHighlight: (event) =>
-          room.client.pushruleEvaluator.match(event).highlight,
+          room.client.pushruleEvaluator.match(event).highlight ||
+          roomMentionHighlight(event),
     );
   }
 
@@ -305,8 +312,8 @@ class ChatController extends State<ChatPageWithRoom>
   bool _jumpingToMention = false;
 
   /// Walks through the unread mentions, oldest first. When none is loaded it
-  /// loads older history (bounded) until one is. Sends nothing: no read
-  /// marker, no receipt, no typing.
+  /// loads older history (bounded) until one is. The mention it jumps to is
+  /// acknowledged like one that is seen; nothing else is sent (no typing).
   Future<void> jumpToNextMention() async {
     final timeline = this.timeline;
     if (timeline == null || _jumpingToMention) return;
@@ -337,6 +344,7 @@ class ChatController extends State<ChatPageWithRoom>
         return;
       }
       mentionJump.visit(id);
+      if (_isBeingRead && activeThreadId == null) _sendSeenReceipt(id);
       setState(() {});
       await scrollToEventId(id);
     } finally {
@@ -386,10 +394,41 @@ class ChatController extends State<ChatPageWithRoom>
     enterThread(id);
   }
 
-  void enterThread(String eventId) => setState(() {
-    activeThreadId = eventId;
-    selectedEvents.clear();
-  });
+  final hiddenTopicsExpanded = ValueNotifier<bool>(false);
+
+  void toggleHiddenTopics() =>
+      hiddenTopicsExpanded.value = !hiddenTopicsExpanded.value;
+
+  Future<void> setTopicHidden(Topic topic, {required bool hidden}) =>
+      HiddenTopicsStore.of(
+        room.client,
+      ).setHidden(room.id, topic.rootEventId, hidden: hidden);
+
+  void enterThread(String eventId) {
+    setState(() {
+      activeThreadId = eventId;
+      selectedEvents.clear();
+    });
+    unawaited(_loadThreadRoot(eventId));
+  }
+
+  Future<void> _loadThreadRoot(String rootId) async {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+    try {
+      await ensureThreadRootLoaded(
+        isLoaded: () =>
+            !mounted ||
+            activeThreadId != rootId ||
+            timeline.events.any((event) => event.eventId == rootId),
+        canLoadMore: () => timeline.canRequestHistory,
+        loadMore: () =>
+            timeline.requestHistory(historyCount: _loadHistoryCount),
+      );
+    } catch (_) {
+      Logs().w('Unable to load the root of the thread');
+    }
+  }
 
   void closeThread() => setState(() {
     activeThreadId = null;
@@ -497,6 +536,7 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     if (!scrollController.hasClients) return;
+    _queueMentionScan();
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0 && _scrolledUp == false) {
       setState(() => _scrolledUp = true);
@@ -820,15 +860,9 @@ class ChatController extends State<ChatPageWithRoom>
   void updateView() {
     if (!mounted) return;
     _viewUpdates++;
-    if (_mentionFullyRead != room.fullyRead) {
-      _mentionFullyRead = room.fullyRead;
-      mentionJump.reset();
-    }
-    if (_mentionHighlightCount != room.highlightCount) {
-      _mentionHighlightCount = room.highlightCount;
-      mentionJump.rearm();
-    }
+    mentionJump.syncServerCount(room.highlightCount);
     setReadMarker();
+    _queueMentionScan();
     _scheduleRetention();
     _loadTopics();
     setState(() {});
@@ -901,18 +935,94 @@ class ChatController extends State<ChatPageWithRoom>
   void _setThreadReadMarker(String threadId) =>
       _threadMarkers.send(room, threadId, threadLastEventId);
 
-  void setReadMarker({String? eventId}) {
-    // Do not send read markers when app is not in foreground
-    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
-      return;
-    }
+  /// The app is in the foreground and this chat is on screen for the active
+  /// account. Only then anything counts as read.
+  bool get _isBeingRead =>
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+      TickerMode.valuesOf(context).enabled &&
+      identical(Matrix.of(context).activeClientOrNull, sendingClient);
 
-    // A chat that is hidden behind another tab, or that belongs to an account
-    // that is no longer the active one, shows nothing: nothing was read.
-    if (!TickerMode.valuesOf(context).enabled ||
-        !identical(Matrix.of(context).activeClientOrNull, sendingClient)) {
+  bool _mentionScanQueued = false;
+
+  void _queueMentionScan() {
+    if (_mentionScanQueued) return;
+    _mentionScanQueued = true;
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) {
+        _mentionScanQueued = false;
+        _scanVisibleMentions();
+      })
+      ..ensureVisualUpdate();
+  }
+
+  /// Mentions that are on screen are seen: they leave the jump button, and
+  /// the newest of them is acknowledged with the usual receipt (the private
+  /// one always, the public one only when the setting allows).
+  void _scanVisibleMentions() {
+    if (!mounted || !_isBeingRead || activeThreadId != null) return;
+    final timeline = this.timeline;
+    if (timeline == null || !scrollController.hasClients) return;
+    final pending = unreadMentionIds;
+    if (pending.isEmpty) return;
+    final events = timeline.events.filterByVisibleInGui(
+      retention: retention,
+      threadId: activeThreadId,
+    );
+    final indexById = {
+      for (var i = 0; i < events.length; i++) events[i].eventId: i,
+    };
+    final boxes = <VisibleBox>[];
+    RenderBox? viewport;
+    for (final id in pending) {
+      final index = indexById[id];
+      final box = index == null
+          ? null
+          : scrollController.tagMap[index]?.context.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      viewport ??= RenderAbstractViewport.maybeOf(box) as RenderBox?;
+      final top = box.localToGlobal(Offset.zero).dy;
+      boxes.add(VisibleBox(id, top, top + box.size.height));
+    }
+    if (viewport == null || !viewport.attached || boxes.isEmpty) return;
+    final viewportTop = viewport.localToGlobal(Offset.zero).dy;
+    final header = headerKey.currentContext?.findRenderObject();
+    final headerBottom = header is RenderBox && header.attached
+        ? header.localToGlobal(Offset(0, header.size.height)).dy
+        : viewportTop;
+    final seen = visibleIds(
+      boxes,
+      bandTop: math.max(viewportTop, headerBottom) + 8,
+      bandBottom:
+          viewportTop + viewport.size.height - 8 - (inputBarHeight ?? 72),
+    );
+    if (seen.isEmpty) return;
+    mentionJump.see(seen);
+    final newest = seen.reduce(
+      (a, b) => (indexById[a] ?? 0) <= (indexById[b] ?? 0) ? a : b,
+    );
+    _sendSeenReceipt(newest);
+    setState(() {});
+  }
+
+  void _sendSeenReceipt(String eventId) {
+    if (!eventId.isValidMatrixIdStrict() || _setReadMarkerEventId == eventId) {
       return;
     }
+    _setReadMarkerEventId = eventId;
+    unawaited(
+      sendReadMarker(room, eventId)
+          .catchError((_) => Logs().w('[Receipt] could not send'))
+          .whenComplete(() {
+            if (_setReadMarkerEventId == eventId) _setReadMarkerEventId = null;
+          }),
+    );
+  }
+
+  void setReadMarker({String? eventId}) {
+    // Do not send read markers when app is not in foreground, when the chat is
+    // hidden behind another tab, or when it belongs to an account that is no
+    // longer the active one: nothing was read.
+    if (!_isBeingRead) return;
 
     final setOnLatestEvent = eventId == null;
 
@@ -994,6 +1104,7 @@ class ChatController extends State<ChatPageWithRoom>
     timeline = null;
     _retentionTicker.dispose();
     _topics?.dispose();
+    hiddenTopicsExpanded.dispose();
     _storeInputTimeoutTimer?.cancel();
     sendController.dispose();
     composerPanel.dispose();
@@ -1479,6 +1590,8 @@ class ChatController extends State<ChatPageWithRoom>
       okLabel: l10n.ok,
       cancelLabel: l10n.cancel,
       hintText: l10n.reason,
+      minLines: AppDialog.reasonMinLines,
+      maxLines: AppDialog.reasonMaxLines,
     );
     if (reason == null || reason.isEmpty) return;
     if (!mounted) return;

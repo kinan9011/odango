@@ -307,4 +307,101 @@ void main() {
       expect(jump.revision, greaterThan(visited));
     });
   });
+
+  group('seen mentions (T225)', () {
+    test('see marks ids as seen like a visit, once', () {
+      final jump = MentionJump();
+      final revision = jump.revision;
+      jump.see(['a', 'b']);
+      expect(jump.visitedCount, 2);
+      expect(jump.revision, revision + 1);
+      jump.see(['a']);
+      expect(jump.revision, revision + 1);
+      expect(jump.countFor(localPending: 0, serverCount: 3), 1);
+    });
+
+    test('a seen mention is no longer pending after see', () {
+      final jump = MentionJump();
+      final events = [
+        _event(room, r'$m', extra: _mentions([_me])),
+      ];
+      expect(pending(events, jump: jump), [r'$m']);
+      jump.see([r'$m']);
+      expect(pending(events, jump: jump), isEmpty);
+    });
+
+    test('see at the cap still moves the revision, so the list is rebuilt', () {
+      final jump = MentionJump();
+      jump.see([for (var i = 0; i < MentionJump.maxSeen; i++) 'id$i']);
+      final before = jump.revision;
+      jump.see(['brand-new']);
+      expect(jump.revision, before + 1);
+      jump.see(['brand-new']);
+      expect(jump.revision, before + 1);
+    });
+
+    test('a server count of zero keeps what was seen: the room may have '
+        'been read elsewhere without moving the marker', () {
+      final jump = MentionJump()
+        ..syncServerCount(2)
+        ..see([r'$a']);
+      jump.syncServerCount(0);
+      expect(jump.visitedCount, 1);
+      final events = [
+        _event(room, r'$a', extra: _mentions([_me])),
+        _event(room, r'$b', extra: _mentions([_me])),
+      ];
+      expect(pending(events, jump: jump), [r'$b']);
+    });
+
+    test('the seen ids are bounded, the oldest go first', () {
+      final jump = MentionJump();
+      jump.see([for (var i = 0; i < MentionJump.maxSeen + 5; i++) 'id$i']);
+      expect(jump.visitedCount, MentionJump.maxSeen);
+      List<String> pendingOf(String id) => pending([
+        _event(room, id, extra: _mentions([_me])),
+      ], jump: jump);
+      expect(pendingOf('id0'), ['id0']);
+      expect(pendingOf('id4'), ['id4']);
+      expect(pendingOf('id5'), isEmpty);
+      expect(pendingOf('id${MentionJump.maxSeen + 4}'), isEmpty);
+      jump.see(['fresh']);
+      expect(jump.visitedCount, MentionJump.maxSeen);
+      expect(pendingOf('id5'), ['id5']);
+      expect(pendingOf('id6'), isEmpty);
+    });
+
+    test(
+      'a larger server count searches again, a smaller one does not',
+      () async {
+        final jump = MentionJump()..syncServerCount(1);
+        await jump.nextLoading(
+          pending: () => [],
+          canLoadMore: () => false,
+          loadMore: () async {},
+        );
+        expect(jump.exhausted, isTrue);
+        jump.syncServerCount(1);
+        expect(jump.exhausted, isTrue);
+        jump.syncServerCount(2);
+        expect(jump.exhausted, isFalse);
+      },
+    );
+
+    test('what was seen survives a moved read marker', () {
+      final jump = MentionJump()..syncServerCount(1);
+      jump.see(['a']);
+      jump.syncServerCount(1);
+      expect(jump.visitedCount, 1);
+    });
+
+    test('forRoom is one instance per room', () async {
+      final other = Room(id: '!other:example.org', client: room.client);
+      expect(MentionJump.forRoom(room), same(MentionJump.forRoom(room)));
+      expect(
+        MentionJump.forRoom(room),
+        isNot(same(MentionJump.forRoom(other))),
+      );
+    });
+  });
 }

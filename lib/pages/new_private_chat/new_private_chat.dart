@@ -16,6 +16,7 @@ import 'package:odango/utils/adaptive_bottom_sheet.dart';
 import 'package:odango/utils/fluffy_share.dart';
 import 'package:odango/utils/links/matrix_link_policy.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/new_message/contact_list.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/url_launcher.dart';
@@ -97,7 +98,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
               room.directChatMatrixID != null)
             ContactSource(
               userId: room.directChatMatrixID!,
-              name: room.getLocalizedDisplayname(locals),
+              name: room.safeLocalizedDisplayname(locals),
               lastActivity: room.latestEventReceivedTime,
             ),
       ],

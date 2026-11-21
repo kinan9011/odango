@@ -2587,11 +2587,48 @@
     "supportOdango": "Support Odango",
     "supportOdangoBody": "Odango is free and open source. It is built on FluffyChat, and part of what you give goes on to support the FluffyChat source it is built on. Thank you.",
     "@supportOdangoBody": {
-        "description": "Body of the dialog that opens from the Support Odango menu entry. It tells people that part of their support reaches the upstream FluffyChat project."
+        "description": "Body of the Support Odango dialog (opened from the update notice). It tells people that part of their support reaches the upstream FluffyChat project."
     },
     "supportKoFi": "Support on Ko-fi",
     "supportBuyMeACoffee": "Buy me a coffee",
     "supportUpstreamSource": "FluffyChat source code",
+    "hideThread": "Hide thread",
+    "@hideThread": {
+        "description": "Menu entry that removes a thread from the thread bar of a chat on this device"
+    },
+    "showThread": "Show thread",
+    "@showThread": {
+        "description": "Menu entry that puts a hidden thread back into the thread bar of a chat"
+    },
+    "hiddenThreadsCount": "Hidden ({count})",
+    "@hiddenThreadsCount": {
+        "description": "Chip of the thread bar that holds the hidden threads, with how many there are",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "hideThreadInfo": "Hidden only on this device. You still get notifications from it; mute the chat to silence them.",
+    "@hideThreadInfo": {
+        "description": "Explains under the Hide thread entry that hiding changes nothing about notifications"
+    },
+    "hiddenThread": "Hidden thread",
+    "@hiddenThread": {
+        "description": "Screen reader label of the marker on a hidden thread in the thread list"
+    },
+    "mentionEveryoneSubtitle": "Notifies everyone in this chat",
+    "@mentionEveryoneSubtitle": {
+        "description": "Second line of the @room entry in the mention suggestions of the composer"
+    },
+    "mentionsEveryone": "Mentions everyone",
+    "@mentionsEveryone": {
+        "description": "Screen reader label of the @room pill in a message that notifies the whole chat"
+    },
+    "aboutSupportFluffyChat": "Support FluffyChat",
+    "@aboutSupportFluffyChat": {
+        "description": "Row in the About dialog that opens the upstream FluffyChat support page"
+    },
     "supportLinksNotSet": "No donation links are set up in this build.",
     "aboutBasedOnFluffyChat": "Odango is a fork of FluffyChat and is licensed under AGPL-3.0.",
     "pushNeedsOwnGateway": "Push notifications need a push gateway. This build has none configured, so notifications only arrive while the app is open. Ask your administrator to set one up.",

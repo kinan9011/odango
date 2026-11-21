@@ -16,6 +16,7 @@ import 'package:odango/utils/adaptive_bottom_sheet.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/chat/edit_history.dart';
 import 'package:odango/utils/chat/message_actions.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat/word_diff.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -57,12 +58,13 @@ class _EditHistorySheetState extends State<EditHistorySheet> {
 
   Event get _event => widget.event;
 
-  String _originalText(BuildContext context) =>
-      _event.calcLocalizedBodyFallback(
-        MatrixLocals(L10n.of(context)),
-        withSenderNamePrefix: false,
-        hideReply: true,
-      );
+  String _originalText(BuildContext context) => stripBidiOverrides(
+    _event.calcLocalizedBodyFallback(
+      MatrixLocals(L10n.of(context)),
+      withSenderNamePrefix: false,
+      hideReply: true,
+    ),
+  );
 
   List<Event> get _local {
     final timeline = widget.controller.timeline;

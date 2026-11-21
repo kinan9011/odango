@@ -13,6 +13,7 @@ import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_details/chat_details.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat_details/room_trust.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:odango/widgets/settings/mono_value_row.dart';
@@ -75,7 +76,7 @@ class DetailsInfo extends StatelessWidget {
                         text: room.topic.isEmpty
                             ? l10n.noChatDescriptionYet
                             : cappedText(
-                                room.topic,
+                                stripBidiOverrides(room.topic),
                                 maxUnits: AppProfile.topicCap,
                               ),
                         textScaleFactor: MediaQuery.textScalerOf(

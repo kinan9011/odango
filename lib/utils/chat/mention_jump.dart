@@ -10,9 +10,19 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/design_constants.dart';
 
 /// Unread mentions of the own user in the loaded timeline, and which of them
-/// the user already jumped to. Sends nothing.
+/// the user already saw or jumped to.
 class MentionJump {
+  static final _perRoom = Expando<MentionJump>('MentionJump');
+
+  /// The state of [room], kept while the app runs so that leaving and opening
+  /// the chat again does not bring back the mentions that were already seen.
+  static MentionJump forRoom(Room room) => _perRoom[room] ??= MentionJump();
+
+  /// The seen ids are bounded, the oldest go first.
+  static const maxSeen = 1000;
+
   final Set<String> _visited = {};
+  int _lastServerCount = 0;
   int _loadedRounds = 0;
   int _extraScan = 0;
   bool _exhausted = false;
@@ -95,12 +105,38 @@ class MentionJump {
 
   void visit(String id) {
     _visited.add(id);
+    _trimSeen();
     revision++;
+  }
+
+  void _trimSeen() {
+    while (_visited.length > maxSeen) {
+      _visited.remove(_visited.first);
+    }
+  }
+
+  /// The mentions that were on screen: they are seen, like a visit.
+  void see(Iterable<String> ids) {
+    final added = ids.any((id) => !_visited.contains(id));
+    _visited.addAll(ids);
+    _trimSeen();
+    if (added) revision++;
+  }
+
+  /// Follows the server count: a change that adds a mention, or the room
+  /// being read, searches again. What was seen is kept: another client may
+  /// have read the room without moving the marker, and the seen mentions must
+  /// not come back.
+  void syncServerCount(int serverCount) {
+    final previous = _lastServerCount;
+    _lastServerCount = serverCount;
+    if (serverCount > previous || (serverCount <= 0 && previous > 0)) rearm();
   }
 
   /// A new unread state: forget what was visited and searched.
   void reset() {
     _visited.clear();
+    _lastServerCount = 0;
     rearm();
   }
 

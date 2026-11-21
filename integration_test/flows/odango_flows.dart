@@ -4,6 +4,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -22,13 +23,10 @@ extension on FluffyChatTester {
     expect(find.textContaining('FluffyChat'), findsNothing);
 
     await tapOn(find.byKey(const Key('accounts_and_settings_buttons')));
-    await tapOn('Support Odango');
-    await waitFor(find.textContaining('part of what you give goes on to'));
-    expect(find.text('Support on Ko-fi'), findsNothing);
-    expect(find.text('Buy me a coffee'), findsNothing);
-    await tapOn('Close');
-    await waitForGone('Support on Ko-fi');
-    await waitForGone(find.textContaining('part of what you give goes on to'));
+    await waitFor('Settings');
+    expect(find.text('Support Odango'), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await waitForGone('Support Odango');
 
     await openTab('Settings');
     await scrollUntilVisible('About');
@@ -36,6 +34,7 @@ extension on FluffyChatTester {
     await waitFor(
       'Odango is a fork of FluffyChat and is licensed under AGPL-3.0.',
     );
+    await waitFor(const ValueKey('about_support'));
     await tapOn('Close');
     await openTab('Chats');
   }

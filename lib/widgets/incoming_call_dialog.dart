@@ -11,6 +11,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/pulsating_widget.dart';
 
@@ -70,7 +71,7 @@ class _IncomingCallDialogState extends State<IncomingCallDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final displayname = widget.event.room.getLocalizedDisplayname();
+    final displayname = widget.event.room.safeLocalizedDisplayname();
     final avatar = widget.event.room.avatar;
     final theme = Theme.of(context);
     return AlertDialog(

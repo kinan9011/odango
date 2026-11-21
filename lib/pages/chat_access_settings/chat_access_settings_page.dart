@@ -13,6 +13,7 @@ import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/fluffy_share.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/settings/animated_row_list.dart';
 import 'package:odango/widgets/settings/mono_value_row.dart';
@@ -303,7 +304,7 @@ extension JoinRulesDisplayString on JoinRules {
               .map(
                 (space) => visibleId(
                   cappedText(
-                    space.getLocalizedDisplayname(MatrixLocals(l10n)),
+                    space.safeLocalizedDisplayname(MatrixLocals(l10n)),
                     maxUnits: 60,
                   ),
                 ),
@@ -316,7 +317,7 @@ extension JoinRulesDisplayString on JoinRules {
               .map(
                 (space) => visibleId(
                   cappedText(
-                    space.getLocalizedDisplayname(MatrixLocals(l10n)),
+                    space.safeLocalizedDisplayname(MatrixLocals(l10n)),
                     maxUnits: 60,
                   ),
                 ),

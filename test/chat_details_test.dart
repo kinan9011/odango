@@ -633,6 +633,28 @@ void main() {
       await h.finish(tester);
     });
 
+    testWidgets('every edge of the 44 px badge box is a hit, the bottom end '
+        'one too (T225)', (tester) async {
+      final room = withAvatar();
+      await open(tester, room);
+      final box = tester.getRect(key('details_edit_avatar'));
+      expect(box.width, greaterThanOrEqualTo(44));
+      expect(box.height, greaterThanOrEqualTo(44));
+      for (final point in [
+        box.topLeft + const Offset(1, 1),
+        box.topRight + const Offset(-1, 1),
+        box.bottomLeft + const Offset(1, -1),
+        box.bottomRight + const Offset(-1, -1),
+      ]) {
+        await tester.tapAt(point);
+        await h.settle(tester, rounds: 4);
+        expect(find.text('Open gallery'), findsOneWidget, reason: '$point');
+        await tester.tapAt(const Offset(5, 5));
+        await h.settle(tester, rounds: 4);
+      }
+      await h.finish(tester);
+    });
+
     testWidgets('Delete removes the picture once', (tester) async {
       final room = withAvatar();
       await open(tester, room);

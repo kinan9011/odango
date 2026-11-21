@@ -12,11 +12,13 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat_list/peek_controller.dart';
 import 'package:odango/utils/chat_list/peek_menu.dart';
 import 'package:odango/utils/glass_policy.dart';
 import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/string_color.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/glass_surface.dart';
@@ -90,7 +92,7 @@ class _PeekSheetState extends State<_PeekSheet> {
     final l10n = L10n.of(context);
     final mq = MediaQuery.of(context);
     final solid = glassIsSolidNow(context);
-    final name = widget.room.getLocalizedDisplayname(MatrixLocals(l10n));
+    final name = widget.room.safeLocalizedDisplayname(MatrixLocals(l10n));
     final scrim = ColoredBox(
       color: AppTokens.overlay(0.32),
       child: const SizedBox.expand(),
@@ -300,12 +302,14 @@ class _Bubble extends StatelessWidget {
     final tokens = AppTokens.of(context);
     final l10n = L10n.of(context);
     final outgoing = event.senderId == room.client.userID;
-    final text = event.calcLocalizedBodyFallback(
-      MatrixLocals(l10n),
-      hideReply: true,
-      hideEdit: true,
-      plaintextBody: true,
-      removeMarkdown: true,
+    final text = stripBidiOverrides(
+      event.calcLocalizedBodyFallback(
+        MatrixLocals(l10n),
+        hideReply: true,
+        hideEdit: true,
+        plaintextBody: true,
+        removeMarkdown: true,
+      ),
     );
     final showSender = !outgoing && !room.isDirectChat;
     final bubble = DecoratedBox(

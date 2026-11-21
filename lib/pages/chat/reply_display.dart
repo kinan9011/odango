@@ -6,6 +6,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:odango/utils/motion.dart';
 
@@ -78,14 +79,16 @@ class _EditContent extends StatelessWidget {
         Icon(Icons.edit, color: theme.colorScheme.primary),
         Container(width: 15.0),
         Text(
-          event
-              .calcLocalizedBodyFallback(
-                MatrixLocals(L10n.of(context)),
-                withSenderNamePrefix: false,
-                hideReply: true,
-              )
-              .trim()
-              .replaceAll('\n', ' '),
+          stripBidiOverrides(
+            event
+                .calcLocalizedBodyFallback(
+                  MatrixLocals(L10n.of(context)),
+                  withSenderNamePrefix: false,
+                  hideReply: true,
+                )
+                .trim()
+                .replaceAll('\n', ' '),
+          ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
           style: TextStyle(color: theme.textTheme.bodyMedium!.color),

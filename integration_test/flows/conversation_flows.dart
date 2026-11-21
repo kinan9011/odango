@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -32,12 +33,18 @@ Future<void> conversationJumpButtons(WidgetTester widgetTester) => widgetTester
     .startFluffyChatTest()
     .then((tester) => tester._conversationJumpButtons());
 
+Future<void> conversationDirectionRoomMention(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then(
+      (tester) => tester._conversationDirectionRoomMention(),
+    );
+
 const _overflow = Key('chat_overflow_button');
 
 Finder _inBubble(String text) =>
     find.descendant(of: find.byType(MessageBubble), matching: find.text(text));
 const _bubblesRoom = 'Conversation Bubbles Room';
 const _jumpRoom = 'Conversation Jump Room';
+const _directionRoom = 'Conversation Direction Room';
 
 extension on FluffyChatTester {
   Future<void> _sendMessage(String text) async {
@@ -228,11 +235,23 @@ extension on FluffyChatTester {
     await tapOn(find.byKey(ChatJumpButtons.mentionKey));
     await waitFor(find.byKey(Key('mention_ring_$mentionId')));
     await waitForGone(find.byKey(ChatJumpButtons.mentionKey));
-    await tester.pump(const Duration(seconds: 3));
+    // The mention that was shown is acknowledged with the private receipt
+    // and the marker, the public receipt stays off by default.
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    while (DateTime.now().isBefore(end)) {
+      final marker = await alice.getRoomAccountData(roomId, 'm.fully_read');
+      if (marker.toString() != fullyRead.toString()) break;
+      await tester.pump(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
     expect(
-      await alice.getRoomAccountData(roomId, 'm.fully_read'),
-      fullyRead,
-      reason: 'jumping to a mention moves no read marker',
+      ((await alice.getRoomAccountData(roomId, 'm.fully_read'))!
+          as Map)['event_id'],
+      mentionId,
+    );
+    expect(
+      await bob.receiptUsers(roomId, mentionId),
+      isNot(contains(alice.userId)),
     );
 
     await tapOn(find.byKey(ChatJumpButtons.scrollDownKey));
@@ -241,6 +260,68 @@ extension on FluffyChatTester {
 
     await goBack();
     await waitFor(find.byType(ChatList));
+    await tapOn(row);
+    await waitFor('later 30');
+    expect(
+      find.byKey(ChatJumpButtons.mentionKey),
+      findsNothing,
+      reason: 'a mention that was seen does not come back',
+    );
+    await goBack();
+    await waitFor(find.byType(ChatList));
+    await bob.logout();
+    await alice.logout();
+  }
+
+  Future<void> _conversationDirectionRoomMention() async {
+    await ensureLoggedIn();
+    await openTab('Chats');
+    final bob = await SynapseUser.login(user2Name, user2Pw);
+    final alice = await SynapseUser.login(user1Name, user1Pw);
+    final roomId = await alice.createRoom(_directionRoom, invite: [bob.userId]);
+    await bob.join(roomId);
+
+    final row = find.widgetWithText(ChatListItem, _directionRoom);
+    await waitFor(row);
+    await tapOn(row);
+    await waitFor(_overflow);
+
+    // The app is in English: Arabic text is still right to left.
+    await _sendMessage('مرحبا بالعالم');
+    final arabic = tester.renderObject<RenderParagraph>(
+      find
+          .descendant(
+            of: find.byType(MessageBubble),
+            matching: find.textContaining('مرحبا', findRichText: true),
+          )
+          .first,
+    );
+    expect(arabic.textDirection, TextDirection.rtl);
+    await _sendMessage('plain english');
+    final english = tester.renderObject<RenderParagraph>(
+      find
+          .descendant(
+            of: find.byType(MessageBubble),
+            matching: find.textContaining('plain english', findRichText: true),
+          )
+          .first,
+    );
+    expect(english.textDirection, TextDirection.ltr);
+
+    // The creator may notify the room: @room is offered and sent as a mention.
+    await tapOn(const Key('chat_input_field'));
+    // Not the helper: it unfocuses the field, which closes the suggestions.
+    await tester.enterText(find.byKey(const Key('chat_input_field')), '@ro');
+    await tester.pump(const Duration(milliseconds: 500));
+    await waitFor('Notifies everyone in this chat');
+    await tapOn(find.text('@room'));
+    await tapOn(const Key('send_button'));
+    await waitFor(_inBubble('@room'));
+    await tester.pump(const Duration(seconds: 2));
+    final content = await bob.latestMessageFrom(roomId, alice.userId);
+    expect(content['m.mentions'], {'room': true});
+
+    await goBack();
     await bob.logout();
     await alice.logout();
   }

@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_config.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/branding/docs_links.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:odango/widgets/mxc_image.dart';
 
@@ -148,7 +149,9 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                         itemBuilder: (BuildContext context, int imageIndex) {
                           final image = pack.images[imageKeys[imageIndex]]!;
                           return Tooltip(
-                            message: image.body ?? imageKeys[imageIndex],
+                            message: stripBidiOverrides(
+                              image.body ?? imageKeys[imageIndex],
+                            ),
                             child: InkWell(
                               radius: AppConfig.borderRadius,
                               key: ValueKey(image.url.toString()),

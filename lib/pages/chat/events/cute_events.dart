@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 
 class CuteContent extends StatefulWidget {
   final Event event;
@@ -43,7 +44,10 @@ class _CuteContentState extends State<CuteContent> {
             mainAxisSize: .min,
             mainAxisAlignment: .center,
             children: [
-              Text(widget.event.text, style: const TextStyle(fontSize: 150)),
+              Text(
+                stripBidiOverrides(widget.event.text),
+                style: const TextStyle(fontSize: 150),
+              ),
               if (label != null) Text(label),
             ],
           ),
@@ -60,7 +64,7 @@ class _CuteContentState extends State<CuteContent> {
     OverlayEntry? overlay;
     overlay = OverlayEntry(
       builder: (context) => CuteEventOverlay(
-        emoji: widget.event.text,
+        emoji: stripBidiOverrides(widget.event.text),
         onAnimationEnd: () {
           _isOverlayShown = false;
           overlay?.remove();

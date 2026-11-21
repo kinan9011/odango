@@ -19,6 +19,7 @@ import 'package:odango/utils/appearance/chat_appearance_scope.dart';
 import 'package:odango/utils/chat/bubble_shape.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/chat/message_ticks.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/file_description.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -735,7 +736,7 @@ class _ThreadChip extends StatelessWidget {
           onPressed: onTap,
           icon: const Icon(Icons.message),
           label: Text(
-            '${L10n.of(context).countReplies(children.length)} | ${children.first.calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true)}',
+            '${L10n.of(context).countReplies(children.length)} | ${stripBidiOverrides(children.first.calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true))}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

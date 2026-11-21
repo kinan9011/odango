@@ -13,6 +13,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/chat_list/folder_store.dart';
 import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -52,7 +53,7 @@ class _FolderChatPickerState extends State<_FolderChatPicker> {
       for (final room in widget.client.rooms)
         if (!room.isJoinedSpace &&
             room
-                .getLocalizedDisplayname(locals)
+                .safeLocalizedDisplayname(locals)
                 .toLowerCase()
                 .contains(filter.toLowerCase()))
           room,
@@ -86,7 +87,7 @@ class _FolderChatPickerState extends State<_FolderChatPicker> {
                 itemCount: rooms.length,
                 itemBuilder: (context, i) {
                   final room = rooms[i];
-                  final name = room.getLocalizedDisplayname(locals);
+                  final name = room.safeLocalizedDisplayname(locals);
                   final isSelected = selected.contains(room.id);
                   return SettingsCheckRow(
                     key: ValueKey('picker_${room.id}'),

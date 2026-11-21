@@ -42,6 +42,10 @@ void main() {
     testWidgets('Conversation shell', conversationShell);
     testWidgets('Conversation bubbles', conversationBubbles);
     testWidgets('Conversation jump buttons', conversationJumpButtons);
+    testWidgets(
+      'Conversation direction and room mention',
+      conversationDirectionRoomMention,
+    );
     testWidgets('Composer rich text', composerRichText);
     testWidgets('Edit history', editHistory);
     testWidgets('Scheduled message send now', scheduleAndSendNow);

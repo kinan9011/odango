@@ -16,6 +16,7 @@ import 'package:odango/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:odango/widgets/avatar.dart';
 
 import 'utils/chat_page_harness.dart';
+import 'utils/reason_field.dart';
 import 'utils/recording_api.dart';
 
 void main() {
@@ -219,6 +220,14 @@ void main() {
     await harness.settle(tester, rounds: 3);
     expect(find.text('Why do you want to report this?'), findsOneWidget);
     expect(find.byType(AdaptiveDialogAction), findsWidgets);
+    await harness.finish(tester);
+  });
+
+  testWidgets('the report reason takes several lines', (tester) async {
+    await show(tester);
+    await tester.tap(find.text('report'));
+    await harness.settle(tester, rounds: 3);
+    await expectMultilineReasonField(tester);
     await harness.finish(tester);
   });
 }

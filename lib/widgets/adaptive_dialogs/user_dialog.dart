@@ -53,6 +53,8 @@ class UserDialog extends StatelessWidget {
       okLabel: l10n.report,
       cancelLabel: l10n.cancel,
       hintText: l10n.reason,
+      minLines: AppDialog.reasonMinLines,
+      maxLines: AppDialog.reasonMaxLines,
     );
     if (reason == null || reason.isEmpty) return;
     if (!rootContext.mounted) return;

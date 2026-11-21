@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/pages/chat/chat.dart';
 import 'package:odango/pages/chat/chat_jump_buttons.dart';
+import 'package:odango/utils/chat/mention_jump.dart';
 
 import 'utils/chat_page_harness.dart';
 
@@ -18,6 +19,7 @@ void main() {
   setUp(() async {
     harness.setUp();
     await AppSettings.sendTypingNotifications.setItem(false);
+    MentionJump.forRoom(harness.room).reset();
   });
   tearDown(() async {
     await harness.tearDown();

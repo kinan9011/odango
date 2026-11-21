@@ -21,9 +21,11 @@ import 'package:odango/config/app_config.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/call_kit_params.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/client_manager.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/notification_avatar_extension.dart';
 import 'package:odango/utils/notification_background_handler.dart';
 import 'package:odango/utils/platform_infos.dart';
@@ -211,13 +213,15 @@ Future<void> _tryPushHelper(
   // Calculate the body
   final body = event.type == EventTypes.Encrypted
       ? l10n.newMessageInOdango
-      : await event.calcLocalizedBody(
-          matrixLocals,
-          plaintextBody: true,
-          withSenderNamePrefix: false,
-          hideReply: true,
-          hideEdit: true,
-          removeMarkdown: true,
+      : stripBidiOverrides(
+          await event.calcLocalizedBody(
+            matrixLocals,
+            plaintextBody: true,
+            withSenderNamePrefix: false,
+            hideReply: true,
+            hideEdit: true,
+            removeMarkdown: true,
+          ),
         );
 
   // The person object for the android message style notification
@@ -260,7 +264,7 @@ Future<void> _tryPushHelper(
       : null;
   messagingStyleInformation?.messages?.add(newMessage);
 
-  final roomName = event.room.getLocalizedDisplayname(MatrixLocals(l10n));
+  final roomName = event.room.safeLocalizedDisplayname(MatrixLocals(l10n));
 
   final notificationGroupId = event.room.isDirectChat
       ? 'directChats'
@@ -308,13 +312,15 @@ Future<void> _tryPushHelper(
           groupConversation: !event.room.isDirectChat,
           messages: [newMessage],
         ),
-    ticker: event.calcLocalizedBodyFallback(
-      matrixLocals,
-      plaintextBody: true,
-      withSenderNamePrefix: !event.room.isDirectChat,
-      hideReply: true,
-      hideEdit: true,
-      removeMarkdown: true,
+    ticker: stripBidiOverrides(
+      event.calcLocalizedBodyFallback(
+        matrixLocals,
+        plaintextBody: true,
+        withSenderNamePrefix: !event.room.isDirectChat,
+        hideReply: true,
+        hideEdit: true,
+        removeMarkdown: true,
+      ),
     ),
     importance: Importance.high,
     priority: Priority.max,
@@ -372,7 +378,7 @@ Future<void> _tryPushHelper(
     iOS: iOSPlatformChannelSpecifics,
   );
 
-  final title = event.room.getLocalizedDisplayname(MatrixLocals(l10n));
+  final title = event.room.safeLocalizedDisplayname(MatrixLocals(l10n));
 
   if (PlatformInfos.isAndroid && messagingStyleInformation == null) {
     await _setShortcut(event, l10n, title, roomAvatarFile);

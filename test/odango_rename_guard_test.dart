@@ -128,10 +128,19 @@ final _absenceAssertion = RegExp(
 );
 
 /// The upstream repository, linked as credit and nothing else of upstream.
-const _upstreamLiterals = {AppConfigUpstream.repo};
+const _upstreamLiterals = {
+  AppConfigUpstream.repo,
+  AppConfigUpstream.supportPost,
+};
 
 abstract class AppConfigUpstream {
   static const repo = 'https://github.com/krille-chan/fluffychat';
+
+  /// The upstream "How can I support FluffyChat" page, opened by the About
+  /// dialog row `aboutSupportFluffyChat`. The only upstream link besides the
+  /// repository.
+  static const supportPost =
+      'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I';
 }
 
 final _stringLiteral = RegExp(
@@ -221,6 +230,7 @@ void main() {
       const credit = {
         'supportOdangoBody',
         'supportUpstreamSource',
+        'aboutSupportFluffyChat',
         'aboutBasedOnFluffyChat',
       };
       final hits = [
@@ -532,7 +542,9 @@ void main() {
         for (final path in files)
           if (path.startsWith('lib/') &&
               path.endsWith('.dart') &&
-              (_read(path) ?? '').contains('ko-fi.com'))
+              (_read(path) ?? '')
+                  .replaceAll(AppConfigUpstream.supportPost, '')
+                  .contains('ko-fi.com'))
             path,
       ];
       expect(hits, isEmpty);

@@ -15,6 +15,7 @@ import 'package:odango/pages/settings/settings.dart';
 import 'package:odango/utils/chat_details/shared_media_feed.dart';
 import 'package:odango/utils/file_selector.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -115,7 +116,7 @@ class ChatDetailsController extends State<ChatDetails> {
       title: l10n.changeTheNameOfTheGroup,
       okLabel: l10n.ok,
       cancelLabel: l10n.cancel,
-      initialText: room.getLocalizedDisplayname(MatrixLocals(l10n)),
+      initialText: room.safeLocalizedDisplayname(MatrixLocals(l10n)),
     );
     if (input == null) return;
     if (!mounted) return;

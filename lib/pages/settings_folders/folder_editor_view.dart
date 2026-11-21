@@ -10,6 +10,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_folders/folder_editor.dart';
 import 'package:odango/utils/chat_list/folder_store.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -125,7 +126,7 @@ class FolderEditorView extends StatelessWidget {
                   itemBuilder: (context, id) {
                     final room = client.getRoomById(id);
                     final name =
-                        room?.getLocalizedDisplayname(locals) ??
+                        room?.safeLocalizedDisplayname(locals) ??
                         AppTypography.ltr(visibleId(id));
                     return SettingsRow(
                       key: ValueKey('folder_room_$id'),

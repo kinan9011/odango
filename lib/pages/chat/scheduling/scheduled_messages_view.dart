@@ -15,6 +15,7 @@ import 'package:odango/utils/account_config.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/scheduling/schedule_time.dart';
 import 'package:odango/utils/scheduling/scheduled_messages.dart';
 import 'package:odango/widgets/glass_surface.dart';
@@ -91,7 +92,7 @@ class _Header extends StatelessWidget {
     final l10n = L10n.of(context);
     final room = controller.room;
     final roomName = safeDisplayText(
-      room.getLocalizedDisplayname(MatrixLocals(l10n)),
+      room.safeLocalizedDisplayname(MatrixLocals(l10n)),
       maxGraphemes: 40,
     );
     return Padding(
