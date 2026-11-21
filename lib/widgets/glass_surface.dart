@@ -80,6 +80,7 @@ class GlassSurface extends StatelessWidget {
     final radius = borderRadius.resolve(Directionality.of(context));
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.passthrough,
       children: [
         Positioned.fill(
           child: ClipPath(

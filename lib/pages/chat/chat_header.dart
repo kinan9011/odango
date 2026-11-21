@@ -17,6 +17,7 @@ import 'package:odango/pages/chat/chat_overflow_menu.dart';
 import 'package:odango/pages/chat/retention_sheet.dart';
 import 'package:odango/utils/chat_list/swipe_actions.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/calls_gate.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
@@ -163,32 +164,123 @@ class _ChatHeaderState extends State<ChatHeader> {
         : columnMode
         ? null
         : const _GlassCircle(child: BackButton());
+    final showOverflow = !controller.selectMode && !room.isArchived;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
-      child: Row(
-        spacing: AppChat.headerGap,
-        children: [
-          ?leading,
-          Expanded(
-            child: controller.selectMode
-                ? _SelectionPill(controller)
-                : _TitlePill(controller),
-          ),
-          if (!controller.selectMode && !room.isArchived)
-            ValueListenableBuilder(
-              valueListenable: _menuOpen,
-              builder: (context, open, _) => _GlassCircle(
-                key: _overflowKey,
-                tinted: open,
-                child: IconButton(
-                  key: const Key('chat_overflow_button'),
-                  icon: const Icon(Icons.more_vert_rounded),
-                  tooltip: l10n.moreOptions,
-                  onPressed: _openOverflow,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showIsland = threadId != null && !controller.selectMode;
+          final collapsed =
+              showIsland &&
+              !_threadIslandFits(context, constraints.maxWidth, showOverflow);
+          return Row(
+            spacing: AppChat.headerGap,
+            children: [
+              ?leading,
+              if (showIsland) _ThreadIsland(collapsed: collapsed),
+              Expanded(
+                child: controller.selectMode
+                    ? _SelectionPill(controller)
+                    : _TitlePill(controller),
+              ),
+              if (showOverflow)
+                ValueListenableBuilder(
+                  valueListenable: _menuOpen,
+                  builder: (context, open, _) => _GlassCircle(
+                    key: _overflowKey,
+                    tinted: open,
+                    child: IconButton(
+                      key: const Key('chat_overflow_button'),
+                      icon: const Icon(Icons.more_vert_rounded),
+                      tooltip: l10n.moreOptions,
+                      onPressed: _openOverflow,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  bool _threadIslandFits(BuildContext context, double maxWidth, bool overflow) {
+    final scaler = MediaQuery.textScalerOf(
+      context,
+    ).clamp(maxScaleFactor: AppChat.headerClampedTextScale);
+    final label = TextPainter(
+      text: TextSpan(text: L10n.of(context).thread, style: _threadIslandStyle),
+      textDirection: Directionality.of(context),
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    final labelWidth = label.width;
+    label.dispose();
+    final island = _threadIslandPadding + 18 + 5 + labelWidth;
+    final buttons = AppChat.headerButton * (overflow ? 2 : 1);
+    final gaps = AppChat.headerGap * (overflow ? 3 : 2);
+    return maxWidth - buttons - gaps - island >= AppChat.threadPillMinWidth;
+  }
+}
+
+const _threadIslandStyle = TextStyle(
+  fontSize: 15.5,
+  fontWeight: FontWeight.w600,
+);
+const _threadIslandPadding = 12.0 + 14.0;
+
+class _ThreadIsland extends StatelessWidget {
+  final bool collapsed;
+
+  const _ThreadIsland({required this.collapsed});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: motionDuration(context, AppTitleMotion.duration),
+      curve: AppTitleMotion.curve,
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: Transform.scale(scale: 0.9 + 0.1 * t, child: child),
+      ),
+      child: SizedBox(
+        key: const ValueKey('thread_island'),
+        height: AppChat.headerButton,
+        width: collapsed ? AppChat.headerButton : null,
+        child: GlassSurface(
+          borderRadius: BorderRadius.circular(AppChat.headerButton / 2),
+          child: Semantics(
+            container: true,
+            header: true,
+            label: l10n.thread,
+            excludeSemantics: true,
+            child: MediaQuery.withClampedTextScaling(
+              maxScaleFactor: AppChat.headerClampedTextScale,
+              child: Padding(
+                padding: collapsed
+                    ? EdgeInsets.zero
+                    : const EdgeInsetsDirectional.only(start: 12, end: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 5,
+                  children: [
+                    Icon(Icons.forum_outlined, size: 18, color: tokens.acc),
+                    if (!collapsed)
+                      Text(
+                        l10n.thread,
+                        maxLines: 1,
+                        style: _threadIslandStyle.copyWith(color: tokens.fg),
+                      ),
+                  ],
                 ),
               ),
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -235,40 +327,58 @@ class _TitlePill extends StatelessWidget {
     final room = controller.room;
     final tokens = AppTokens.of(context);
     return SizedBox(
+      key: const ValueKey('chat_title_pill'),
       height: AppChat.headerButton,
       child: GlassSurface(
         borderRadius: BorderRadius.circular(AppChat.headerButton / 2),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 5, end: 14),
-          child: Row(
-            children: [
-              Expanded(child: ChatAppBarTitle(controller)),
-              CallsGate(
-                client: room.client,
-                builder: (context, available) =>
-                    available && room.hasActiveMatrixRtcCall && !room.isArchived
-                    ? PulsatingWidget(
-                        color: tokens.red,
-                        child: TextButton.icon(
-                          icon: Icon(switch (room.activeMatrixRtcCallIntent) {
-                            .voice => Icons.video_call_outlined,
-                            _ => Icons.mic_outlined,
-                          }),
-                          label: Text(
-                            room.getActiveMatrixRtcMembers().length.toString(),
-                          ),
-                          onPressed: room.hasPermissionForMatrixRtcCall
-                              ? controller.startOrJoinVideoCall
-                              : null,
-                          style: TextButton.styleFrom(
-                            backgroundColor: tokens.red,
-                            foregroundColor: tokens.onRed,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+        child: MediaQuery.withClampedTextScaling(
+          maxScaleFactor: AppChat.headerClampedTextScale,
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onTap: ChatAppBarTitle.onTap(context, controller),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 5, end: 14),
+              child: Row(
+                children: [
+                  Expanded(child: ChatAppBarTitle(controller)),
+                  CallsGate(
+                    client: room.client,
+                    builder: (context, available) =>
+                        available &&
+                            room.hasActiveMatrixRtcCall &&
+                            !room.isArchived
+                        ? PulsatingWidget(
+                            color: tokens.red,
+                            child: TextButton.icon(
+                              icon: Icon(
+                                switch (room.activeMatrixRtcCallIntent) {
+                                  .voice => Icons.video_call_outlined,
+                                  _ => Icons.mic_outlined,
+                                },
+                              ),
+                              label: Text(
+                                room
+                                    .getActiveMatrixRtcMembers()
+                                    .length
+                                    .toString(),
+                              ),
+                              onPressed: room.hasPermissionForMatrixRtcCall
+                                  ? controller.startOrJoinVideoCall
+                                  : null,
+                              style: TextButton.styleFrom(
+                                backgroundColor: tokens.red,
+                                foregroundColor: tokens.onRed,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/pages/chat_list/chat_list_item.dart';
 import 'package:odango/pages/chat_list/space_switcher.dart';
+import 'package:odango/widgets/app_sheet.dart';
+import 'package:odango/widgets/settings/settings_check_row.dart';
 import 'package:odango/widgets/settings/settings_row.dart';
 
 import '../data/environment_constants.dart';
@@ -65,7 +67,7 @@ extension on FluffyChatTester {
     await tapOn(const Key('accounts_and_settings_buttons'));
     await tapOn(find.widgetWithText(PopupMenuItem<Object>, 'New space'));
     await enterText(TextField, _spaceName);
-    await tapOn(find.widgetWithText(ElevatedButton, 'New space'));
+    await tapOn(find.byKey(const ValueKey('create_group_button')));
     await waitFor(find.widgetWithText(InkWell, _spaceName));
     await waitFor(ChatFlows.groupChatName);
 
@@ -84,7 +86,7 @@ extension on FluffyChatTester {
     await tapOn('Add to space');
     await tapOn(
       find.descendant(
-        of: find.byType(ListTile),
+        of: find.byType(AppSheet),
         matching: find.text(_spaceName),
       ),
     );
@@ -113,9 +115,9 @@ extension on FluffyChatTester {
     await tapOn('Folders');
     await tapOn('Create folder');
     await enterText(find.byKey(const ValueKey('folder_name')), _folderName);
-    await tapOn(find.widgetWithText(CheckboxListTile, 'Groups'));
+    await tapOn(find.widgetWithText(SettingsCheckRow, 'Groups'));
     await tapOn(find.byKey(const ValueKey('save_folder')));
-    await waitFor(find.widgetWithText(ListTile, _folderName));
+    await waitFor(find.widgetWithText(SettingsRow, _folderName));
 
     final alice = await SynapseUser.login(user1Name, user1Pw);
     final stored = await alice.getAccountData('com.swovo.odango.folders');
@@ -123,6 +125,48 @@ extension on FluffyChatTester {
     final folders = (stored! as Map)['folders'] as List;
     expect((stored as Map)['version'], 1);
     expect(folders.map((f) => (f as Map)['name']), [_folderName]);
+
+    await waitForGone(find.byKey(const ValueKey('save_folder')));
+    await tapOn('Create folder');
+    await enterText(find.byKey(const ValueKey('folder_name')), 'Home');
+    await tapOn(find.byKey(const ValueKey('save_folder')));
+    await waitFor(find.widgetWithText(SettingsRow, 'Home'));
+    final handle = find.descendant(
+      of: find.widgetWithText(SettingsRow, 'Home'),
+      matching: find.byIcon(Icons.drag_indicator_rounded),
+    );
+    final gesture = await tester.startGesture(tester.getCenter(handle));
+    await gesture.moveBy(const Offset(0, -12));
+    await tester.pump(const Duration(milliseconds: 50));
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(0, -10));
+      await tester.pump(const Duration(milliseconds: 40));
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    var order = <Object?>[];
+    while (DateTime.now().isBefore(end)) {
+      final data = await SynapseUser.login(user1Name, user1Pw).then((u) async {
+        final value = await u.getAccountData('com.swovo.odango.folders');
+        await u.logout();
+        return value;
+      });
+      order = [
+        for (final f in (data! as Map)['folders'] as List) (f as Map)['name'],
+      ];
+      if (order.first == 'Home') break;
+      await tester.pump(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    expect(order, [
+      'Home',
+      _folderName,
+    ], reason: 'the drag reorders the folders');
+    await tapOn(find.widgetWithText(SettingsRow, 'Home'));
+    await tapOn(find.byKey(const ValueKey('delete_folder')));
+    await tapOn(find.widgetWithText(TextButton, 'Delete').last);
+    await waitForGone(find.widgetWithText(SettingsRow, 'Home'));
 
     await goBack();
     await goBack();
@@ -136,10 +180,10 @@ extension on FluffyChatTester {
 
     await longPressOn(tab);
     await tapOn('Edit folder');
-    await tapOn(find.widgetWithText(CheckboxListTile, 'Groups'));
-    await tapOn(find.widgetWithText(CheckboxListTile, 'Personal'));
+    await tapOn(find.widgetWithText(SettingsCheckRow, 'Groups'));
+    await tapOn(find.widgetWithText(SettingsCheckRow, 'Personal'));
     await tapOn(find.byKey(const ValueKey('save_folder')));
-    await waitFor(find.widgetWithText(ListTile, _folderName));
+    await waitFor(find.widgetWithText(SettingsRow, _folderName));
     await goBack();
     await goBack();
     await openTab('Chats');
@@ -157,10 +201,10 @@ extension on FluffyChatTester {
     await openTab('Settings');
     await tapOn(find.widgetWithText(SettingsRow, 'Chats'));
     await tapOn('Folders');
-    await tapOn(find.widgetWithText(ListTile, _folderName));
+    await tapOn(find.widgetWithText(SettingsRow, _folderName));
     await tapOn(find.byKey(const ValueKey('delete_folder')));
     await tapOn(find.widgetWithText(TextButton, 'Delete').last);
-    await waitForGone(find.widgetWithText(ListTile, _folderName));
+    await waitForGone(find.widgetWithText(SettingsRow, _folderName));
     await goBack();
     await goBack();
     await openTab('Chats');

@@ -8,8 +8,11 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 
 /// Displays a loading dialog which reacts to the given [future]. The dialog
@@ -55,8 +58,9 @@ Future<Result<T>> showFutureLoadingDialog<T>({
     return Result.capture(futureExec);
   }
 
-  final result = await showAdaptiveDialog<Result<T>>(
+  final result = await showDialog<Result<T>>(
     context: context,
+    animationStyle: dialogAnimationStyle(context),
     barrierDismissible: barrierDismissible,
     builder: (BuildContext context) => LoadingDialog<T>(
       future: futureExec,
@@ -117,36 +121,49 @@ class LoadingDialogState<T> extends State<LoadingDialog> {
         ? exception.toLocalizedString(context, widget.exceptionContext)
         : widget.title ?? L10n.of(context).loadingPleaseWait;
 
-    return AlertDialog.adaptive(
+    final tokens = AppTokens.of(context);
+    return AlertDialog(
+      constraints: const BoxConstraints(maxWidth: AppDialog.maxWidth),
+      scrollable: true,
       title: exception == null
           ? null
-          : Icon(
-              Icons.error_outline_outlined,
-              color: Theme.of(context).colorScheme.error,
-              size: 48,
-            ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 256),
-        child: Row(
-          crossAxisAlignment: .center,
-          children: [
-            if (exception == null) ...[
-              StreamBuilder(
-                stream: widget.onProgressStream,
-                builder: (context, snapshot) =>
-                    CircularProgressIndicator.adaptive(value: snapshot.data),
+          : Icon(Icons.error_outline_rounded, color: tokens.red, size: 48),
+      content: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: motionDuration(context, AppMotion.spinnerIn),
+        curve: const OvershootCurve(AppMotion.spinnerTension),
+        builder: (context, scale, child) => Opacity(
+          opacity: scale.clamp(0.0, 1.0),
+          child: Transform.scale(scale: scale, child: child),
+        ),
+        child: Semantics(
+          liveRegion: true,
+          child: Row(
+            crossAxisAlignment: .center,
+            spacing: AppSpacing.xxl,
+            children: [
+              if (exception == null)
+                StreamBuilder(
+                  stream: widget.onProgressStream,
+                  builder: (context, snapshot) => SizedBox.square(
+                    dimension: 28,
+                    child: CircularProgressIndicator(
+                      value: snapshot.data,
+                      strokeWidth: 3,
+                      color: tokens.acc,
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Text(
+                  titleLabel,
+                  maxLines: 4,
+                  textAlign: exception == null ? TextAlign.start : null,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const SizedBox(width: 20),
             ],
-            Expanded(
-              child: Text(
-                titleLabel,
-                maxLines: 4,
-                textAlign: exception == null ? TextAlign.start : null,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       actions: exception == null

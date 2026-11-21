@@ -20,6 +20,17 @@ class SettingsScaffold extends StatelessWidget {
   final Widget? bottom;
   final List<Widget>? actions;
   final bool largeTitle;
+  final VoidCallback? onBack;
+  final int? itemCount;
+  final IndexedWidgetBuilder? itemBuilder;
+  final List<Widget>? slivers;
+
+  static const _padding = EdgeInsetsDirectional.fromSTEB(
+    AppSettingsLayout.sideMargin,
+    0,
+    AppSettingsLayout.sideMargin,
+    AppSpacing.huge,
+  );
 
   const SettingsScaffold({
     required this.title,
@@ -28,16 +39,50 @@ class SettingsScaffold extends StatelessWidget {
     this.bottom,
     this.actions,
     this.largeTitle = false,
+    this.onBack,
     super.key,
-  });
+  }) : itemCount = null,
+       itemBuilder = null,
+       slivers = null;
+
+  const SettingsScaffold.slivers({
+    required this.title,
+    required List<Widget> this.slivers,
+    this.subtitle,
+    this.bottom,
+    this.actions,
+    this.onBack,
+    super.key,
+  }) : children = const [],
+       itemCount = null,
+       itemBuilder = null,
+       largeTitle = false;
+
+  const SettingsScaffold.builder({
+    required this.title,
+    required int this.itemCount,
+    required IndexedWidgetBuilder this.itemBuilder,
+    this.subtitle,
+    this.actions,
+    this.onBack,
+    super.key,
+  }) : children = const [],
+       bottom = null,
+       slivers = null,
+       largeTitle = false;
 
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final columnMode = FluffyThemes.isColumnMode(context);
     final subtitle = this.subtitle;
-    final bottom = this.bottom;
+    final itemBuilder = this.itemBuilder;
+    final slivers = this.slivers;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final bottom = keyboard ? null : this.bottom;
+    final inList = keyboard ? this.bottom : null;
     final canPop = Navigator.of(context).canPop();
+    final hasBack = onBack != null || (!columnMode && canPop);
     return Scaffold(
       backgroundColor: tokens.bg,
       appBar: AppBar(
@@ -46,46 +91,9 @@ class SettingsScaffold extends StatelessWidget {
         automaticallyImplyLeading: false,
         centerTitle: false,
         toolbarHeight: 64,
-        titleSpacing: columnMode || !canPop ? AppSpacing.xxxl : 0,
-        leading: columnMode || !canPop
-            ? null
-            : Padding(
-                padding: const EdgeInsetsDirectional.only(start: 10),
-                child: Center(
-                  child: Semantics(
-                    button: true,
-                    label: MaterialLocalizations.of(context).backButtonTooltip,
-                    excludeSemantics: true,
-                    child: Tooltip(
-                      message: MaterialLocalizations.of(
-                        context,
-                      ).backButtonTooltip,
-                      child: InkResponse(
-                        key: backKey,
-                        onTap: () => Navigator.of(context).maybePop(),
-                        radius: 24,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: tokens.surf2,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 23,
-                            color: tokens.fg,
-                            textDirection: Directionality.of(context),
-                            semanticLabel: null,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-        leadingWidth: columnMode || !canPop ? 0 : 64,
+        titleSpacing: !hasBack ? AppSpacing.xxxl : 0,
+        leading: !hasBack ? null : SettingsBackButton(onBack: onBack),
+        leadingWidth: !hasBack ? 0 : 64,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -121,20 +129,82 @@ class SettingsScaffold extends StatelessWidget {
                   constraints: const BoxConstraints(
                     maxWidth: AppSettingsLayout.maxWidth,
                   ),
-                  child: ListView(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      AppSettingsLayout.sideMargin,
-                      0,
-                      AppSettingsLayout.sideMargin,
-                      AppSpacing.huge,
-                    ),
-                    children: children,
-                  ),
+                  child: slivers != null
+                      ? CustomScrollView(
+                          slivers: [
+                            SliverPadding(
+                              padding: _padding,
+                              sliver: SliverMainAxisGroup(
+                                slivers: [
+                                  ...slivers,
+                                  if (inList != null)
+                                    SliverToBoxAdapter(child: inList),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : itemBuilder == null
+                      ? ListView(
+                          padding: _padding,
+                          children: [...children, ?inList],
+                        )
+                      : ListView.builder(
+                          padding: _padding,
+                          itemCount: itemCount,
+                          itemBuilder: itemBuilder,
+                        ),
                 ),
               ),
             ),
             ?bottom,
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsBackButton extends StatelessWidget {
+  final VoidCallback? onBack;
+
+  const SettingsBackButton({this.onBack, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final tooltip = MaterialLocalizations.of(context).backButtonTooltip;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 10),
+      child: Center(
+        child: Semantics(
+          button: true,
+          label: tooltip,
+          excludeSemantics: true,
+          child: Tooltip(
+            message: tooltip,
+            child: InkResponse(
+              key: SettingsScaffold.backKey,
+              onTap: onBack ?? () => Navigator.of(context).maybePop(),
+              radius: 24,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: tokens.surf2,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 23,
+                  color: tokens.fg,
+                  textDirection: Directionality.of(context),
+                  semanticLabel: null,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

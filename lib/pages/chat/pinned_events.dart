@@ -10,6 +10,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/chat.dart';
 import 'package:odango/pages/chat/chat_app_bar_list_tile.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
@@ -44,16 +45,17 @@ class PinnedEvents extends StatelessWidget {
                   (event) => AdaptiveModalAction(
                     value: event?.eventId ?? '',
                     icon: const Icon(Icons.push_pin_outlined),
-                    label:
-                        event
-                            ?.calcLocalizedBodyFallback(
-                              MatrixLocals(l10n),
-                              withSenderNamePrefix: true,
-                              hideReply: true,
-                            )
-                            .trim()
-                            .replaceAll('\n', ' ') ??
-                        'UNKNOWN',
+                    label: stripBidiOverrides(
+                      event
+                              ?.calcLocalizedBodyFallback(
+                                MatrixLocals(l10n),
+                                withSenderNamePrefix: true,
+                                hideReply: true,
+                              )
+                              .trim()
+                              .replaceAll('\n', ' ') ??
+                          'UNKNOWN',
+                    ),
                   ),
                 )
                 .toList(),
@@ -77,15 +79,16 @@ class PinnedEvents extends StatelessWidget {
       builder: (context, snapshot) {
         final event = snapshot.data;
         return ChatAppBarListTile(
-          title:
-              event
-                  ?.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)),
-                    withSenderNamePrefix: true,
-                    hideReply: true,
-                  )
-                  .replaceAll('\n', ' ') ??
-              L10n.of(context).loadingPleaseWait,
+          title: stripBidiOverrides(
+            event
+                    ?.calcLocalizedBodyFallback(
+                      MatrixLocals(L10n.of(context)),
+                      withSenderNamePrefix: true,
+                      hideReply: true,
+                    )
+                    .replaceAll('\n', ' ') ??
+                L10n.of(context).loadingPleaseWait,
+          ),
           leading: IconButton(
             splashRadius: 18,
             iconSize: 18,

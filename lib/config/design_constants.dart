@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/utils/motion.dart';
 
 /// Shape (DESIGN.md 6.4). Pills use half of the element height.
 abstract class AppRadius {
@@ -33,6 +34,11 @@ abstract class AppSettingsLayout {
   static const double knob = 22;
   static const double sideMargin = 14;
   static const double maxWidth = 600;
+  static const double toggleHit = 76;
+  static const double checkBox = 22;
+  static const double checkRadius = 7;
+  static const double dragHandle = AppChat.tapTarget;
+  static const double fieldGap = 8;
 }
 
 /// Spacing scale (DESIGN.md 6.4).
@@ -81,6 +87,13 @@ abstract class AppElevation {
   ];
 }
 
+/// Title island motion, from Telegram's ChatAvatarContainer (title swaps use
+/// EASE_OUT_QUINT for 320 ms).
+abstract class AppTitleMotion {
+  static const Duration duration = Duration(milliseconds: 320);
+  static const Curve curve = Curves.easeOutQuint;
+}
+
 /// Conversation layout constants (DESIGN.md 5.2, 7.5-7.12).
 abstract class AppChat {
   static const double headerButton = 48;
@@ -88,6 +101,8 @@ abstract class AppChat {
   static const double headerGap = 8;
   static const double headerTopGap = 4;
   static const double headerAvatar = 38;
+  static const double headerClampedTextScale = 1.5;
+  static const double threadPillMinWidth = 100;
   static const double composerHeight = 52;
   static const double actionButton = 52;
   static const double jumpButton = 46;
@@ -185,6 +200,143 @@ abstract class AppTopics {
   static const int maxChips = 8;
 }
 
+abstract class AppDialog {
+  static const double maxWidth = 356;
+  static const double sideInset = 28;
+  static const double buttonMinWidth = 64;
+  static const double buttonHeight = 44;
+  static const double buttonGap = 8;
+  static const double bigButtonHeight = 54;
+  static const double fieldRadius = 14;
+  static const double fieldFocusWidth = 1.5;
+  static const int reasonMinLines = 2;
+  static const int reasonMaxLines = 6;
+  static const double actionTileRadius = 14;
+  static const double actionTileMinHeight = 64;
+  static const double actionRowHeight = 50;
+  static const double handleWidth = 40;
+  static const double handleHeight = 4;
+  static const double closeButton = 34;
+  static const double profileAvatar = 104;
+  static const double scrim = 0.35;
+  static const Duration sheetOpen = Duration(milliseconds: 400);
+  static const Duration sheetClose = Duration(milliseconds: 250);
+  static const Curve sheetOpenCurve = Cubic(.23, 1, .32, 1);
+  static const Curve sheetCloseCurve = Cubic(0, 0, .58, 1);
+}
+
+abstract class AppViewer {
+  static const double topBar = 56;
+  static const double stripHeight = 44;
+  static const double stripRadius = 6;
+  static const int stripWindow = 7;
+  static const double actionIcon = 25;
+  static const double captionMaxHeight = 96;
+  static const int maxCaptionUnits = 2000;
+  static const Duration chromeFade = Duration(milliseconds: 200);
+  static const Duration returnToRest = Duration(milliseconds: 250);
+  static const double actionRow = 56;
+  static const Curve returnCurve = DecelerateCurve(1.5);
+  static const double scrimAlpha = .5;
+  static const double muted = .65;
+}
+
+abstract class AppMotion {
+  static const Duration spinnerIn = Duration(milliseconds: 190);
+  static const double spinnerTension = 1.3;
+  static const Duration banner = Duration(milliseconds: 220);
+  static const Duration counterUp = Duration(milliseconds: 220);
+  static const Duration counterDown = Duration(milliseconds: 150);
+  static const Duration select = Duration(milliseconds: 180);
+  static const Duration fab = Duration(milliseconds: 250);
+  static const Duration pageMove = Duration(milliseconds: 250);
+  static const Duration shimmer = Duration(milliseconds: 1400);
+  static const Duration copied = Duration(milliseconds: 150);
+  static const Curve standard = Cubic(.25, .1, .25, 1);
+  static const Curve easeOut = Cubic(0, 0, .58, 1);
+  static const double dismissFraction = 1 / 6;
+  static const double dragStart = 30;
+  static const Duration switchToggle = Duration(milliseconds: 200);
+  static const Curve switchCurve = AccelerateDecelerateCurve();
+  static const Duration checkToggle = Duration(milliseconds: 200);
+  static const Curve easeOutQuint = Cubic(.23, 1, .32, 1);
+  static const Duration listRemove = Duration(milliseconds: 120);
+  static const Duration listMove = Duration(milliseconds: 250);
+  static const Duration folderList = Duration(milliseconds: 350);
+  static const Duration dragLift = Duration(milliseconds: 420);
+  static const double dragInset = 8;
+  static const double dragRadius = 12;
+  static const double dragShadowBlur = 12;
+  static const double dragShadowOffset = 3;
+  static const double dragShadowAlpha = 0x12 / 255;
+  static const double shakeShift = 5;
+  static const double shakeStiffness = 600;
+  static const double shakeDamping = .5;
+  static const Duration buttonSwap = Duration(milliseconds: 150);
+  static const Duration saveBar = Duration(milliseconds: 250);
+  static const Duration profileList = Duration(milliseconds: 320);
+  static const Duration memberList = Duration(milliseconds: 420);
+  static const Duration tabIndicator = Duration(milliseconds: 350);
+  static const Duration tabTap = Duration(milliseconds: 250);
+  static const Duration tabSwipeMin = Duration(milliseconds: 150);
+  static const Duration tabSwipeMax = Duration(milliseconds: 600);
+  static const Duration avatarSwap = Duration(milliseconds: 180);
+  static const Duration selectToggle = Duration(milliseconds: 180);
+  static const double selectedAvatarScale = .82;
+  static const Duration chipEnter = Duration(milliseconds: 150);
+  static const Duration chipsHeight = Duration(milliseconds: 350);
+  static const Curve tabSwipeCurve = PolyOutCurve();
+  static const Duration radioToggle = Duration(milliseconds: 200);
+}
+
+abstract class AppProfile {
+  static const double barHeight = 64;
+  static const double expandedExtra = 176;
+  static const double avatarExpanded = AppDialog.profileAvatar;
+  static const double avatarCollapsed = 42;
+  static const double nameExpanded = 24;
+  static const double nameCollapsed = 22;
+  static const double statusExpanded = 14;
+  static const double statusCollapsed = 12.5;
+  static const double hairlineFraction = .1;
+  static const double editBadge = 36;
+  static const double tileRadius = 14;
+  static const double tileGap = 8;
+  static const double tabStripHeight = 48;
+  static const double tabGap = 18;
+  static const double tabSidePadding = 16;
+  static const double indicatorHeight = 3;
+  static const int mediaColumns = 3;
+  static const double mediaGap = 2;
+  static const int feedCap = 500;
+  static const int feedPage = 100;
+  static const int topicCap = 4000;
+  static const int nameCap = 100;
+  static const int detailsMembers = 10;
+  static const double flingVelocity = 700;
+  static const double swipeFraction = 1 / 3;
+}
+
+abstract class AppMembers {
+  static const double rowHeight = 62;
+  static const double avatar = 44;
+  static const double dividerInset = 70;
+  static const double filterHeight = 38;
+  static const double filterRadius = 19;
+  static const double filterBarRadius = 24;
+  static const double filterBarPadding = 4;
+  static const double chipHeight = 32;
+  static const double chipAvatar = 32;
+  static const int maxSelected = 50;
+  static const int animateUpTo = 12;
+  static const int permissionRowsCap = 200;
+  static const int devicesCap = 100;
+}
+
+abstract class AppEncryption {
+  static const int userRowsCap = 500;
+}
+
 abstract class AppTypography {
   static const monoFamily = 'JetBrainsMono';
   static const mono = TextStyle(fontFamily: monoFamily);
@@ -195,6 +347,7 @@ abstract class AppTypography {
 
 /// Bounds for composing, parsing and rendering formatted messages.
 abstract class RichLimits {
+  static const int maxDirectionParagraphs = 100;
   static const int maxBlocks = 500;
   static const int maxLinks = 100;
   static const int maxMaths = 50;

@@ -5,6 +5,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/room_mention.dart';
 import 'package:odango/utils/topics/topic.dart';
 import 'package:odango/utils/topics/topic_loader.dart';
 import 'package:odango/utils/topics/topic_unread.dart';
@@ -70,7 +71,8 @@ class TopicsModel {
             ownReceiptTimestamp: receipt,
             ownUserId: own,
             isHighlight: (event) =>
-                room.client.pushruleEvaluator.match(event).highlight,
+                room.client.pushruleEvaluator.match(event).highlight ||
+                roomMentionHighlight(event),
             roomIsRead: !room.isUnread,
             latestActivity: topic.replyCount > 0 ? topic.lastActivity : null,
             latestSenderId: topic.lastSenderId,

@@ -11,12 +11,14 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_list/active_call_indicator.dart';
 import 'package:odango/pages/chat_list/swipe_action_row.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat_list/chat_row_model.dart';
 import 'package:odango/utils/chat_list/swipe_actions.dart';
 import 'package:odango/utils/draft_store.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/retention/retention_policy.dart';
 import 'package:odango/utils/room_status_extension.dart';
@@ -67,7 +69,7 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
     final locals = MatrixLocals(l10n);
-    final displayname = room.getLocalizedDisplayname(locals);
+    final displayname = room.safeLocalizedDisplayname(locals);
     final lastEvent = _lastVisibleEvent(room);
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;
@@ -155,13 +157,15 @@ class RowPreview {
   String get text => '$prefix$body'.trim().replaceAll('\n', ' ');
 
   static RowPreview fallback(Event event, MatrixLocals locals, bool prefixed) {
-    String body(bool withPrefix) => event.calcLocalizedBodyFallback(
-      locals,
-      hideReply: true,
-      hideEdit: true,
-      plaintextBody: true,
-      removeMarkdown: true,
-      withSenderNamePrefix: withPrefix,
+    String body(bool withPrefix) => stripBidiOverrides(
+      event.calcLocalizedBodyFallback(
+        locals,
+        hideReply: true,
+        hideEdit: true,
+        plaintextBody: true,
+        removeMarkdown: true,
+        withSenderNamePrefix: withPrefix,
+      ),
     );
     final plain = body(false);
     final full = prefixed ? body(true) : plain;
@@ -173,13 +177,15 @@ class RowPreview {
     MatrixLocals locals,
     bool prefixed,
   ) async {
-    Future<String> body(bool withPrefix) => event.calcLocalizedBody(
-      locals,
-      hideReply: true,
-      hideEdit: true,
-      plaintextBody: true,
-      removeMarkdown: true,
-      withSenderNamePrefix: withPrefix,
+    Future<String> body(bool withPrefix) async => stripBidiOverrides(
+      await event.calcLocalizedBody(
+        locals,
+        hideReply: true,
+        hideEdit: true,
+        plaintextBody: true,
+        removeMarkdown: true,
+        withSenderNamePrefix: withPrefix,
+      ),
     );
     final plain = await body(false);
     final full = prefixed ? await body(true) : plain;
@@ -455,7 +461,7 @@ class _RowAvatar extends StatelessWidget {
                 ),
                 mxContent: space.avatar,
                 size: small,
-                name: space.getLocalizedDisplayname(),
+                name: space.safeLocalizedDisplayname(),
                 colorSeed: space.id,
                 onTap: () => onMore?.call(context),
               ),

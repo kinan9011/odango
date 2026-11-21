@@ -3,10 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/utils/chat_list/folder_ref.dart';
+import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:odango/widgets/settings/settings_toggle_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -169,6 +172,89 @@ void main() {
       '/settings/chat/folders',
     );
     await harness.finish(tester);
+  });
+
+  group('double-tap reaction sheet', () {
+    Future<void> openSheet(WidgetTester tester) async {
+      await AppSettings.doubleTapToReact.setItem(true);
+      await pumpChatSettings(tester);
+      await tester.tap(find.text('Double-tap reaction'));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    testWidgets('opens as a sheet with a handle title and close button', (
+      tester,
+    ) async {
+      await openSheet(tester);
+      expect(find.byType(AppSheet), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppSheet),
+          matching: find.text('Double-tap reaction'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Close'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppSheet),
+          matching: find.byType(AppBar),
+        ),
+        findsNothing,
+      );
+      await harness.finish(tester);
+    });
+
+    testWidgets('the picker uses the app colours', (tester) async {
+      await openSheet(tester);
+      final tokens = AppTokens.of(tester.element(find.byType(EmojiPicker)));
+      final config = tester
+          .widget<EmojiPicker>(find.byType(EmojiPicker))
+          .config;
+      expect(config.categoryViewConfig.indicatorColor, tokens.acc);
+      expect(config.categoryViewConfig.iconColorSelected, tokens.acc);
+      expect(config.categoryViewConfig.backgroundColor, tokens.surf);
+      expect(config.skinToneConfig.dialogBackgroundColor, tokens.surf2);
+      await harness.finish(tester);
+    });
+
+    testWidgets('the close button stores nothing', (tester) async {
+      await AppSettings.doubleTapReaction.setItem('👍');
+      await openSheet(tester);
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byType(AppSheet), findsNothing);
+      expect(AppSettings.doubleTapReaction.value, '👍');
+      await harness.finish(tester);
+    });
+
+    testWidgets('a tap on the barrier stores nothing', (tester) async {
+      await AppSettings.doubleTapReaction.setItem('👍');
+      await openSheet(tester);
+      await tester.tapAt(const Offset(200, 20));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byType(AppSheet), findsNothing);
+      expect(AppSettings.doubleTapReaction.value, '👍');
+      await harness.finish(tester);
+    });
+
+    testWidgets('picking an emoji stores it and closes the sheet', (
+      tester,
+    ) async {
+      await AppSettings.doubleTapReaction.setItem('👍');
+      await openSheet(tester);
+      final smile = find.descendant(
+        of: find.byType(EmojiPicker),
+        matching: find.text('😀'),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(smile.first);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byType(AppSheet), findsNothing);
+      expect(AppSettings.doubleTapReaction.value, '😀');
+      await harness.finish(tester);
+    });
   });
 
   group('page level', () {

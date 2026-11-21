@@ -14,6 +14,7 @@ import 'package:odango/pages/chat/events/video_player.dart';
 import 'package:odango/pages/image_viewer/image_viewer.dart';
 
 import '../../../config/app_config.dart';
+import '../../../utils/chat/room_mention.dart';
 import '../../../utils/event_checkbox_extension.dart';
 import '../../../utils/html_limits.dart';
 import '../../../utils/platform_infos.dart';
@@ -202,6 +203,7 @@ class MessageContent extends StatelessWidget {
                 ),
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                 eventId: event.eventId,
+                roomMention: isRoomMention(event),
                 checkboxCheckedEvents: event.aggregatedEvents(
                   timeline,
                   EventCheckboxRoomExtension.relationshipType,

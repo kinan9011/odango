@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/chat.dart';
@@ -30,7 +31,9 @@ import 'package:odango/pages/topics/topic_chip_bar.dart';
 import 'package:odango/utils/account_config.dart';
 import 'package:odango/utils/appearance/chat_appearance_scope.dart';
 import 'package:odango/utils/chat/new_device_banner_model.dart';
+import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/topics/hidden_split.dart';
 import 'package:odango/utils/topics/topic.dart';
 import 'package:odango/widgets/glass_surface.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -89,10 +92,7 @@ class ChatView extends StatelessWidget {
                   activeThreadId == null;
               final showScrollUp =
                   scrollUpBannerEventId != null && activeThreadId == null;
-              final bannerCount =
-                  (activeThreadId != null ? 1 : 0) +
-                  (showPinned ? 1 : 0) +
-                  (showScrollUp ? 1 : 0);
+              final bannerCount = (showPinned ? 1 : 0) + (showScrollUp ? 1 : 0);
               final newDevice = activeThreadId == null
                   ? lookUpNewDeviceBanner(
                       controller.room,
@@ -108,7 +108,11 @@ class ChatView extends StatelessWidget {
               return ValueListenableBuilder(
                 valueListenable: topicsModel?.topics ?? _noTopics,
                 builder: (context, topics, _) {
-                  final showChips = topicsModel != null && topics.isNotEmpty;
+                  final showChips =
+                      topicsModel != null &&
+                      topics.isNotEmpty &&
+                      (activeThreadId == null ||
+                          AppSettings.showTopicBarInThread.value);
                   final topPadding = AppChat.listTopPadding(
                     topInset: MediaQuery.paddingOf(context).top,
                     bannerCount: bannerCount,
@@ -161,6 +165,7 @@ class ChatView extends StatelessWidget {
                                     child: SafeArea(
                                       bottom: false,
                                       child: Column(
+                                        key: controller.headerKey,
                                         children: [
                                           const SizedBox(
                                             height: AppChat.headerTopGap,
@@ -193,36 +198,45 @@ class ChatView extends StatelessWidget {
                                               ),
                                             ),
                                           if (showChips)
-                                            TopicChipBar(
-                                              topics: topics,
-                                              activeThreadId: activeThreadId,
-                                              onGeneral: controller.closeThread,
-                                              onTopic: (topic) =>
-                                                  controller.enterThread(
-                                                    topic.rootEventId,
+                                            ListenableBuilder(
+                                              listenable: Listenable.merge([
+                                                HiddenTopicsStore.revision,
+                                                controller.hiddenTopicsExpanded,
+                                              ]),
+                                              builder: (context, _) {
+                                                final split = splitHidden(
+                                                  topics,
+                                                  HiddenTopicsStore.of(
+                                                    controller.room.client,
+                                                  ).hiddenIn(
+                                                    controller.room.id,
                                                   ),
-                                              onAll: () => context.go(
-                                                '/rooms/${controller.room.id}/topics',
-                                              ),
-                                            ),
-                                          if (activeThreadId != null)
-                                            _Banner(
-                                              child: Center(
-                                                child: TextButton.icon(
-                                                  onPressed: () => controller
-                                                      .scrollToEventId(
-                                                        activeThreadId,
+                                                  activeThreadId:
+                                                      activeThreadId,
+                                                );
+                                                return TopicChipBar(
+                                                  topics: split.shown,
+                                                  hidden: split.hidden,
+                                                  hiddenExpanded: controller
+                                                      .hiddenTopicsExpanded
+                                                      .value,
+                                                  onToggleHidden: controller
+                                                      .toggleHiddenTopics,
+                                                  onSetHidden:
+                                                      controller.setTopicHidden,
+                                                  activeThreadId:
+                                                      activeThreadId,
+                                                  onGeneral:
+                                                      controller.closeThread,
+                                                  onTopic: (topic) =>
+                                                      controller.enterThread(
+                                                        topic.rootEventId,
                                                       ),
-                                                  icon: const Icon(
-                                                    Icons.message,
+                                                  onAll: () => context.go(
+                                                    '/rooms/${controller.room.id}/topics',
                                                   ),
-                                                  label: Text(
-                                                    L10n.of(
-                                                      context,
-                                                    ).replyInThread,
-                                                  ),
-                                                ),
-                                              ),
+                                                );
+                                              },
                                             ),
                                           if (showPinned)
                                             _Banner(

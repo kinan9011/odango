@@ -10,6 +10,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/notification_avatar_extension.dart';
 import 'package:uuid/uuid.dart';
 
@@ -35,7 +36,7 @@ Future<CallKitParams> buildFluffyChatCallKitParams(
       'intent': intent.name,
     },
     appName: AppSettings.applicationName.value,
-    nameCaller: room.getLocalizedDisplayname(),
+    nameCaller: room.safeLocalizedDisplayname(),
     avatar: avatarUrl?.toString(),
     handle: switch (intent) {
       MatrixRtcCallIntent.voice => l10n.voiceCall,

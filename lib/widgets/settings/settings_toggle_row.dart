@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
@@ -19,12 +20,16 @@ class SettingsToggleRow extends StatelessWidget {
   static const knobAlignKey = ValueKey('settings_switch_align');
   @visibleForTesting
   static const opacityKey = ValueKey('settings_toggle_opacity');
+  @visibleForTesting
+  static const toggleZoneKey = ValueKey('settings_toggle_zone');
 
   final IconData? icon;
   final String title;
   final String? subtitle;
   final bool value;
   final ValueChanged<bool>? onChanged;
+  final VoidCallback? onTapRow;
+  final String? rowHint;
 
   const SettingsToggleRow({
     required this.title,
@@ -32,6 +37,8 @@ class SettingsToggleRow extends StatelessWidget {
     required this.onChanged,
     this.icon,
     this.subtitle,
+    this.onTapRow,
+    this.rowHint,
     super.key,
   });
 
@@ -42,108 +49,148 @@ class SettingsToggleRow extends StatelessWidget {
     final icon = this.icon;
     final subtitle = this.subtitle;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final duration = reduceMotion
-        ? Duration.zero
-        : const Duration(milliseconds: 180);
+    final duration = reduceMotion ? Duration.zero : AppMotion.switchToggle;
     final enabled = onChanged != null;
-    return Semantics(
-      toggled: value,
-      enabled: enabled,
-      label: title,
-      excludeSemantics: true,
-      onTap: enabled ? () => onChanged(!value) : null,
-      child: Opacity(
-        key: opacityKey,
-        opacity: enabled ? 1 : 0.4,
-        child: InkWell(
-          onTap: enabled ? () => onChanged(!value) : null,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: subtitle == null
-                  ? AppSettingsLayout.rowHeight
-                  : AppSettingsLayout.rowHeightSub,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSettingsLayout.rowPadding,
-                vertical: 6,
+    final onTapRow = this.onTapRow;
+    final rowHint = this.rowHint;
+    final toggle = enabled ? () => onChanged(!value) : null;
+    final switchWidget = AnimatedContainer(
+      key: switchKey,
+      duration: duration,
+      curve: AppMotion.switchCurve,
+      width: AppSettingsLayout.switchWidth,
+      height: AppSettingsLayout.switchHeight,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: value ? tokens.acc : tokens.line,
+        borderRadius: BorderRadius.circular(AppSettingsLayout.switchHeight / 2),
+      ),
+      child: AnimatedAlign(
+        key: knobAlignKey,
+        duration: duration,
+        curve: AppMotion.switchCurve,
+        alignment: value
+            ? AlignmentDirectional.centerEnd
+            : AlignmentDirectional.centerStart,
+        child: Container(
+          key: knobKey,
+          width: AppSettingsLayout.knob,
+          height: AppSettingsLayout.knob,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFFFFFF),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x33000000),
+                offset: Offset(0, 1),
+                blurRadius: 2,
               ),
-              child: Row(
-                children: [
-                  if (icon != null) ...[
-                    SettingsIconTile(icon),
-                    const SizedBox(width: AppSpacing.l),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: tokens.fg,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (subtitle != null)
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              color: tokens.mut,
-                              fontSize: 12.5,
-                              height: 1.3,
-                            ),
-                          ),
-                      ],
+            ],
+          ),
+        ),
+      ),
+    );
+    final body = Padding(
+      padding: EdgeInsetsDirectional.only(
+        start: AppSettingsLayout.rowPadding,
+        top: 6,
+        bottom: 6,
+        end: 0,
+      ),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            SettingsIconTile(icon),
+            const SizedBox(width: AppSpacing.l),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: tokens.fg,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: tokens.mut,
+                      fontSize: 12.5,
+                      height: 1.3,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.m),
-                  AnimatedContainer(
-                    key: switchKey,
-                    duration: duration,
-                    curve: Curves.easeOut,
-                    width: AppSettingsLayout.switchWidth,
-                    height: AppSettingsLayout.switchHeight,
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: value ? tokens.acc : tokens.line,
-                      borderRadius: BorderRadius.circular(
-                        AppSettingsLayout.switchHeight / 2,
-                      ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.m),
+        ],
+      ),
+    );
+    final minHeight = subtitle == null
+        ? AppSettingsLayout.rowHeight
+        : AppSettingsLayout.rowHeightSub;
+    final row = onTapRow == null
+        ? InkWell(
+            onTap: toggle,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: minHeight),
+              child: Row(
+                children: [
+                  Expanded(child: body),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      end: AppSettingsLayout.rowPadding,
                     ),
-                    child: AnimatedAlign(
-                      key: knobAlignKey,
-                      duration: duration,
-                      curve: Curves.easeOut,
-                      alignment: value
-                          ? AlignmentDirectional.centerEnd
-                          : AlignmentDirectional.centerStart,
-                      child: Container(
-                        key: knobKey,
-                        width: AppSettingsLayout.knob,
-                        height: AppSettingsLayout.knob,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFFFFF),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x33000000),
-                              offset: Offset(0, 1),
-                              blurRadius: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    child: switchWidget,
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
+          )
+        : Stack(
+            children: [
+              InkWell(
+                onTap: onTapRow,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: minHeight),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      end: AppSettingsLayout.toggleHit,
+                    ),
+                    child: body,
+                  ),
+                ),
+              ),
+              PositionedDirectional(
+                top: 0,
+                bottom: 0,
+                end: 0,
+                width: AppSettingsLayout.toggleHit,
+                child: InkWell(
+                  key: toggleZoneKey,
+                  onTap: toggle,
+                  child: Center(child: switchWidget),
+                ),
+              ),
+            ],
+          );
+    return Semantics(
+      toggled: value,
+      enabled: enabled,
+      label: title,
+      hint: subtitle,
+      excludeSemantics: true,
+      onTap: toggle,
+      customSemanticsActions: onTapRow == null || rowHint == null
+          ? null
+          : {CustomSemanticsAction(label: rowHint): onTapRow},
+      child: Opacity(key: opacityKey, opacity: enabled ? 1 : 0.4, child: row),
     );
   }
 }

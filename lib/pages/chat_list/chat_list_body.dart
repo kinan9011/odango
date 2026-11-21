@@ -27,6 +27,7 @@ import 'package:odango/utils/chat_list/space_tabs_model.dart';
 import 'package:odango/utils/draft_store.dart';
 import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/stream_extension.dart';
 import 'package:odango/widgets/own_avatar.dart';
 
@@ -74,7 +75,7 @@ class ChatListViewBody extends StatelessWidget {
           );
           final spaceModel = SpaceTabsModel.build(
             client.rooms,
-            nameOf: (room) => room.getLocalizedDisplayname(MatrixLocals(l10n)),
+            nameOf: (room) => room.safeLocalizedDisplayname(MatrixLocals(l10n)),
           );
           final userFolders = FolderStore.of(client).folders;
           final folderContext = FolderContext(
@@ -253,7 +254,7 @@ class ChatListViewBody extends StatelessWidget {
                           names: archivedRooms
                               .take(ArchivedChatsRow.maxNames)
                               .map(
-                                (room) => room.getLocalizedDisplayname(
+                                (room) => room.safeLocalizedDisplayname(
                                   MatrixLocals(l10n),
                                 ),
                               )

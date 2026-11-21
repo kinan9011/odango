@@ -9,6 +9,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/utd_why_sheet.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/retention/retention_labels.dart';
@@ -64,8 +65,10 @@ class StateMessage extends StatelessWidget {
                             else if (event.type != EventTypes.Encrypted ||
                                 event.redacted)
                               TextSpan(
-                                text: event.calcLocalizedBodyFallback(
-                                  MatrixLocals(L10n.of(context)),
+                                text: stripBidiOverrides(
+                                  event.calcLocalizedBodyFallback(
+                                    MatrixLocals(L10n.of(context)),
+                                  ),
                                 ),
                               )
                             else ...[

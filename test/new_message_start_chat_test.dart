@@ -98,11 +98,8 @@ void main() {
           membership: Membership.join,
         ),
       );
-      final l10n = L10n.of(tester.element(find.byType(Scaffold).first));
       await tester.enterText(find.byType(TextField).first, 'Project room');
-      await tester.tap(
-        find.widgetWithText(ElevatedButton, l10n.createGroupAndInviteUsers),
-      );
+      await tester.tap(find.byKey(const ValueKey('create_group_button')));
       await harness.settle(tester, rounds: 8);
       final request = body();
       final state = ((request['initial_state'] ?? <Object?>[]) as List)

@@ -14,6 +14,7 @@ import 'package:odango/pages/global_search/search_filter_sheet.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/matrix_room_id.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/retention/retention_policy.dart';
 import 'package:odango/utils/route_path.dart';
 import 'package:odango/utils/search/chat_matcher.dart';
@@ -192,7 +193,7 @@ class GlobalSearchController extends State<GlobalSearch> {
     chats = ChatMatcher.run(
       _client.rooms,
       query,
-      nameOf: (room) => room.getLocalizedDisplayname(locals),
+      nameOf: (room) => room.safeLocalizedDisplayname(locals),
     );
   }
 
@@ -568,7 +569,7 @@ class GlobalSearchController extends State<GlobalSearch> {
     final room = _client.getRoomById(roomId);
     if (room == null) return '';
     return safeDisplayText(
-      room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+      room.safeLocalizedDisplayname(MatrixLocals(L10n.of(context))),
     );
   }
 

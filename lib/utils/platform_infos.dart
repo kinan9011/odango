@@ -61,7 +61,10 @@ abstract class PlatformInfos {
     return version;
   }
 
-  static Future<void> showDialog(BuildContext context) async {
+  static Future<void> showDialog(
+    BuildContext context, {
+    Future<bool> Function(String url) launch = launchWebUrl,
+  }) async {
     final l10n = L10n.of(context);
     final version = await PlatformInfos.getVersion();
     if (!context.mounted) return;
@@ -71,14 +74,20 @@ abstract class PlatformInfos {
         Text(l10n.versionWithNumber(version)),
         Text(l10n.aboutBasedOnFluffyChat),
         TextButton.icon(
-          onPressed: () => launchWebUrl(RepoLinks.configured.page.toString()),
+          onPressed: () => launch(RepoLinks.configured.page.toString()),
           icon: const Icon(Icons.source_outlined),
           label: Text(l10n.sourceCode),
         ),
         TextButton.icon(
-          onPressed: () => launchWebUrl(AppConfig.upstreamRepoUrl),
+          onPressed: () => launch(AppConfig.upstreamRepoUrl),
           icon: const Icon(Icons.source_outlined),
           label: Text(l10n.supportUpstreamSource),
+        ),
+        TextButton.icon(
+          key: const ValueKey('about_support'),
+          onPressed: () => launch(AppConfig.upstreamSupportUrl),
+          icon: const Icon(Icons.favorite_outline_rounded),
+          label: Text(l10n.aboutSupportFluffyChat),
         ),
         Builder(
           builder: (innerContext) {

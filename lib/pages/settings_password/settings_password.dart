@@ -5,6 +5,7 @@
 
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_password/settings_password_view.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
@@ -27,13 +28,24 @@ class SettingsPasswordController extends State<SettingsPassword> {
   String? newPassword2Error;
 
   bool loading = false;
+  int attempt = 0;
+  bool oldShown = false;
+  bool new1Shown = false;
+  bool new2Shown = false;
+
+  void toggleOldShown() => setState(() => oldShown = !oldShown);
+
+  void toggleNew1Shown() => setState(() => new1Shown = !new1Shown);
+
+  void toggleNew2Shown() => setState(() => new2Shown = !new2Shown);
 
   Future<void> changePassword() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
     setState(() {
       oldPasswordError = newPassword1Error = newPassword2Error = null;
+      attempt++;
     });
     if (oldPasswordController.text.isEmpty) {
       setState(() {
@@ -71,17 +83,19 @@ class SettingsPasswordController extends State<SettingsPassword> {
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          backgroundColor: theme.colorScheme.error,
+          backgroundColor: tokens.red,
           content: Text(
             e.toLocalizedString(context),
-            style: TextStyle(color: theme.colorScheme.onError),
+            style: TextStyle(color: tokens.onRed),
           ),
         ),
       );
     } finally {
-      setState(() {
-        loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     }
   }
 

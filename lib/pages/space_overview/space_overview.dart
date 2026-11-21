@@ -12,10 +12,12 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/space_overview/space_overview_view.dart';
 import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/fluffy_share.dart';
 import 'package:odango/utils/links/matrix_link_policy.dart';
 import 'package:odango/utils/matrix_room_id.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/retention/default_retention.dart';
 import 'package:odango/utils/retention/retention_policy.dart';
 import 'package:odango/utils/route_path.dart';
@@ -85,7 +87,7 @@ class SpaceOverviewController extends State<SpaceOverview> {
   String get title {
     final room = space;
     final name =
-        room?.getLocalizedDisplayname(MatrixLocals(L10n.of(context))) ??
+        room?.safeLocalizedDisplayname(MatrixLocals(L10n.of(context))) ??
         widget.preview?.name;
     return name == null || name.isEmpty
         ? L10n.of(context).spaceOverview
@@ -97,7 +99,8 @@ class SpaceOverviewController extends State<SpaceOverview> {
     if (text != null && text.isNotEmpty) {
       return safeDisplayText(text, maxGraphemes: HierarchyParser.maxTopicChars);
     }
-    return widget.preview?.topic;
+    final preview = widget.preview?.topic;
+    return preview == null ? null : stripBidiOverrides(preview);
   }
 
   int? get memberCount =>

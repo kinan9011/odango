@@ -4,15 +4,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_emotes/settings_emotes.dart';
 import 'package:odango/utils/archive_guard.dart';
 import 'package:odango/utils/image_pixel_cap.dart';
+import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/matrix.dart';
 
@@ -46,41 +51,46 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final height = MediaQuery.sizeOf(context).height;
     return AlertDialog(
-      title: Text(L10n.of(context).importEmojis),
-      content: _loading
-          ? Center(child: CircularProgressIndicator(value: _progress))
-          : SingleChildScrollView(
-              child: Wrap(
-                alignment: WrapAlignment.spaceEvenly,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                runSpacing: 8,
-                spacing: 8,
-                children: _importMap.entries
-                    .map(
-                      (e) => _EmojiImportPreview(
-                        key: ValueKey(e.key.name),
-                        entry: e,
-                        onNameChanged: (name) => _importMap[e.key] = name,
-                        onRemove: () =>
-                            setState(() => _importMap.remove(e.key)),
-                      ),
-                    )
-                    .toList(),
+      title: Text(l10n.importEmojis),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: math.min(360, height * 0.6),
+        child: _loading
+            ? _ImportProgress(progress: _progress, total: _importMap.length)
+            : GridView.builder(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 128,
+                  mainAxisExtent: 176,
+                  mainAxisSpacing: AppSpacing.s,
+                  crossAxisSpacing: AppSpacing.s,
+                ),
+                itemCount: _importMap.length,
+                itemBuilder: (context, i) {
+                  final e = _importMap.entries.elementAt(i);
+                  return _EmojiImportPreview(
+                    key: ValueKey(e.key.name),
+                    entry: e,
+                    onNameChanged: (name) => _importMap[e.key] = name,
+                    onRemove: () => setState(() => _importMap.remove(e.key)),
+                  );
+                },
               ),
-            ),
+      ),
       actions: [
-        TextButton(
+        AdaptiveDialogAction(
           onPressed: _loading ? null : Navigator.of(context).pop,
-          child: Text(L10n.of(context).cancel),
+          child: Text(l10n.cancel),
         ),
-        TextButton(
+        AdaptiveDialogAction(
           onPressed: _loading
               ? null
               : _importMap.isNotEmpty
               ? _addEmotePack
               : null,
-          child: Text(L10n.of(context).importNow),
+          child: Text(l10n.importNow),
         ),
       ],
     );
@@ -111,23 +121,8 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
       final imageCode = entry.value;
 
       if (widget.controller.pack!.images.containsKey(imageCode)) {
-        final completer = Completer<OkCancelResult>();
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-          final result = await showOkCancelAlertDialog(
-            useRootNavigator: false,
-            context: context,
-            title: L10n.of(context).emoteExists,
-            message: imageCode,
-            cancelLabel: L10n.of(context).replace,
-            okLabel: L10n.of(context).skip,
-          );
-          completer.complete(result);
-        });
-
-        final result = await completer.future;
-        if (result == OkCancelResult.ok) {
-          skipKeys.add(entry.key);
-        }
+        final skip = await askSkipDuplicateEmote(context, imageCode);
+        if (skip) skipKeys.add(entry.key);
       }
     }
 
@@ -235,74 +230,76 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+    final tokens = AppTokens.of(context);
 
     // TODO: support Lottie here as well ...
-    return Stack(
-      alignment: AlignmentDirectional.topEnd,
-      children: [
-        IconButton(
-          onPressed: widget.onRemove,
-          icon: const Icon(Icons.remove_circle),
-          tooltip: L10n.of(context).remove,
-        ),
-        ValueListenableBuilder(
-          valueListenable: hasErrorNotifier,
-          builder: (context, hasError, child) {
-            if (hasError) return _ImageFileError(name: widget.entry.key.name);
+    return Material(
+      color: tokens.surf2,
+      borderRadius: BorderRadius.circular(AppDialog.fieldRadius),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.s),
+            child: ValueListenableBuilder(
+              valueListenable: hasErrorNotifier,
+              builder: (context, hasError, child) {
+                if (hasError) {
+                  return _ImageFileError(name: widget.entry.key.name);
+                }
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.memory(
+                      widget.entry.key.bytes,
+                      height: 64,
+                      width: 64,
+                      cacheWidth: 128,
+                      cacheHeight: 128,
+                      errorBuilder: (context, e, s) {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _setRenderError(),
+                        );
 
-            return Column(
-              mainAxisSize: .min,
-              mainAxisAlignment: .center,
-              crossAxisAlignment: .center,
-              children: [
-                Image.memory(
-                  widget.entry.key.bytes,
-                  height: 64,
-                  width: 64,
-                  cacheWidth: 128,
-                  cacheHeight: 128,
-                  errorBuilder: (context, e, s) {
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      (_) => _setRenderError(),
-                    );
-
-                    return _ImageFileError(name: widget.entry.key.name);
-                  },
-                ),
-                SizedBox(
-                  width: 128,
-                  child: TextField(
-                    controller: controller,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^[-\w]+$')),
-                    ],
-                    autocorrect: false,
-                    minLines: 1,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                      hintText: L10n.of(context).emoteShortcode,
+                        return _ImageFileError(name: widget.entry.key.name);
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.s),
+                    DialogTextField(
+                      controller: controller,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^[-\w]+$')),
+                      ],
+                      autocorrect: false,
+                      minLines: 1,
+                      maxLines: 1,
+                      hintText: l10n.emoteShortcode,
                       prefixText: ': ',
                       suffixText: ':',
-                      border: const OutlineInputBorder(),
-                      prefixStyle: TextStyle(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      suffixStyle: TextStyle(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      textStyle: const TextStyle(fontSize: 13),
+                      onChanged: widget.onNameChanged,
+                      onSubmitted: widget.onNameChanged,
                     ),
-                    onChanged: widget.onNameChanged,
-                    onSubmitted: widget.onNameChanged,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+                  ],
+                );
+              },
+            ),
+          ),
+          PositionedDirectional(
+            top: 0,
+            end: 0,
+            child: IconButton(
+              onPressed: widget.onRemove,
+              constraints: const BoxConstraints(
+                minWidth: AppChat.tapTarget,
+                minHeight: AppChat.tapTarget,
+              ),
+              icon: Icon(Icons.cancel_rounded, color: tokens.mut),
+              tooltip: l10n.remove,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -319,26 +316,58 @@ class _ImageFileError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
 
     return SizedBox.square(
       dimension: 64,
       child: Tooltip(
         message: name,
         child: Column(
-          mainAxisAlignment: .start,
-          mainAxisSize: .min,
-          crossAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(Icons.error),
+            Icon(Icons.error_outline_rounded, color: tokens.red),
             Text(
               L10n.of(context).notAnImage,
               textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall,
+              style: TextStyle(color: tokens.mut, fontSize: 11),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ImportProgress extends StatelessWidget {
+  final double progress;
+  final int total;
+
+  const _ImportProgress({required this.progress, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final done = (progress * total).round().clamp(0, total);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 4,
+            color: tokens.acc,
+            backgroundColor: tokens.line,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.l),
+        Text(
+          L10n.of(context).countOfTotal(done, total),
+          style: TextStyle(color: tokens.mut, fontSize: 13),
+        ),
+      ],
     );
   }
 }
@@ -359,4 +388,23 @@ extension on String {
         // ... replacing unexpected characters
         .replaceAll(RegExp(r'[^-\w]'), '_');
   }
+}
+
+/// Skip or replace an emote that exists. A dismissal skips: it never replaces.
+@visibleForTesting
+Future<bool> askSkipDuplicateEmote(BuildContext context, String code) {
+  final completer = Completer<bool>();
+  WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+    final result = await showOkCancelAlertDialog(
+      useRootNavigator: false,
+      context: context,
+      title: L10n.of(context).emoteExists,
+      message: code,
+      cancelLabel: L10n.of(context).replace,
+      okLabel: L10n.of(context).skip,
+      cancelIsAction: true,
+    );
+    completer.complete(result != OkCancelResult.cancel);
+  });
+  return completer.future;
 }

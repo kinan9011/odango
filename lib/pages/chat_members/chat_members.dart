@@ -8,6 +8,8 @@ import 'dart:async';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
+import 'package:odango/utils/members/member_filter.dart';
+
 import '../../widgets/matrix.dart';
 import 'chat_members_view.dart';
 
@@ -34,29 +36,17 @@ class ChatMembersController extends State<ChatMembersPage> {
   }
 
   Future<void> setFilter([_]) async {
-    final filter = filterController.text.toLowerCase().trim();
-
-    final members = this.members
-        ?.where((member) => member.membership == membershipFilter)
-        .toList();
-
-    if (filter.isEmpty) {
-      setState(() {
-        filteredMembers = members
-          ?..sort((b, a) => a.powerLevel.level.compareTo(b.powerLevel.level));
-      });
-      return;
+    final members = this.members;
+    if (members == null) return;
+    if (!MemberFilter.availableFilters(members).contains(membershipFilter)) {
+      membershipFilter = Membership.join;
     }
     setState(() {
-      filteredMembers =
-          members
-              ?.where(
-                (user) =>
-                    user.displayName?.toLowerCase().contains(filter) ??
-                    user.id.toLowerCase().contains(filter),
-              )
-              .toList()
-            ?..sort((b, a) => a.powerLevel.level.compareTo(b.powerLevel.level));
+      filteredMembers = MemberFilter.apply(
+        members,
+        membership: membershipFilter,
+        query: filterController.text,
+      );
     });
   }
 
@@ -84,6 +74,7 @@ class ChatMembersController extends State<ChatMembersPage> {
         e,
         s,
       );
+      if (!mounted) return;
       setState(() {
         error = e;
       });

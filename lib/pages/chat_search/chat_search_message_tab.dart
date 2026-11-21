@@ -9,8 +9,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_search/search_footer.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:odango/widgets/avatar.dart';
 
@@ -46,7 +48,7 @@ class ChatSearchMessageTab extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Text(
               L10n.of(context).searchIn(
-                room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+                room.safeLocalizedDisplayname(MatrixLocals(L10n.of(context))),
               ),
               textAlign: TextAlign.center,
             ),
@@ -132,13 +134,15 @@ class _MessageSearchResultListTile extends StatelessWidget {
           decorationColor: theme.colorScheme.primary,
         ),
         onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-        text: event
-            .calcLocalizedBodyFallback(
-              plaintextBody: true,
-              removeMarkdown: true,
-              MatrixLocals(L10n.of(context)),
-            )
-            .trim(),
+        text: stripBidiOverrides(
+          event
+              .calcLocalizedBodyFallback(
+                plaintextBody: true,
+                removeMarkdown: true,
+                MatrixLocals(L10n.of(context)),
+              )
+              .trim(),
+        ),
         maxLines: 7,
         overflow: TextOverflow.ellipsis,
       ),

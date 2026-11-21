@@ -23,6 +23,7 @@ import 'package:odango/utils/chat_list/archive_policy.dart';
 import 'package:odango/utils/client_manager.dart';
 import 'package:odango/utils/draft_migration.dart';
 import 'package:odango/utils/draft_store.dart';
+import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/init_with_restore.dart';
 import 'package:odango/utils/launch_web_url.dart';
 import 'package:odango/utils/logout_cleanup.dart';
@@ -259,6 +260,7 @@ class MatrixState extends State<Matrix> {
     ScheduledQueue.forget(c);
     ScheduledStore.forget(c);
     DraftStore.forget(c);
+    HiddenTopicsStore.forget(c);
     IndexFeeder.forget(c);
     MessageIndex.forget(c);
     if (identical(_activeClientRef, c)) _activeClientRef = null;
@@ -552,21 +554,7 @@ class MatrixState extends State<Matrix> {
               FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
               this.context;
           if (!context.mounted) return;
-          final result = await showOkCancelAlertDialog(
-            context: context,
-            title: L10n.of(context).pushNotificationsNotAvailable,
-            message: errorMsg,
-            okLabel: link == null
-                ? L10n.of(context).ok
-                : L10n.of(context).learnMore,
-            cancelLabel: L10n.of(context).doNotShowAgain,
-          );
-          if (result == OkCancelResult.ok && link != null) {
-            launchWebUrl(link.toString(), mode: LaunchMode.externalApplication);
-          }
-          if (result == OkCancelResult.cancel) {
-            await AppSettings.showNoGoogle.setItem(true);
-          }
+          await showPushUnavailableNotice(context, errorMsg, link);
         },
       );
     }
@@ -708,3 +696,25 @@ class MatrixState extends State<Matrix> {
 }
 
 enum CallPosition { fullScreen, top }
+
+@visibleForTesting
+Future<void> showPushUnavailableNotice(
+  BuildContext context,
+  String errorMsg,
+  Uri? link,
+) async {
+  final result = await showOkCancelAlertDialog(
+    context: context,
+    title: L10n.of(context).pushNotificationsNotAvailable,
+    message: errorMsg,
+    okLabel: link == null ? L10n.of(context).ok : L10n.of(context).learnMore,
+    cancelLabel: L10n.of(context).doNotShowAgain,
+    cancelIsAction: true,
+  );
+  if (result == OkCancelResult.ok && link != null) {
+    launchWebUrl(link.toString(), mode: LaunchMode.externalApplication);
+  }
+  if (result == OkCancelResult.cancel) {
+    await AppSettings.showNoGoogle.setItem(true);
+  }
+}

@@ -5,8 +5,6 @@
 
 import 'dart:async';
 
-import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,6 +14,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/space_overview/community_widgets.dart';
 import 'package:odango/pages/space_overview/space_overview.dart';
 import 'package:odango/pages/space_overview/space_overview_widgets.dart';
+import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/fluffy_chat_app.dart';
 
 import 'utils/chat_page_harness.dart';
@@ -687,23 +686,29 @@ void main() {
     });
 
     testWidgets('the popup marks the active choice', (tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       joinCommunity();
       announcementsRule('room');
       await harness.open(tester, path: path());
       await tester.tap(find.byType(SpaceActionButton).last);
       await harness.settle(tester, rounds: 3);
-      final actions = tester
-          .widgetList<CupertinoActionSheetAction>(
-            find.byType(CupertinoActionSheetAction),
+      final texts = l10n(tester);
+      FontWeight? weight(String label) => tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byType(AppSheet),
+              matching: find.text(label),
+            ),
           )
-          .toList();
-      expect(actions.take(3).map((a) => a.isDefaultAction), [
-        false,
-        true,
-        false,
-      ]);
-      debugDefaultTargetPlatformOverride = null;
+          .style
+          ?.fontWeight;
+      expect(
+        [
+          texts.communityNotificationsAll,
+          texts.communityNotificationsMentions,
+          texts.muted,
+        ].map(weight).toList(),
+        [FontWeight.w500, FontWeight.w700, FontWeight.w500],
+      );
       await harness.finish(tester);
     });
 

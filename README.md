@@ -18,7 +18,7 @@ Odango is a fork of [FluffyChat](https://github.com/krille-chan/fluffychat) by C
 - **Licence:** [AGPL-3.0-or-later](LICENSE), like the FluffyChat project. The upstream copyright and SPDX headers are untouched, and new files add an Odango line.
 - **Attribution:** see [NOTICE.md](NOTICE.md). Odango is not affiliated with, endorsed by or supported by the FluffyChat project.
 - **Upstream:** Odango is no longer a GitHub fork but still follows the FluffyChat project: new upstream commits are reported by a daily check and brought in by review. See [docs/UPSTREAM.md](docs/UPSTREAM.md).
-- **Support:** the in-app *Support Odango* entry explains that part of the support goes on to the FluffyChat source Odango is built on.
+- **Support:** please support the main repo, FluffyChat, on [Ko-fi](https://ko-fi.com/C1C86VN53). Without FluffyChat there is no Odango. The in-app *Support Odango* entry also explains that part of the support goes on to the FluffyChat source Odango is built on.
 
 Odango is a **new app** with its own app id, `com.swovo.odango`. It does not read the data of a FluffyChat installation and there is no migration: sign in again and your chats come back from your homeserver.
 
@@ -27,6 +27,7 @@ Odango is a **new app** with its own app id, `com.swovo.odango`. It does not rea
 - 🌐 Website: <https://odango.swovo.de>
 - 💻 Source and issues: <https://github.com/kinan9011/odango>
 - 🙏 Upstream: <https://github.com/krille-chan/fluffychat>
+- ☕ Support the FluffyChat project: <https://ko-fi.com/C1C86VN53>
 
 ## Features
 

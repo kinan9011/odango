@@ -57,7 +57,10 @@ void main() {
       tester,
       htmlWidget(room, 'a <span data-mx-maths="x^2"><b>children</b></span> b'),
     );
-    expect(styleOf(tester, 'x^2')?.fontFamily, AppTypography.monoFamily);
+    expect(
+      styleOf(tester, '\u2068x^2\u2069')?.fontFamily,
+      AppTypography.monoFamily,
+    );
     expect(find.textContaining('children', findRichText: true), findsNothing);
   });
 

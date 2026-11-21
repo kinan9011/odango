@@ -14,8 +14,11 @@ void main() {
     await expectGoldenVariants(
       tester,
       'database_unencrypted_warning_tile',
-      const DatabaseUnencryptedWarningTile(isLinux: true),
-      size: const Size(400, 160),
+      const Align(
+        alignment: Alignment.topCenter,
+        child: DatabaseUnencryptedWarningTile(isLinux: true),
+      ),
+      size: const Size(400, 380),
     );
   });
 }

@@ -3,20 +3,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
-import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/pages/settings_emotes/emote_row.dart';
+import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/url_launcher.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
-import 'package:odango/widgets/mxc_image.dart';
-import 'package:odango/widgets/mxc_image_viewer.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:odango/widgets/settings/animated_row_list.dart';
+import 'package:odango/widgets/settings/settings_field_row.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
-
-enum PopupMenuEmojiActions { import, export }
 
 class EmotesSettingsView extends StatelessWidget {
   final EmotesSettingsController controller;
@@ -25,16 +31,23 @@ class EmotesSettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
     if (controller.widget.roomId != null && controller.room == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(L10n.of(context).oopsSomethingWentWrong)),
-        body: Center(
-          child: Text(L10n.of(context).youAreNoLongerParticipatingInThisChat),
-        ),
+      return SettingsScaffold(
+        title: l10n.oopsSomethingWentWrong,
+        children: [
+          SettingsGroup(
+            rows: [
+              SettingsNotice(
+                tone: SettingsNoticeTone.error,
+                icon: Icons.error_outline_rounded,
+                text: l10n.youAreNoLongerParticipatingInThisChat,
+              ),
+            ],
+          ),
+        ],
       );
     }
-    final theme = Theme.of(context);
-
     final client = Matrix.of(context).client;
     final imageKeys = controller.pack!.images.keys.toList();
     final packKeys = controller.packKeys;
@@ -44,153 +57,85 @@ class EmotesSettingsView extends StatelessWidget {
     final attributionUrl = Uri.tryParse(
       controller.packAttributionController.text,
     );
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: controller.showSave
-            ? TextButton(
-                onPressed: controller.resetAction,
-                child: Text(L10n.of(context).cancel),
-              )
-            : null,
-        title: Text(L10n.of(context).customEmojisAndStickers),
-        actions: [
-          if (controller.showSave)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 16.0),
-              child: TextButton(
-                onPressed: () => controller.save(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                ),
-                child: Text(L10n.of(context).saveChanges),
-              ),
-            )
-          else
-            PopupMenuButton<PopupMenuEmojiActions>(
-              useRootNavigator: true,
-              onSelected: (value) {
-                switch (value) {
-                  case PopupMenuEmojiActions.export:
-                    controller.exportAsZip();
-                    break;
-                  case PopupMenuEmojiActions.import:
-                    controller.importEmojiZip();
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                if (!controller.readonly)
-                  PopupMenuItem(
-                    value: PopupMenuEmojiActions.import,
-                    child: Text(L10n.of(context).importFromZipFile),
-                  ),
-                if (imageKeys.isNotEmpty)
-                  PopupMenuItem(
-                    value: PopupMenuEmojiActions.export,
-                    child: Text(L10n.of(context).exportEmotePack),
-                  ),
-              ],
-            ),
-        ],
-        bottom: packKeys == null
-            ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(48),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: SizedBox(
-                    height: 40,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: packKeys.length + 1,
-                      itemBuilder: (context, i) {
-                        if (i == 0) {
-                          if (controller.readonly) {
-                            return const SizedBox.shrink();
-                          }
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4.0,
-                            ),
-                            child: FilterChip(
-                              label: const Icon(Icons.add_outlined, size: 20),
-                              onSelected: controller.showSave
-                                  ? null
-                                  : (_) => controller.createImagePack(),
-                            ),
-                          );
-                        }
-                        i--;
-                        final key = packKeys[i];
-                        final event = controller.room?.getState(
-                          'im.ponies.room_emotes',
-                          packKeys[i],
-                        );
-
-                        final eventPack = event?.content
-                            .tryGetMap<String, Object?>('pack');
-                        final packName =
-                            eventPack?.tryGet<String>('display_name') ??
-                            eventPack?.tryGet<String>('name') ??
-                            (key.isNotEmpty ? key : 'Default');
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: FilterChip(
-                            label: Text(packName),
-                            selected:
-                                controller.stateKey == key ||
-                                (controller.stateKey == null && key.isEmpty),
-                            onSelected: controller.showSave
-                                ? null
-                                : (_) => controller.setStateKey(key),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-      ),
-      body: MaxWidthBody(
-        child: Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .stretch,
-          children: <Widget>[
-            if (controller.room != null) ...[
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  maxLength: 256,
-                  controller: controller.packDisplayNameController,
-                  readOnly: controller.readonly,
-                  onSubmitted: (_) => controller.submitDisplaynameAction(),
-                  decoration: InputDecoration(
-                    counter: const SizedBox.shrink(),
+    final readonly = controller.readonly;
+    final actionRows = [
+      if (!readonly)
+        SettingsRow(
+          key: const ValueKey('create_sticker'),
+          icon: Icons.upload_rounded,
+          title: l10n.createSticker,
+          showChevron: false,
+          onTap: controller.createStickers,
+        ),
+      if (!readonly)
+        SettingsRow(
+          key: const ValueKey('import_emotes'),
+          icon: Icons.archive_outlined,
+          title: l10n.importFromZipFile,
+          showChevron: false,
+          onTap: controller.importEmojiZip,
+        ),
+      if (imageKeys.isNotEmpty)
+        SettingsRow(
+          key: const ValueKey('export_emotes'),
+          icon: Icons.ios_share_rounded,
+          title: l10n.exportEmotePack,
+          showChevron: false,
+          onTap: controller.exportAsZip,
+        ),
+      if (controller.room != null && imageKeys.isNotEmpty)
+        SettingsToggleRow(
+          title: l10n.enableEmotesGlobally,
+          value: controller.isGloballyActive(client),
+          onChanged: controller.setIsGloballyActive,
+        ),
+    ];
+    return PopScope(
+      canPop: !controller.showSave,
+      onPopInvokedWithResult: controller.onPopBlocked,
+      child: SettingsScaffold(
+        title: l10n.customEmojisAndStickers,
+        bottom: _SaveBar(controller: controller),
+        children: [
+          if (packKeys != null)
+            _PackChips(controller: controller, keys: packKeys),
+          if (controller.room != null)
+            SettingsGroup(
+              rows: [
+                SettingsFieldRow(
+                  child: DialogTextField(
+                    key: const ValueKey('pack_name'),
+                    maxLength: 256,
+                    counterText: '',
+                    controller: controller.packDisplayNameController,
+                    readOnly: readonly,
+                    onSubmitted: (_) => controller.submitDisplaynameAction(),
                     hintText: controller.stateKey,
-                    labelText: L10n.of(context).stickerPackName,
+                    labelText: l10n.stickerPackName,
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  maxLength: 256,
-                  controller: controller.packAttributionController,
-                  readOnly: controller.readonly,
-                  keyboardType: TextInputType.url,
-                  onSubmitted: (_) => controller.submitAttributionAction(),
-                  decoration: InputDecoration(
-                    counter: const SizedBox.shrink(),
-                    labelText: L10n.of(context).attribution,
+                SettingsFieldRow(
+                  child: DialogTextField(
+                    key: const ValueKey('pack_attribution'),
+                    maxLength: 256,
+                    counterText: '',
+                    controller: controller.packAttributionController,
+                    readOnly: readonly,
+                    keyboardType: TextInputType.url,
+                    onSubmitted: (_) => controller.submitAttributionAction(),
+                    labelText: l10n.attribution,
                     suffixIcon: attributionUrl == null
                         ? null
                         : IconButton(
-                            icon: const Icon(Icons.link_outlined),
+                            tooltip: l10n.attribution,
+                            constraints: const BoxConstraints(
+                              minWidth: AppChat.tapTarget,
+                              minHeight: AppChat.tapTarget,
+                            ),
+                            icon: Icon(
+                              Icons.link_rounded,
+                              color: AppTokens.of(context).acc,
+                            ),
                             onPressed: () => UrlLauncher(
                               context,
                               attributionUrl.toString(),
@@ -198,188 +143,211 @@ class EmotesSettingsView extends StatelessWidget {
                           ),
                   ),
                 ),
-              ),
-            ],
-            if (!controller.readonly) ...[
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton.icon(
-                  onPressed: controller.createStickers,
-                  icon: const Icon(Icons.upload_outlined),
-                  label: Text(L10n.of(context).createSticker),
-                ),
-              ),
-              const Divider(),
-            ],
-            if (controller.room != null && imageKeys.isNotEmpty)
-              SwitchListTile.adaptive(
-                title: Text(L10n.of(context).enableEmotesGlobally),
-                value: controller.isGloballyActive(client),
-                onChanged: controller.setIsGloballyActive,
-              ),
-            imageKeys.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        L10n.of(context).noEmotesFound,
-                        style: const TextStyle(fontSize: 20),
-                      ),
+              ],
+            ),
+          if (actionRows.isNotEmpty) SettingsGroup(rows: actionRows),
+          SettingsGroup(
+            rows: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AnimatedRowList<MapEntry<String, ImagePackImageContent>>(
+                    items: controller.pack!.images.entries.toList(),
+                    keyOf: (entry) => entry.key,
+                    itemBuilder: (context, entry) => EmoteRow(
+                      key: ValueKey('emote_${entry.key}'),
+                      code: entry.key,
+                      image: entry.value,
+                      controller: controller,
                     ),
-                  )
-                : ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    separatorBuilder: (BuildContext context, int i) =>
-                        const SizedBox.shrink(),
-                    itemCount: imageKeys.length,
-                    itemBuilder: (BuildContext context, int i) {
-                      final imageCode = imageKeys[i];
-                      final image = controller.pack!.images[imageCode]!;
-                      // TODO: Dispose this
-                      final textEditingController = TextEditingController();
-                      textEditingController.text = imageCode;
-                      final useShortCuts =
-                          (PlatformInfos.isWeb || PlatformInfos.isDesktop);
-                      return ListTile(
-                        title: Row(
-                          children: [
-                            Expanded(
-                              child: Shortcuts(
-                                shortcuts: !useShortCuts
-                                    ? {}
-                                    : {
-                                        LogicalKeySet(LogicalKeyboardKey.enter):
-                                            SubmitLineIntent(),
-                                      },
-                                child: Actions(
-                                  actions: !useShortCuts
-                                      ? {}
-                                      : {
-                                          SubmitLineIntent: CallbackAction(
-                                            onInvoke: (i) {
-                                              controller.submitImageAction(
-                                                imageCode,
-                                                image,
-                                                textEditingController,
-                                              );
-                                              return null;
-                                            },
-                                          ),
-                                        },
-                                  child: TextField(
-                                    readOnly: controller.readonly,
-                                    controller: textEditingController,
-                                    autocorrect: false,
-                                    minLines: 1,
-                                    maxLines: 1,
-                                    maxLength: 128,
-                                    decoration: InputDecoration(
-                                      hintText: L10n.of(context).emoteShortcode,
-                                      prefixText: ': ',
-                                      suffixText: ':',
-                                      counter: const SizedBox.shrink(),
-                                      filled: false,
-                                      enabledBorder: const OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                        ),
-                                      ),
-                                    ),
-                                    onSubmitted: (s) =>
-                                        controller.submitImageAction(
-                                          imageCode,
-                                          image,
-                                          textEditingController,
-                                        ),
-                                  ),
+                  ),
+                  if (imageKeys.isEmpty)
+                    SettingsNotice(
+                      icon: Icons.emoji_emotions_outlined,
+                      text: l10n.noEmotesFound,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PackChips extends StatelessWidget {
+  final EmotesSettingsController controller;
+  final List<String> keys;
+
+  const _PackChips({required this.controller, required this.keys});
+
+  @override
+  Widget build(BuildContext context) {
+    final locked = controller.showSave;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
+      child: SizedBox(
+        height: AppChat.tapTarget,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            if (!controller.readonly)
+              _PackChip(
+                key: const ValueKey('create_pack'),
+                label: null,
+                selected: false,
+                onTap: locked ? null : controller.createImagePack,
+              ),
+            for (final key in keys)
+              _PackChip(
+                key: ValueKey('pack_$key'),
+                label: _name(key),
+                selected:
+                    controller.stateKey == key ||
+                    (controller.stateKey == null && key.isEmpty),
+                onTap: locked ? null : () => controller.setStateKey(key),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _name(String key) {
+    final event = controller.room?.getState('im.ponies.room_emotes', key);
+    final eventPack = event?.content.tryGetMap<String, Object?>('pack');
+    return eventPack?.tryGet<String>('display_name') ??
+        eventPack?.tryGet<String>('name') ??
+        (key.isNotEmpty ? key : 'Default');
+  }
+}
+
+class _PackChip extends StatelessWidget {
+  final String? label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const _PackChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final label = this.label;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: AppSpacing.s),
+      child: Semantics(
+        selected: selected,
+        button: true,
+        enabled: onTap != null,
+        label: label ?? L10n.of(context).createSticker,
+        excludeSemantics: true,
+        onTap: onTap,
+        child: Opacity(
+          opacity: onTap == null && !selected ? .4 : 1,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppChat.tapTarget / 2),
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppChat.tapTarget,
+                minWidth: AppChat.tapTarget,
+              ),
+              child: Center(
+                widthFactor: 1,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: selected ? tokens.accs : tokens.surf,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 36,
+                      minWidth: 36,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xl,
+                      ),
+                      child: Center(
+                        widthFactor: 1,
+                        child: label == null
+                            ? Icon(
+                                Icons.add_rounded,
+                                size: 20,
+                                color: tokens.acc,
+                              )
+                            : Text(
+                                label,
+                                style: TextStyle(
+                                  color: selected ? tokens.acc : tokens.fg,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                            if (!controller.readonly)
-                              PopupMenuButton<ImagePackUsage>(
-                                onSelected: (usage) =>
-                                    controller.toggleUsage(imageCode, usage),
-                                itemBuilder: (context) => [
-                                  PopupMenuItem(
-                                    value: ImagePackUsage.sticker,
-                                    child: Row(
-                                      mainAxisSize: .min,
-                                      children: [
-                                        if (image.usage?.contains(
-                                              ImagePackUsage.sticker,
-                                            ) ??
-                                            true)
-                                          const Icon(Icons.check_outlined),
-                                        const SizedBox(width: 12),
-                                        Text(L10n.of(context).useAsSticker),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: ImagePackUsage.emoticon,
-                                    child: Row(
-                                      mainAxisSize: .min,
-                                      children: [
-                                        if (image.usage?.contains(
-                                              ImagePackUsage.emoticon,
-                                            ) ??
-                                            true)
-                                          const Icon(Icons.check_outlined),
-                                        const SizedBox(width: 12),
-                                        Text(L10n.of(context).useAsEmoji),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                                icon: const Icon(Icons.edit_outlined),
-                              ),
-                          ],
-                        ),
-                        leading: _EmoteImage(image.url),
-                        trailing: controller.readonly
-                            ? null
-                            : IconButton(
-                                tooltip: L10n.of(context).delete,
-                                onPressed: () =>
-                                    controller.removeImageAction(imageCode),
-                                icon: const Icon(Icons.delete_outlined),
-                              ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
-          ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-class _EmoteImage extends StatelessWidget {
-  final Uri mxc;
+class _SaveBar extends StatelessWidget {
+  final EmotesSettingsController controller;
 
-  const _EmoteImage(this.mxc);
+  const _SaveBar({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    const size = 44.0;
-    final key = 'sticker_preview_$mxc';
-    return InkWell(
-      borderRadius: BorderRadius.circular(4),
-      onTap: () =>
-          showDialog(context: context, builder: (_) => MxcImageViewer(mxc)),
-      child: MxcImage(
-        key: ValueKey(key),
-        cacheKey: key,
-        uri: mxc,
-        fit: BoxFit.contain,
-        width: size,
-        height: size,
-        isThumbnail: true,
-        animated: true,
-      ),
+    final l10n = L10n.of(context);
+    final tokens = AppTokens.of(context);
+    return AnimatedSize(
+      duration: motionDuration(context, AppMotion.saveBar),
+      alignment: Alignment.bottomCenter,
+      child: controller.showSave
+          ? Material(
+              color: tokens.surf,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSettingsLayout.sideMargin,
+                  vertical: AppSpacing.s,
+                ),
+                child: Row(
+                  children: [
+                    TextButton(
+                      key: const ValueKey('emotes_cancel'),
+                      onPressed: controller.resetAction,
+                      child: Text(
+                        l10n.cancel,
+                        style: TextStyle(color: tokens.mut),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s),
+                    Expanded(
+                      child: SettingsPillButton(
+                        key: const ValueKey('emotes_save'),
+                        label: l10n.saveChanges,
+                        height: AppDialog.buttonHeight,
+                        onPressed: () => controller.save(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : const SizedBox(width: double.infinity),
     );
   }
 }
-
-class SubmitLineIntent extends Intent {}

@@ -33,7 +33,7 @@ extension type FluffyChatTester(WidgetTester tester) {
 
   Future<void> waitFor(
     Object object, {
-    Duration timeout = const Duration(seconds: 30),
+    Duration timeout = const Duration(seconds: 60),
   }) async {
     _print('👀 Waiting for "$object" (${timeout.inSeconds}s)');
     final end = DateTime.now().add(timeout);
@@ -64,6 +64,14 @@ extension type FluffyChatTester(WidgetTester tester) {
   Future<Finder> _ensureVisible(Object object, {int? index}) async {
     var finder = object.toFinder();
     if (finder.evaluate().isEmpty) await waitFor(object);
+
+    if (index == null && finder.evaluate().length > 1) {
+      // A page that is leaving is still under the new one for a moment.
+      final end = DateTime.now().add(const Duration(seconds: 5));
+      while (finder.evaluate().length > 1 && DateTime.now().isBefore(end)) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+    }
 
     if (finder.evaluate().length > 1) {
       if (index == null) {

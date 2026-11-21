@@ -127,9 +127,27 @@ void main() {
     await harness.finish(tester);
   });
 
+  testWidgets('the chip bar is hidden inside a topic by default', (
+    tester,
+  ) async {
+    api.threadsResponse = {
+      'chunk': [root(r'$a:example.org', 'Releases')],
+    };
+    await open(tester);
+    final controller = tester.state<ChatController>(
+      find.byType(ChatPageWithRoom),
+    );
+    await tester.tap(chip(r'topic_chip_$a:example.org'));
+    await harness.settle(tester, rounds: 3);
+    expect(controller.activeThreadId, r'$a:example.org');
+    expect(chip('topic_chip_general'), findsNothing);
+    await harness.finish(tester);
+  });
+
   testWidgets('a chip opens the topic, General closes it again', (
     tester,
   ) async {
+    await AppSettings.showTopicBarInThread.setItem(true);
     api.threadsResponse = {
       'chunk': [root(r'$a:example.org', 'Releases')],
     };

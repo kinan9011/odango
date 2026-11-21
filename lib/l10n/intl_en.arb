@@ -919,6 +919,8 @@
     },
     "hideRedactedMessages": "Hide redacted messages",
     "hideRedactedMessagesBody": "If someone redacts a message, this message won't be visible in the chat anymore.",
+    "showTopicBarInThread": "Show topics bar inside threads",
+    "showTopicBarInThreadDescription": "Keep the row of topic chips visible while reading a thread.",
     "hideInvalidOrUnknownMessageFormats": "Hide invalid or unknown message formats",
     "block": "Block",
     "blockedUsers": "Blocked users",
@@ -2473,7 +2475,7 @@
     "pause": "Pause",
     "resume": "Resume",
     "removeFromSpaceDescription": "The chat will be removed from the space but still appear in your chat list.",
-    "countChats": "{chats} chats",
+    "countChats": "{chats, plural, =1{1 chat} other{{chats} chats}}",
     "@countChats": {
         "type": "String",
         "placeholders": {
@@ -2587,11 +2589,48 @@
     "supportOdango": "Support Odango",
     "supportOdangoBody": "Odango is free and open source. It is built on FluffyChat, and part of what you give goes on to support the FluffyChat source it is built on. Thank you.",
     "@supportOdangoBody": {
-        "description": "Body of the dialog that opens from the Support Odango menu entry. It tells people that part of their support reaches the upstream FluffyChat project."
+        "description": "Body of the Support Odango dialog (opened from the update notice). It tells people that part of their support reaches the upstream FluffyChat project."
     },
     "supportKoFi": "Support on Ko-fi",
     "supportBuyMeACoffee": "Buy me a coffee",
     "supportUpstreamSource": "FluffyChat source code",
+    "hideThread": "Hide thread",
+    "@hideThread": {
+        "description": "Menu entry that removes a thread from the thread bar of a chat on this device"
+    },
+    "showThread": "Show thread",
+    "@showThread": {
+        "description": "Menu entry that puts a hidden thread back into the thread bar of a chat"
+    },
+    "hiddenThreadsCount": "Hidden ({count})",
+    "@hiddenThreadsCount": {
+        "description": "Chip of the thread bar that holds the hidden threads, with how many there are",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "hideThreadInfo": "Hidden only on this device. You still get notifications from it; mute the chat to silence them.",
+    "@hideThreadInfo": {
+        "description": "Explains under the Hide thread entry that hiding changes nothing about notifications"
+    },
+    "hiddenThread": "Hidden thread",
+    "@hiddenThread": {
+        "description": "Screen reader label of the marker on a hidden thread in the thread list"
+    },
+    "mentionEveryoneSubtitle": "Notifies everyone in this chat",
+    "@mentionEveryoneSubtitle": {
+        "description": "Second line of the @room entry in the mention suggestions of the composer"
+    },
+    "mentionsEveryone": "Mentions everyone",
+    "@mentionsEveryone": {
+        "description": "Screen reader label of the @room pill in a message that notifies the whole chat"
+    },
+    "aboutSupportFluffyChat": "Support FluffyChat",
+    "@aboutSupportFluffyChat": {
+        "description": "Row in the About dialog that opens the upstream FluffyChat support page"
+    },
     "supportLinksNotSet": "No donation links are set up in this build.",
     "aboutBasedOnFluffyChat": "Odango is a fork of FluffyChat and is licensed under AGPL-3.0.",
     "pushNeedsOwnGateway": "Push notifications need a push gateway. This build has none configured, so notifications only arrive while the app is open. Ask your administrator to set one up.",
@@ -5103,5 +5142,209 @@
         "type": "String",
         "description": "Short explanation under the writing and replying settings group.",
         "placeholders": {}
+    },
+    "activeCallIndicator": "{count, plural, =1{1 person in a call} other{{count} people in a call}}",
+    "@activeCallIndicator": {
+        "type": "String",
+        "description": "Spoken label of the call badge on a chat row.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "qrCodeTitle": "QR code",
+    "@qrCodeTitle": {
+        "type": "String",
+        "description": "Title of the sheet that shows a QR code of a person or chat.",
+        "placeholders": {}
+    },
+    "showQrCode": "Show QR code",
+    "@showQrCode": {
+        "type": "String",
+        "description": "Tooltip of the button that opens a QR code.",
+        "placeholders": {}
+    },
+    "profileUnavailableNotice": "This profile could not be loaded. The person may not exist or their server is not answering. You can still try to message them.",
+    "@profileUnavailableNotice": {
+        "type": "String",
+        "description": "Notice in the profile sheet when the profile lookup failed.",
+        "placeholders": {}
+    },
+    "mediaPosition": "{index} of {total}",
+    "@mediaPosition": {
+        "type": "String",
+        "description": "Position of the shown picture or video in the media viewer.",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "roomAddress": "Room address",
+    "@roomAddress": {
+        "type": "String",
+        "description": "Label of the public address or ID of a chat in its profile.",
+        "placeholders": {}
+    },
+    "zoomIn": "Zoom in",
+    "@zoomIn": {
+        "type": "String",
+        "description": "Tooltip of the button that makes the log text bigger.",
+        "placeholders": {}
+    },
+    "zoomOut": "Zoom out",
+    "@zoomOut": {
+        "type": "String",
+        "description": "Tooltip of the button that makes the log text smaller.",
+        "placeholders": {}
+    },
+    "noBlockedUsers": "You have not blocked anyone.",
+    "@noBlockedUsers": {
+        "type": "String",
+        "description": "Shown in the blocked users list when it is empty.",
+        "placeholders": {}
+    },
+    "unblockUser": "Unblock",
+    "@unblockUser": {
+        "type": "String",
+        "description": "Tooltip of the button that removes a person from the blocked users list.",
+        "placeholders": {}
+    },
+    "showPassword": "Show password",
+    "@showPassword": {
+        "type": "String",
+        "description": "Tooltip of the eye button that shows the text of a password field.",
+        "placeholders": {}
+    },
+    "hidePassword": "Hide password",
+    "@hidePassword": {
+        "type": "String",
+        "description": "Tooltip of the eye button that hides the text of a password field.",
+        "placeholders": {}
+    },
+    "moveUp": "Move up",
+    "@moveUp": {
+        "type": "String",
+        "description": "Screen reader action that moves a list entry one place up.",
+        "placeholders": {}
+    },
+    "moveDown": "Move down",
+    "@moveDown": {
+        "type": "String",
+        "description": "Screen reader action that moves a list entry one place down.",
+        "placeholders": {}
+    },
+    "countOfTotal": "{count} of {total}",
+    "@countOfTotal": {
+        "type": "String",
+        "description": "A progress or selection count such as 3 of 500.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "entriesNotShown": "{count, plural, =1{1 more entry is not shown} other{{count} more entries are not shown}}",
+    "@entriesNotShown": {
+        "type": "String",
+        "description": "Shown under a list that was cut short to a safe size.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "chatDetailsMembers": "Members",
+    "@chatDetailsMembers": {
+        "type": "String",
+        "description": "Tab of the chat details page that lists the people in the chat.",
+        "placeholders": {}
+    },
+    "encryptedChat": "Encrypted",
+    "@encryptedChat": {
+        "type": "String",
+        "description": "Shown in the chat details when messages in this chat are end-to-end encrypted.",
+        "placeholders": {}
+    },
+    "encryptedAllMembersVerified": "Encrypted \u00b7 all members verified",
+    "@encryptedAllMembersVerified": {
+        "type": "String",
+        "description": "Shown in the chat details only when every person in the chat has been verified.",
+        "placeholders": {}
+    },
+    "chatDetailsSessions": "{count, plural, =1{1 session} other{{count} sessions}}",
+    "@chatDetailsSessions": {
+        "type": "String",
+        "description": "How many sessions (devices) a person is signed in on, in the chat details of a direct chat.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "deleteAddressWarning": "People will not be able to use this address to find the chat any more.",
+    "@deleteAddressWarning": {
+        "type": "String",
+        "description": "Shown before a chat address is deleted.",
+        "placeholders": {}
+    },
+    "publicChatWarning": "Anyone will be able to find this chat and join it.",
+    "@publicChatWarning": {
+        "type": "String",
+        "description": "Shown before a chat is opened for everyone to join.",
+        "placeholders": {}
+    },
+    "worldReadableWarning": "Anyone will be able to read the messages of this chat, even without joining it.",
+    "@worldReadableWarning": {
+        "type": "String",
+        "description": "Shown before the history of a chat is made readable for everyone.",
+        "placeholders": {}
+    },
+    "inviteSelectedCount": "{count, plural, =0{Invite} =1{Invite 1 person} other{Invite {count} people}}",
+    "@inviteSelectedCount": {
+        "type": "String",
+        "description": "Button that invites everyone picked in the invite list.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "invitedCountToGroup": "{count, plural, =1{1 contact has been invited} other{{count} contacts have been invited}}",
+    "@invitedCountToGroup": {
+        "type": "String",
+        "description": "Shown after several people were invited to a chat.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "removeSelected": "Remove {name}",
+    "@removeSelected": {
+        "type": "String",
+        "description": "Label of a chip that takes a person off the list of people to invite.",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "selectionLimitReached": "You can invite up to {max} people at once.",
+    "@selectionLimitReached": {
+        "type": "String",
+        "description": "Shown when no more people can be picked in the invite list.",
+        "placeholders": {
+            "max": {
+                "type": "int"
+            }
+        }
     }
 }

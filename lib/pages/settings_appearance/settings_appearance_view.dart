@@ -19,6 +19,7 @@ import 'package:odango/utils/chat/bubble_shape.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/color_value.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:odango/widgets/settings/settings_group.dart';
 import 'package:odango/widgets/settings/settings_row.dart';
@@ -56,7 +57,7 @@ class SettingsAppearanceView extends StatelessWidget {
     final roomName = room == null
         ? null
         : safeDisplayText(
-            room.getLocalizedDisplayname(MatrixLocals(l10n)),
+            room.safeLocalizedDisplayname(MatrixLocals(l10n)),
             maxGraphemes: 40,
           );
     final client = Matrix.of(context).client;

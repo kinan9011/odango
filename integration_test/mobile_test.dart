@@ -12,11 +12,13 @@ import 'flows/chat_flows.dart';
 import 'flows/chat_list_flows.dart';
 import 'flows/composer_flows.dart';
 import 'flows/conversation_flows.dart';
+import 'flows/dialog_flows.dart';
 import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/odango_flows.dart';
 import 'flows/privacy_topics_flows.dart';
+import 'flows/room_flows.dart';
 import 'flows/scheduling_flows.dart';
 import 'flows/search_flows.dart';
 import 'flows/settings_flows.dart';
@@ -40,6 +42,10 @@ void main() {
     testWidgets('Conversation shell', conversationShell);
     testWidgets('Conversation bubbles', conversationBubbles);
     testWidgets('Conversation jump buttons', conversationJumpButtons);
+    testWidgets(
+      'Conversation direction and room mention',
+      conversationDirectionRoomMention,
+    );
     testWidgets('Composer rich text', composerRichText);
     testWidgets('Edit history', editHistory);
     testWidgets('Scheduled message send now', scheduleAndSendNow);
@@ -52,12 +58,21 @@ void main() {
     testWidgets('Topics', topicFlow);
     testWidgets('Disappearing messages', disappearingFlow);
     testWidgets('Direct chat with the default timer', directChatFlow);
+    testWidgets('User profile sheet', userSheetFlow);
+    testWidgets('Own QR sheet', profileQrFlow);
     testWidgets('Search encrypted chats', searchEncryptedFlow);
     testWidgets('Search unencrypted chats', searchServerFlow);
     testWidgets('Search index wiped on logout', searchWipeFlow);
+    testWidgets('Chat details', chatDetailsFlow);
+    testWidgets('Room access', roomAccessFlow);
+    testWidgets('Room permissions', roomPermissionsFlow);
+    testWidgets('Invite selection', inviteSelectionFlow);
     testWidgets('Space community', communityFlow);
     testWidgets('Settings appearance', settingsAppearanceFlow);
     testWidgets('Settings chat', settingsChatFlow);
+    testWidgets('Settings notifications', settingsNotificationsFlow);
+    testWidgets('Settings blocked users', settingsBlockedUsersFlow);
+    testWidgets('Settings double-tap reaction', settingsDoubleTapReactionFlow);
     testWidgets('Settings homeserver features', settingsHomeserverFlow);
     testWidgets('Settings export chat', settingsExportFlow);
     // Signs out every other session of the user: keep it after the flows that

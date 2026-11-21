@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
@@ -27,6 +29,59 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
   Room get room => Matrix.of(context).client.getRoomById(roomId!)!;
+
+  late Future<List<User>> participants = room.requestParticipants();
+  StreamSubscription? _memberSub;
+  Timer? _debounce;
+  bool _inFlight = false;
+  bool _pending = false;
+
+  void reloadParticipants() {
+    final next = room.requestParticipants();
+    _inFlight = true;
+    next.whenComplete(() {
+      _inFlight = false;
+      if (!_pending) return;
+      _pending = false;
+      _scheduleReload();
+    }).ignore();
+    setState(() {
+      participants = next;
+    });
+  }
+
+  void _scheduleReload() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      if (_inFlight) {
+        _pending = true;
+        return;
+      }
+      reloadParticipants();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _memberSub ??= room.client.onSync.stream
+        .where(
+          (update) =>
+              update.rooms?.join?[roomId]?.timeline?.events?.any(
+                (event) => event.type == EventTypes.RoomMember,
+              ) ??
+              false,
+        )
+        .listen((_) => _scheduleReload());
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _memberSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> unblock(DeviceKeys key) async {
     if (key.blocked) {

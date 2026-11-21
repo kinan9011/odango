@@ -39,7 +39,7 @@ Future<bool> showTrustUserInRoomDialog(BuildContext context, Room room) async {
 
   final action = await showAdaptiveDialog<_Action>(
     context: context,
-    builder: (context) => AlertDialog.adaptive(
+    builder: (context) => AlertDialog(
       title: Center(
         child: Icon(
           Icons.lock_outlined,

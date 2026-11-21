@@ -7,10 +7,13 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/app_config.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_notifications/push_rule_extensions.dart';
+import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -18,6 +21,12 @@ import 'package:odango/widgets/future_loading_dialog.dart';
 
 import '../../widgets/matrix.dart';
 import 'settings_notifications_view.dart';
+
+const maxPushRuleJsonUnits = 20000;
+const maxPusherTextUnits = 256;
+
+String _shown(String text) =>
+    visibleId(cappedText(text, maxUnits: maxPusherTextUnits));
 
 class SettingsNotifications extends StatefulWidget {
   const SettingsNotifications({super.key});
@@ -33,8 +42,8 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   Future<void> onPusherTap(Pusher pusher) async {
     final delete = await showModalActionPopup<bool>(
       context: context,
-      title: pusher.deviceDisplayName,
-      message: '${pusher.appDisplayName} (${pusher.appId})',
+      title: _shown(pusher.deviceDisplayName),
+      message: _shown('${pusher.appDisplayName} (${pusher.appId})'),
       cancelLabel: L10n.of(context).cancel,
       actions: [
         AdaptiveModalAction(
@@ -97,45 +106,50 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   }
 
   Future<void> editPushRule(PushRule rule, PushRuleKind kind) async {
-    final theme = Theme.of(context);
     final action = await showAdaptiveDialog<PushRuleDialogAction>(
       context: context,
-      builder: (context) => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 256),
-        child: AlertDialog.adaptive(
-          title: Text(rule.getPushRuleName(L10n.of(context))),
-          content: Padding(
-            padding: const EdgeInsetsDirectional.only(top: 16.0),
-            child: Material(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-              color: theme.colorScheme.surfaceContainer,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                scrollDirection: Axis.horizontal,
-                child: SelectableText(
-                  prettyJson(rule.toJson()),
-                  style: TextStyle(color: theme.colorScheme.onSurface),
+      builder: (context) {
+        final tokens = AppTokens.of(context);
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 256),
+          child: AlertDialog(
+            title: Text(rule.getPushRuleName(L10n.of(context))),
+            content: Padding(
+              padding: const EdgeInsetsDirectional.only(top: AppSpacing.xxl),
+              child: Material(
+                borderRadius: BorderRadius.circular(AppDialog.fieldRadius),
+                color: tokens.surf2,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.xxl),
+                  scrollDirection: Axis.horizontal,
+                  child: SelectableText(
+                    cappedText(
+                      prettyJson(rule.toJson()),
+                      maxUnits: maxPushRuleJsonUnits,
+                    ),
+                    style: AppTypography.mono.copyWith(color: tokens.fg),
+                  ),
                 ),
               ),
             ),
-          ),
-          actions: [
-            AdaptiveDialogAction(
-              onPressed: Navigator.of(context).pop,
-              child: Text(L10n.of(context).close),
-            ),
-            if (!rule.ruleId.startsWith('.m.'))
+            actions: [
               AdaptiveDialogAction(
-                onPressed: () =>
-                    Navigator.of(context).pop(PushRuleDialogAction.delete),
-                child: Text(
-                  L10n.of(context).delete,
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
+                onPressed: Navigator.of(context).pop,
+                child: Text(L10n.of(context).close),
               ),
-          ],
-        ),
-      ),
+              if (!rule.ruleId.startsWith('.m.'))
+                AdaptiveDialogAction(
+                  onPressed: () =>
+                      Navigator.of(context).pop(PushRuleDialogAction.delete),
+                  child: Text(
+                    L10n.of(context).delete,
+                    style: TextStyle(color: tokens.red),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
     if (action == null) return;
     if (!mounted) return;

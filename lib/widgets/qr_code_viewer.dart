@@ -7,22 +7,32 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/app_config.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/fluffy_share.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:odango/utils/visible_id.dart';
+import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
-import 'package:particles_network/particles_network.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:qr_image/qr_image.dart';
 
-import '../config/themes.dart';
-
 Future<void> showQrCodeViewer(BuildContext context, String content) =>
-    showDialog(
+    showAppSheet<void>(
       context: context,
       builder: (context) => QrCodeViewer(content: content),
     );
+
+/// File name of the saved QR image. The content is a Matrix ID or a room
+/// alias chosen by someone else: only a safe set of characters reaches the
+/// name the save dialog proposes.
+String qrFileName(String content) {
+  final safe = content.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+  final clipped = safe.length > 64 ? safe.substring(0, 64) : safe;
+  return 'QR_Code_$clipped.png';
+}
 
 class QrCodeViewer extends StatelessWidget {
   final String content;
@@ -44,98 +54,66 @@ class QrCodeViewer extends StatelessWidget {
 
     MatrixImageFile(
       bytes: bytes,
-      name: 'QR_Code_$content.png',
+      name: qrFileName(content),
       mimeType: 'image/png',
     ).save(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
     final inviteLink = 'https://matrix.to/#/$content';
-    return Scaffold(
-      backgroundColor: Colors.black.withAlpha(128),
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          style: IconButton.styleFrom(
-            backgroundColor: Colors.black.withAlpha(128),
-          ),
-          icon: const Icon(Icons.close),
-          onPressed: Navigator.of(context).pop,
-          color: Colors.white,
-          tooltip: L10n.of(context).close,
-        ),
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.black.withAlpha(128),
-            ),
-            icon: Icon(Icons.adaptive.share_outlined),
-            onPressed: () => FluffyShare.share(inviteLink, context),
-            color: Colors.white,
-            tooltip: L10n.of(context).share,
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.black.withAlpha(128),
-            ),
-            icon: const Icon(Icons.download_outlined),
-            onPressed: () => _save(context),
-            color: Colors.white,
-            tooltip: L10n.of(context).downloadFile,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Stack(
+    return AppSheet(
+      title: l10n.qrCodeTitle,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: AppSpacing.xl,
         children: [
-          if (!MediaQuery.disableAnimationsOf(context))
-            ParticleNetwork(maxSpeed: 0.25),
           Center(
             child: Container(
-              margin: const EdgeInsets.all(32.0),
-              padding: const EdgeInsets.all(32.0),
+              constraints: const BoxConstraints(maxWidth: 256 + 32),
+              padding: const EdgeInsets.all(AppSpacing.xxl),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: theme.colorScheme.onSurface,
-                  width: 8,
-                ),
-                color: theme.colorScheme.surfaceBright,
-                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                // Scanners need dark modules on a light ground in both themes.
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppRadius.card),
               ),
-              child: Column(
-                mainAxisSize: .min,
-                children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: FluffyThemes.columnWidth,
-                    ),
-                    child: PrettyQrView.data(
-                      data: inviteLink,
-                      decoration: PrettyQrDecoration(
-                        shape: PrettyQrSmoothSymbol(
-                          roundFactor: 1,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
+              child: Semantics(
+                image: true,
+                label: l10n.qrCodeTitle,
+                child: PrettyQrView.data(
+                  data: inviteLink,
+                  decoration: const PrettyQrDecoration(
+                    shape: PrettyQrSmoothSymbol(
+                      roundFactor: 1,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 8.0),
-                  SelectableText(
-                    content,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
+          ),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SelectableText(
+              visibleId(content),
+              textAlign: TextAlign.center,
+              style: AppTypography.mono.copyWith(
+                color: tokens.mut,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          AdaptiveDialogInkWell(
+            primary: true,
+            onTap: () => FluffyShare.share(inviteLink, context),
+            child: Text(l10n.share),
+          ),
+          AdaptiveDialogInkWell(
+            onTap: () => _save(context),
+            child: Text(l10n.downloadFile),
           ),
         ],
       ),

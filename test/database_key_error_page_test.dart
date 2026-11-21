@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/database_key_error/database_key_error_page.dart';
@@ -47,6 +48,7 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(extensions: [AppTokens.light()]),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         builder: (context, child) =>
@@ -218,9 +220,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('moved aside, not deleted'), findsOne);
     final okButton = find.byKey(const Key('ok_cancel_alert_dialog_ok_button'));
-    final theme = Theme.of(tester.element(okButton));
     final ok = find.descendant(of: okButton, matching: find.byType(Text));
-    expect(tester.widget<Text>(ok).style?.color, theme.colorScheme.error);
+    expect(
+      tester.widget<Text>(ok).style?.color,
+      AppTokens.of(tester.element(okButton)).red,
+    );
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 

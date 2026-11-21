@@ -11,11 +11,11 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+//<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-//<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/main.dart';
 import 'package:odango/utils/branding/docs_links.dart';
