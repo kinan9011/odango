@@ -284,5 +284,13 @@ jobs:
           ram-size: 4096M
           sdcard-path-or-size: 4096M
           emulator-options: -no-snapshot-save -no-window -wipe-data -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # ponytail: emulator can drop offline during flutter_tools teardown after all tests pass; trust the reporter summary instead of the exit code
-          script: flutter test integration_test/mobile_test.dart 2>&1 | tee integration_test.log; grep -qE '^🎉 [1-9][0-9]* tests? passed' integration_test.log
+          # ponytail: emulator can drop offline during flutter_tools teardown after all tests pass; trust the reporter summary instead of the exit code, but only when every flow passed. The runner executes each script line in its own shell, so the gate stays one line. timeout covers a frozen emulator, where the on-device flow timeout never fires.
+          script: timeout 45m flutter test integration_test/mobile_test.dart 2>&1 | tee integration_test.log; expected=$(grep -c '^    flow(' integration_test/mobile_test.dart); grep -qE "^🎉 $expected tests passed" integration_test.log || { adb devices; adb logcat -d > logcat.txt; exit 1; }
+      - name: Upload integration logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-logs
+          path: |
+            integration_test.log
+            logcat.txt
