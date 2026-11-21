@@ -12,7 +12,7 @@ flutter run                                  # debug on host platform
 ./scripts/prepare-web.sh                     # once before web run/build (vodozemac WASM, LiveKit e2ee worker)
 flutter build web
 
-flutter test                                 # unit/widget/golden tests
+flutter test                                 # unit/widget/golden tests (goldens assume TZ=Europe/Berlin, as CI sets)
 flutter test test/swipe_to_reply_test.dart   # single file
 flutter test --plain-name "<name>"           # single test
 dart run golden_screenshot:download_apple_fonts   # needed for golden/screenshot tests (CI does this)

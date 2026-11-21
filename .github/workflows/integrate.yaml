@@ -58,6 +58,8 @@ jobs:
 
   flutter_tests:
     runs-on: ubuntu-26.04
+    env:
+      TZ: Europe/Berlin
     steps:
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
@@ -65,7 +67,9 @@ jobs:
           flutter-version-file: .fvmrc
           cache: true
       - uses: dtolnay/rust-toolchain@stable
+      - run: sudo apt-get update && sudo apt-get install -y libmpv-dev
       - run: flutter pub get
+      - run: ./scripts/prepare_vodozemac.sh
       - run: dart run golden_screenshot:download_apple_fonts
       - run: flutter test
 

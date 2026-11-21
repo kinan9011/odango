@@ -384,6 +384,7 @@ const webAllowedSettings = <AppSettings<Object?>>{
   AppSettings.webNotificationSound,
   AppSettings.hideRoomsInSpaces,
   AppSettings.showThumbnailsInTimeline,
+  AppSettings.showTopicBarInThread,
   AppSettings.doubleTapToReact,
   AppSettings.doubleTapReaction,
 };

@@ -162,6 +162,7 @@ void main() {
   });
 
   testWidgets('the open thread is never hidden from the bar', (tester) async {
+    await AppSettings.showTopicBarInThread.setItem(true);
     await open(tester);
     await hide(tester, b);
     final controller = tester.state<ChatController>(

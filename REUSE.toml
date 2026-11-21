@@ -9,6 +9,9 @@ version = 1
 path = [
     ".mailmap",
     ".fvmrc",
+    ".claude/**",
+    "CLAUDE.md",
+    "graphify-out/**",
     "pubspec.lock",
     "*.json",
     ".vscode/**",

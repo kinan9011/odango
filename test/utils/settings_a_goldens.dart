@@ -238,7 +238,7 @@ final settingsAScreens = <SettingsAScreen>[
   SettingsAScreen(
     name: 'double_tap_sheet',
     path: '/settings/chat',
-    height: 1200,
+    height: 1300,
     arrange: (api, client) {},
     act: (tester, harness) async {
       await AppSettings.doubleTapToReact.setItem(true);
