@@ -18,6 +18,7 @@ import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/odango_flows.dart';
 import 'flows/privacy_topics_flows.dart';
+import 'flows/room_flows.dart';
 import 'flows/scheduling_flows.dart';
 import 'flows/search_flows.dart';
 import 'flows/settings_flows.dart';
@@ -58,6 +59,10 @@ void main() {
     testWidgets('Search encrypted chats', searchEncryptedFlow);
     testWidgets('Search unencrypted chats', searchServerFlow);
     testWidgets('Search index wiped on logout', searchWipeFlow);
+    testWidgets('Chat details', chatDetailsFlow);
+    testWidgets('Room access', roomAccessFlow);
+    testWidgets('Room permissions', roomPermissionsFlow);
+    testWidgets('Invite selection', inviteSelectionFlow);
     testWidgets('Space community', communityFlow);
     testWidgets('Settings appearance', settingsAppearanceFlow);
     testWidgets('Settings chat', settingsChatFlow);

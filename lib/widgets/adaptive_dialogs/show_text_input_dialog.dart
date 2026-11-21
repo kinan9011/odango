@@ -27,7 +27,7 @@ Future<String?> showTextInputDialog({
   bool obscureText = false,
   bool isDestructive = false,
   int? minLines,
-  int? maxLines,
+  int? maxLines = 1,
   String? Function(String input)? validator,
   TextInputType? keyboardType,
   int? maxLength,

@@ -184,6 +184,7 @@ class SettingsToggleRow extends StatelessWidget {
       toggled: value,
       enabled: enabled,
       label: title,
+      hint: subtitle,
       excludeSemantics: true,
       onTap: toggle,
       customSemanticsActions: onTapRow == null || rowHint == null

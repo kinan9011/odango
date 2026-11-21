@@ -46,10 +46,10 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
       room.getState(EventTypes.RoomPowerLevels)!.content,
     );
     if (category != null) {
-      if (!content.containsKey(category)) {
-        content[category] = <String, dynamic>{};
-      }
-      content[category][key] = newLevel;
+      content[category] = {
+        ...(content[category] as Map<String, dynamic>? ?? {}),
+        key: newLevel,
+      };
     } else {
       content[key] = newLevel;
     }

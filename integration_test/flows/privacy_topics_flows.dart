@@ -55,7 +55,11 @@ extension on FluffyChatTester {
     await waitFor(row);
     if (tester.widget<SettingsToggleRow>(row).value == wanted) return;
     await tapOn(row);
-    expect(tester.widget<SettingsToggleRow>(row).value, wanted, reason: title);
+    await _untilTrue(
+      () async => tester.widget<SettingsToggleRow>(row).value == wanted,
+      timeout: const Duration(seconds: 15),
+      reason: 'the $title switch shows $wanted',
+    );
   }
 
   Future<({SynapseUser alice, SynapseUser bob, String roomId})> _openRoom(

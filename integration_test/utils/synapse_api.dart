@@ -177,14 +177,30 @@ class SynapseUser {
   }
 
   /// Content of a state event of the room, or null when there is none.
-  Future<Map<String, Object?>?> stateContent(String roomId, String type) async {
+  Future<Map<String, Object?>?> stateContent(
+    String roomId,
+    String type, {
+    String stateKey = '',
+  }) async {
     final json = await _request(
       'GET',
-      '/rooms/${Uri.encodeComponent(roomId)}/state/$type/',
+      '/rooms/${Uri.encodeComponent(roomId)}/state/$type/${Uri.encodeComponent(stateKey)}',
       token: _token,
       allow404: true,
     );
     return json == null ? null : Map<String, Object?>.from(json as Map);
+  }
+
+  /// The id of the joined room that has [name], or null.
+  Future<String?> roomIdNamed(String name) async {
+    final joined =
+        await _request('GET', '/joined_rooms', token: _token)
+            as Map<String, Object?>;
+    for (final id in joined['joined_rooms']! as List) {
+      final content = await stateContent(id as String, 'm.room.name');
+      if (content?['name'] == name) return id;
+    }
+    return null;
   }
 
   /// Content of the newest event of [type] (optionally of [senderId]) as the

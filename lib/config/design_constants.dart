@@ -263,6 +263,67 @@ abstract class AppMotion {
   static const double shakeDamping = .5;
   static const Duration buttonSwap = Duration(milliseconds: 150);
   static const Duration saveBar = Duration(milliseconds: 250);
+  static const Duration profileList = Duration(milliseconds: 320);
+  static const Duration memberList = Duration(milliseconds: 420);
+  static const Duration tabIndicator = Duration(milliseconds: 350);
+  static const Duration tabTap = Duration(milliseconds: 250);
+  static const Duration tabSwipeMin = Duration(milliseconds: 150);
+  static const Duration tabSwipeMax = Duration(milliseconds: 600);
+  static const Duration avatarSwap = Duration(milliseconds: 180);
+  static const Duration selectToggle = Duration(milliseconds: 180);
+  static const double selectedAvatarScale = .82;
+  static const Duration chipEnter = Duration(milliseconds: 150);
+  static const Duration chipsHeight = Duration(milliseconds: 350);
+  static const Curve tabSwipeCurve = PolyOutCurve();
+  static const Duration radioToggle = Duration(milliseconds: 200);
+}
+
+abstract class AppProfile {
+  static const double barHeight = 64;
+  static const double expandedExtra = 176;
+  static const double avatarExpanded = AppDialog.profileAvatar;
+  static const double avatarCollapsed = 42;
+  static const double nameExpanded = 24;
+  static const double nameCollapsed = 22;
+  static const double statusExpanded = 14;
+  static const double statusCollapsed = 12.5;
+  static const double hairlineFraction = .1;
+  static const double editBadge = 36;
+  static const double tileRadius = 14;
+  static const double tileGap = 8;
+  static const double tabStripHeight = 48;
+  static const double tabGap = 18;
+  static const double tabSidePadding = 16;
+  static const double indicatorHeight = 3;
+  static const int mediaColumns = 3;
+  static const double mediaGap = 2;
+  static const int feedCap = 500;
+  static const int feedPage = 100;
+  static const int topicCap = 4000;
+  static const int nameCap = 100;
+  static const int detailsMembers = 10;
+  static const double flingVelocity = 700;
+  static const double swipeFraction = 1 / 3;
+}
+
+abstract class AppMembers {
+  static const double rowHeight = 62;
+  static const double avatar = 44;
+  static const double dividerInset = 70;
+  static const double filterHeight = 38;
+  static const double filterRadius = 19;
+  static const double filterBarRadius = 24;
+  static const double filterBarPadding = 4;
+  static const double chipHeight = 32;
+  static const double chipAvatar = 32;
+  static const int maxSelected = 50;
+  static const int animateUpTo = 12;
+  static const int permissionRowsCap = 200;
+  static const int devicesCap = 100;
+}
+
+abstract class AppEncryption {
+  static const int userRowsCap = 500;
 }
 
 abstract class AppTypography {

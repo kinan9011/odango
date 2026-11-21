@@ -23,6 +23,7 @@ class SettingsScaffold extends StatelessWidget {
   final VoidCallback? onBack;
   final int? itemCount;
   final IndexedWidgetBuilder? itemBuilder;
+  final List<Widget>? slivers;
 
   static const _padding = EdgeInsetsDirectional.fromSTEB(
     AppSettingsLayout.sideMargin,
@@ -41,7 +42,21 @@ class SettingsScaffold extends StatelessWidget {
     this.onBack,
     super.key,
   }) : itemCount = null,
-       itemBuilder = null;
+       itemBuilder = null,
+       slivers = null;
+
+  const SettingsScaffold.slivers({
+    required this.title,
+    required List<Widget> this.slivers,
+    this.subtitle,
+    this.bottom,
+    this.actions,
+    this.onBack,
+    super.key,
+  }) : children = const [],
+       itemCount = null,
+       itemBuilder = null,
+       largeTitle = false;
 
   const SettingsScaffold.builder({
     required this.title,
@@ -53,6 +68,7 @@ class SettingsScaffold extends StatelessWidget {
     super.key,
   }) : children = const [],
        bottom = null,
+       slivers = null,
        largeTitle = false;
 
   @override
@@ -61,7 +77,10 @@ class SettingsScaffold extends StatelessWidget {
     final columnMode = FluffyThemes.isColumnMode(context);
     final subtitle = this.subtitle;
     final itemBuilder = this.itemBuilder;
-    final bottom = this.bottom;
+    final slivers = this.slivers;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final bottom = keyboard ? null : this.bottom;
+    final inList = keyboard ? this.bottom : null;
     final canPop = Navigator.of(context).canPop();
     final hasBack = onBack != null || (!columnMode && canPop);
     return Scaffold(
@@ -73,44 +92,7 @@ class SettingsScaffold extends StatelessWidget {
         centerTitle: false,
         toolbarHeight: 64,
         titleSpacing: !hasBack ? AppSpacing.xxxl : 0,
-        leading: !hasBack
-            ? null
-            : Padding(
-                padding: const EdgeInsetsDirectional.only(start: 10),
-                child: Center(
-                  child: Semantics(
-                    button: true,
-                    label: MaterialLocalizations.of(context).backButtonTooltip,
-                    excludeSemantics: true,
-                    child: Tooltip(
-                      message: MaterialLocalizations.of(
-                        context,
-                      ).backButtonTooltip,
-                      child: InkResponse(
-                        key: backKey,
-                        onTap: onBack ?? () => Navigator.of(context).maybePop(),
-                        radius: 24,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: tokens.surf2,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 23,
-                            color: tokens.fg,
-                            textDirection: Directionality.of(context),
-                            semanticLabel: null,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+        leading: !hasBack ? null : SettingsBackButton(onBack: onBack),
         leadingWidth: !hasBack ? 0 : 64,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,8 +129,26 @@ class SettingsScaffold extends StatelessWidget {
                   constraints: const BoxConstraints(
                     maxWidth: AppSettingsLayout.maxWidth,
                   ),
-                  child: itemBuilder == null
-                      ? ListView(padding: _padding, children: children)
+                  child: slivers != null
+                      ? CustomScrollView(
+                          slivers: [
+                            SliverPadding(
+                              padding: _padding,
+                              sliver: SliverMainAxisGroup(
+                                slivers: [
+                                  ...slivers,
+                                  if (inList != null)
+                                    SliverToBoxAdapter(child: inList),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : itemBuilder == null
+                      ? ListView(
+                          padding: _padding,
+                          children: [...children, ?inList],
+                        )
                       : ListView.builder(
                           padding: _padding,
                           itemCount: itemCount,
@@ -159,6 +159,52 @@ class SettingsScaffold extends StatelessWidget {
             ),
             ?bottom,
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsBackButton extends StatelessWidget {
+  final VoidCallback? onBack;
+
+  const SettingsBackButton({this.onBack, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    final tooltip = MaterialLocalizations.of(context).backButtonTooltip;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 10),
+      child: Center(
+        child: Semantics(
+          button: true,
+          label: tooltip,
+          excludeSemantics: true,
+          child: Tooltip(
+            message: tooltip,
+            child: InkResponse(
+              key: SettingsScaffold.backKey,
+              onTap: onBack ?? () => Navigator.of(context).maybePop(),
+              radius: 24,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: tokens.surf2,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 23,
+                  color: tokens.fg,
+                  textDirection: Directionality.of(context),
+                  semanticLabel: null,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

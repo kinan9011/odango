@@ -48,6 +48,9 @@ class RecordingApi extends FakeMatrixApi {
   /// GET paths (by their end) that the server does not know: 404.
   final notFound = <String>{};
 
+  /// GET paths (by their end) that the server refuses: 403.
+  final forbidden = <String>{};
+
   /// Writes to these paths need user-interactive auth: a request without an
   /// `auth` member gets the 401 flow, one with it succeeds.
   final uiaPaths = <String>{};
@@ -63,7 +66,7 @@ class RecordingApi extends FakeMatrixApi {
   Object? Function(Uri url)? getResponder;
 
   static final _accept = RegExp(
-    r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads|/account_data/',
+    r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads|/account_data/|/invite',
   );
 
   void clear() => log.clear();
@@ -125,6 +128,16 @@ class RecordingApi extends FakeMatrixApi {
       return StreamedResponse(
         Stream.value(utf8.encode(jsonEncode(threads))),
         200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (request.method == 'GET' &&
+        forbidden.any((end) => request.url.path.endsWith(end))) {
+      return StreamedResponse(
+        Stream.value(
+          utf8.encode('{"errcode":"M_FORBIDDEN","error":"Forbidden"}'),
+        ),
+        403,
         headers: {'content-type': 'application/json'},
       );
     }

@@ -257,6 +257,32 @@ void main() {
     );
   });
 
+  testWidgets('DialogTextField is one line unless a caller asks (R-4)', (
+    tester,
+  ) async {
+    await pumpGoldenWidget(tester, const Center(child: DialogTextField()));
+    expect(tester.widget<TextField>(find.byType(TextField)).maxLines, 1);
+    await pumpGoldenWidget(
+      tester,
+      const Center(child: DialogTextField(minLines: 2, maxLines: 4)),
+    );
+    expect(tester.widget<TextField>(find.byType(TextField)).maxLines, 4);
+  });
+
+  testWidgets('the text input dialog is one line by default (R-4)', (
+    tester,
+  ) async {
+    final context = await _host(tester);
+    unawaited(showTextInputDialog(context: context, title: 'Name'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byType(TextField)).maxLines, 1);
+    await tester.enterText(find.byType(TextField), 'a\nb');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'ab',
+    );
+  });
+
   testWidgets('the text input dialog disposes its controller (M1377)', (
     tester,
   ) async {

@@ -5221,5 +5221,91 @@
                 "type": "int"
             }
         }
+    },
+    "chatDetailsMembers": "Members",
+    "@chatDetailsMembers": {
+        "type": "String",
+        "description": "Tab of the chat details page that lists the people in the chat.",
+        "placeholders": {}
+    },
+    "encryptedChat": "Encrypted",
+    "@encryptedChat": {
+        "type": "String",
+        "description": "Shown in the chat details when messages in this chat are end-to-end encrypted.",
+        "placeholders": {}
+    },
+    "encryptedAllMembersVerified": "Encrypted \u00b7 all members verified",
+    "@encryptedAllMembersVerified": {
+        "type": "String",
+        "description": "Shown in the chat details only when every person in the chat has been verified.",
+        "placeholders": {}
+    },
+    "chatDetailsSessions": "{count, plural, =1{1 session} other{{count} sessions}}",
+    "@chatDetailsSessions": {
+        "type": "String",
+        "description": "How many sessions (devices) a person is signed in on, in the chat details of a direct chat.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "deleteAddressWarning": "People will not be able to use this address to find the chat any more.",
+    "@deleteAddressWarning": {
+        "type": "String",
+        "description": "Shown before a chat address is deleted.",
+        "placeholders": {}
+    },
+    "publicChatWarning": "Anyone will be able to find this chat and join it.",
+    "@publicChatWarning": {
+        "type": "String",
+        "description": "Shown before a chat is opened for everyone to join.",
+        "placeholders": {}
+    },
+    "worldReadableWarning": "Anyone will be able to read the messages of this chat, even without joining it.",
+    "@worldReadableWarning": {
+        "type": "String",
+        "description": "Shown before the history of a chat is made readable for everyone.",
+        "placeholders": {}
+    },
+    "inviteSelectedCount": "{count, plural, =0{Invite} =1{Invite 1 person} other{Invite {count} people}}",
+    "@inviteSelectedCount": {
+        "type": "String",
+        "description": "Button that invites everyone picked in the invite list.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "invitedCountToGroup": "{count, plural, =1{1 contact has been invited} other{{count} contacts have been invited}}",
+    "@invitedCountToGroup": {
+        "type": "String",
+        "description": "Shown after several people were invited to a chat.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "removeSelected": "Remove {name}",
+    "@removeSelected": {
+        "type": "String",
+        "description": "Label of a chip that takes a person off the list of people to invite.",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "selectionLimitReached": "You can invite up to {max} people at once.",
+    "@selectionLimitReached": {
+        "type": "String",
+        "description": "Shown when no more people can be picked in the invite list.",
+        "placeholders": {
+            "max": {
+                "type": "int"
+            }
+        }
     }
 }

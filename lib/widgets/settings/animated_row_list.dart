@@ -35,6 +35,20 @@ class RowListMotion {
     sequential: false,
   );
 
+  static const members = RowListMotion(
+    fade: AppMotion.memberList,
+    move: AppMotion.memberList,
+    curve: AppMotion.easeOutQuint,
+    sequential: false,
+  );
+
+  static const profile = RowListMotion(
+    fade: AppMotion.profileList,
+    move: AppMotion.profileList,
+    curve: AppMotion.easeOutQuint,
+    sequential: false,
+  );
+
   Duration get total => sequential ? fade + move : move;
 
   double get _split => fade.inMicroseconds / total.inMicroseconds;
@@ -152,24 +166,12 @@ class _AnimatedRowListState<T> extends State<AnimatedRowList<T>> {
     Animation<double> animation,
     Widget child, {
     required bool entering,
-  }) {
-    final elapsed = entering ? animation : ReverseAnimation(animation);
-    final fade = CurvedAnimation(
-      parent: elapsed,
-      curve: widget.motion.fadeInterval(entering: entering),
-    );
-    final size = CurvedAnimation(
-      parent: elapsed,
-      curve: widget.motion.sizeInterval(entering: entering),
-    );
-    final fadeValue = entering ? fade : ReverseAnimation(fade);
-    final sizeValue = entering ? size : ReverseAnimation(size);
-    return SizeTransition(
-      sizeFactor: sizeValue,
-      alignment: Alignment.topCenter,
-      child: FadeTransition(opacity: fadeValue, child: child),
-    );
-  }
+  }) => RowListTransition(
+    motion: widget.motion,
+    animation: animation,
+    entering: entering,
+    child: child,
+  );
 
   @override
   Widget build(BuildContext context) => AnimatedList(
@@ -188,4 +190,39 @@ class _AnimatedRowListState<T> extends State<AnimatedRowList<T>> {
       );
     },
   );
+}
+
+class RowListTransition extends StatelessWidget {
+  final RowListMotion motion;
+  final Animation<double> animation;
+  final bool entering;
+  final Widget child;
+
+  const RowListTransition({
+    required this.motion,
+    required this.animation,
+    required this.entering,
+    required this.child,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final elapsed = entering ? animation : ReverseAnimation(animation);
+    final fade = CurvedAnimation(
+      parent: elapsed,
+      curve: motion.fadeInterval(entering: entering),
+    );
+    final size = CurvedAnimation(
+      parent: elapsed,
+      curve: motion.sizeInterval(entering: entering),
+    );
+    final fadeValue = entering ? fade : ReverseAnimation(fade);
+    final sizeValue = entering ? size : ReverseAnimation(size);
+    return SizeTransition(
+      sizeFactor: sizeValue,
+      alignment: Alignment.topCenter,
+      child: FadeTransition(opacity: fadeValue, child: child),
+    );
+  }
 }

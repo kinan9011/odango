@@ -74,6 +74,21 @@ extension on FluffyChatTester {
     await waitForGone('Change wallpaper');
   }
 
+  /// The overflow menu shows the mute state the room had when it opened: after
+  /// a tap on Mute or Unmute the push rule needs a round trip, so reopen the
+  /// menu until it shows [label].
+  Future<void> _overflowShows(String label, {required String reason}) async {
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    await _openOverflow();
+    while (find.text(label).evaluate().isEmpty &&
+        DateTime.now().isBefore(end)) {
+      await _closeOverflow();
+      await tester.pump(const Duration(seconds: 1));
+      await _openOverflow();
+    }
+    expect(find.text(label), findsOneWidget, reason: reason);
+  }
+
   Future<void> _conversationShell() async {
     await ensureLoggedIn();
     await ensureGroupChatCreated();
@@ -107,11 +122,9 @@ extension on FluffyChatTester {
 
     await _openOverflow();
     await tapOn('Mute');
-    await _openOverflow();
-    expect(find.text('Unmute'), findsOneWidget, reason: 'muted now');
+    await _overflowShows('Unmute', reason: 'muted now');
     await tapOn('Unmute');
-    await _openOverflow();
-    expect(find.text('Mute'), findsOneWidget, reason: 'unmuted again');
+    await _overflowShows('Mute', reason: 'unmuted again');
     await _closeOverflow();
 
     await _openOverflow();

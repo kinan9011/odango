@@ -5,200 +5,202 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/invitation_selection/invitation_selection.dart';
-import 'package:odango/widgets/avatar.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
+import 'package:odango/pages/invitation_selection/invite_row.dart';
+import 'package:odango/pages/invitation_selection/selection_chips.dart';
+import 'package:odango/utils/invite_selection.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/matrix.dart';
-
-import '../../widgets/adaptive_dialogs/user_dialog.dart';
+import 'package:odango/widgets/settings/settings_field_row.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
 
 class InvitationSelectionView extends StatelessWidget {
   final InvitationSelectionController controller;
 
   const InvitationSelectionView(this.controller, {super.key});
 
+  List<InviteCandidate> _found() => [
+    for (final profile in controller.foundProfiles)
+      InviteCandidate(
+        id: profile.userId,
+        displayName:
+            profile.displayName ?? profile.userId.localpart ?? profile.userId,
+        avatarUrl: profile.avatarUrl,
+      ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
     final room = Matrix.of(
       context,
     ).client.getRoomById(controller.widget.roomId);
     if (room == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(L10n.of(context).oopsSomethingWentWrong)),
-        body: Center(
-          child: Text(L10n.of(context).youAreNoLongerParticipatingInThisChat),
-        ),
+      return SettingsScaffold(
+        title: l10n.oopsSomethingWentWrong,
+        children: [
+          SettingsNotice(text: l10n.youAreNoLongerParticipatingInThisChat),
+        ],
       );
     }
-
-    final groupName = room.name.isEmpty ? L10n.of(context).group : room.name;
-    final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: const Center(child: BackButton()),
-        titleSpacing: 0,
-        title: Text(L10n.of(context).inviteContact),
-      ),
-      body: MaxWidthBody(
-        innerPadding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
+    final groupName = room.name.isEmpty ? l10n.group : room.name;
+    return ListenableBuilder(
+      listenable: controller.selection,
+      builder: (context, _) => SettingsScaffold.slivers(
+        title: l10n.inviteContact,
+        bottom: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSettingsLayout.sideMargin,
+            AppSpacing.s,
+            AppSettingsLayout.sideMargin,
+            AppSpacing.xl,
+          ),
+          child: SettingsPillButton(
+            key: const ValueKey('invite_selected_button'),
+            label: l10n.inviteSelectedCount(controller.selection.length),
+            onPressed: controller.selection.length == 0
+                ? null
+                : controller.inviteSelected,
+          ),
+        ),
+        slivers: [
+          SliverToBoxAdapter(
+            child: SettingsFieldRow(
+              child: DialogTextField(
+                key: const ValueKey('invite_search'),
+                hintText: l10n.inviteContactToGroup(groupName),
+                autocorrect: false,
                 textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: theme.colorScheme.secondaryContainer,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  hintStyle: TextStyle(
-                    color: theme.colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.normal,
-                  ),
-                  hintText: L10n.of(context).inviteContactToGroup(groupName),
-                  prefixIcon: controller.loading
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 10.0,
-                            horizontal: 12,
+                prefixIcon: controller.loading
+                    ? const Padding(
+                        padding: EdgeInsets.all(AppSpacing.l),
+                        child: SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator.adaptive(
+                            strokeWidth: 2,
                           ),
-                          child: SizedBox.square(
-                            dimension: 24,
-                            child: CircularProgressIndicator.adaptive(
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        )
-                      : const Icon(Icons.search_outlined),
-                ),
+                        ),
+                      )
+                    : const Icon(Icons.search_rounded),
                 onChanged: controller.searchUserWithCoolDown,
               ),
             ),
-            StreamBuilder<Object>(
-              stream: room.client.onRoomState.stream.where(
-                (update) => update.roomId == room.id,
+          ),
+          SliverToBoxAdapter(
+            child: SelectionChips(selection: controller.selection),
+          ),
+          if (controller.selection.atCap)
+            SliverToBoxAdapter(
+              child: SettingsNotice(
+                text: l10n.selectionLimitReached(AppMembers.maxSelected),
               ),
-              builder: (context, snapshot) {
-                final participants = room
-                    .getParticipants()
-                    .map((user) => user.id)
-                    .toSet();
-                return controller.foundProfiles.isNotEmpty
-                    ? ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: controller.foundProfiles.length,
-                        itemBuilder: (BuildContext context, int i) =>
-                            _InviteContactListTile(
-                              profile: controller.foundProfiles[i],
-                              isMember: participants.contains(
-                                controller.foundProfiles[i].userId,
-                              ),
-                              onTap: () => controller.inviteAction(
-                                context,
-                                controller.foundProfiles[i].userId,
-                                controller.foundProfiles[i].displayName ??
-                                    controller
-                                        .foundProfiles[i]
-                                        .userId
-                                        .localpart ??
-                                    L10n.of(context).user,
-                              ),
-                            ),
-                      )
-                    : FutureBuilder<List<User>>(
-                        future: controller.getContacts(context),
-                        builder: (BuildContext context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator.adaptive(
-                                strokeWidth: 2,
-                              ),
-                            );
-                          }
-                          final contacts = snapshot.data!;
-                          return ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: contacts.length,
-                            itemBuilder: (BuildContext context, int i) =>
-                                _InviteContactListTile(
-                                  user: contacts[i],
-                                  profile: Profile(
-                                    avatarUrl: contacts[i].avatarUrl,
-                                    displayName:
-                                        contacts[i].displayName ??
-                                        contacts[i].id.localpart ??
-                                        L10n.of(context).user,
-                                    userId: contacts[i].id,
-                                  ),
-                                  isMember: participants.contains(
-                                    contacts[i].id,
-                                  ),
-                                  onTap: () => controller.inviteAction(
-                                    context,
-                                    contacts[i].id,
-                                    contacts[i].displayName ??
-                                        contacts[i].id.localpart ??
-                                        L10n.of(context).user,
-                                  ),
-                                ),
-                          );
-                        },
-                      );
-              },
             ),
-          ],
-        ),
+          StreamBuilder<Object>(
+            stream: room.client.onRoomState.stream.where(
+              (update) => update.roomId == room.id,
+            ),
+            builder: (context, _) {
+              final members = {
+                ...controller.loadedMembers,
+                for (final user in room.getParticipants())
+                  user.id: user.membership,
+              };
+              if (controller.foundProfiles.isNotEmpty) {
+                return _CandidateList(
+                  candidates: _found(),
+                  members: members,
+                  selection: controller.selection,
+                );
+              }
+              return FutureBuilder<List<User>>(
+                future: controller.contacts,
+                builder: (context, snapshot) {
+                  final contacts = snapshot.data;
+                  if (contacts == null) {
+                    return const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(AppSpacing.xxl),
+                        child: Center(
+                          child: CircularProgressIndicator.adaptive(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return _CandidateList(
+                    candidates: [
+                      for (final user in contacts)
+                        InviteCandidate(
+                          id: user.id,
+                          displayName:
+                              user.displayName ??
+                              user.id.localpart ??
+                              l10n.user,
+                          avatarUrl: user.avatarUrl,
+                        ),
+                    ],
+                    members: members,
+                    selection: controller.selection,
+                  );
+                },
+              );
+            },
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+        ],
       ),
     );
   }
 }
 
-class _InviteContactListTile extends StatelessWidget {
-  final Profile profile;
-  final User? user;
-  final bool isMember;
-  final void Function() onTap;
+class _CandidateList extends StatelessWidget {
+  final List<InviteCandidate> candidates;
+  final Map<String, Membership> members;
+  final InviteSelection selection;
 
-  const _InviteContactListTile({
-    required this.profile,
-    this.user,
-    required this.isMember,
-    required this.onTap,
+  const _CandidateList({
+    required this.candidates,
+    required this.members,
+    required this.selection,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = L10n.of(context);
-
-    return ListTile(
-      leading: Avatar(
-        mxContent: profile.avatarUrl,
-        name: profile.displayName,
-        presenceUserId: profile.userId,
-        onTap: () => UserDialog.show(context: context, profile: profile),
-      ),
-      title: Text(
-        profile.displayName ?? profile.userId.localpart ?? l10n.user,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(
-        profile.userId,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: theme.colorScheme.secondary),
-      ),
-      trailing: TextButton(
-        onPressed: isMember ? null : onTap,
-        child: Text(isMember ? l10n.participant : l10n.invite),
-      ),
+    if (candidates.isEmpty) {
+      return SliverToBoxAdapter(child: SettingsNotice(text: l10n.nothingFound));
+    }
+    final shown = candidates.take(AppMembers.permissionRowsCap).toList();
+    final cut = candidates.length - shown.length;
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverList.builder(
+          itemCount: shown.length,
+          itemBuilder: (context, i) {
+            final candidate = shown[i];
+            final picked = selection.contains(candidate.id);
+            return InviteRow(
+              key: InviteRow.rowKey(candidate.id),
+              candidate: candidate,
+              membership: members[candidate.id],
+              selected: picked,
+              enabled: picked || !selection.atCap,
+              first: i == 0,
+              last: i == shown.length - 1,
+              onTap: () => selection.toggle(candidate),
+            );
+          },
+        ),
+        if (cut > 0)
+          SliverToBoxAdapter(
+            child: SettingsNotice(text: l10n.entriesNotShown(cut)),
+          ),
+      ],
     );
   }
 }

@@ -26,6 +26,7 @@ class DialogTextField extends StatelessWidget {
   final bool readOnly;
   final bool autofocus;
   final TextStyle? textStyle;
+  final Widget? prefixIcon;
   final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -41,7 +42,7 @@ class DialogTextField extends StatelessWidget {
     this.prefixText,
     this.suffixText,
     this.minLines,
-    this.maxLines,
+    this.maxLines = 1,
     this.keyboardType,
     this.maxLength,
     this.controller,
@@ -52,6 +53,7 @@ class DialogTextField extends StatelessWidget {
     this.readOnly = false,
     this.autofocus = false,
     this.textStyle,
+    this.prefixIcon,
     this.suffixIcon,
     this.onChanged,
     this.onSubmitted,
@@ -110,6 +112,7 @@ class DialogTextField extends StatelessWidget {
         labelText: labelText,
         prefixText: prefixText,
         suffixText: suffixText,
+        prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         counterText: counterText,
       ),

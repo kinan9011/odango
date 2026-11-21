@@ -781,6 +781,7 @@ class ChatController extends State<ChatPageWithRoom>
         _showScrollUpMaterialBanner(readMarkerEventId);
       }
 
+      if (!mounted) return;
       // Mark room as read on first visit if requirements are fulfilled
       setReadMarker();
 
@@ -788,7 +789,9 @@ class ChatController extends State<ChatPageWithRoom>
       _scheduleRetention();
       _loadTopics();
     } catch (e, s) {
-      ErrorReporter(context, 'Unable to load timeline').onErrorCallback(e, s);
+      if (mounted) {
+        ErrorReporter(context, 'Unable to load timeline').onErrorCallback(e, s);
+      }
       rethrow;
     }
   }

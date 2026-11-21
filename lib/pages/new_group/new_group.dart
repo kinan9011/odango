@@ -49,8 +49,10 @@ class NewGroupController extends State<NewGroup> {
 
   CreateGroupType? _createGroupType;
 
-  void setCreateGroupType(Set<CreateGroupType> b) =>
-      setState(() => _createGroupType = b.single);
+  void setCreateGroupType(CreateGroupType type) =>
+      setState(() => _createGroupType = type);
+
+  int attempt = 0;
 
   void setPublicGroup(bool b) =>
       setState(() => publicGroup = groupCanBeFound = b);
@@ -64,6 +66,7 @@ class NewGroupController extends State<NewGroup> {
       allowMultiple: false,
     );
     final bytes = await photo.singleOrNull?.readAsBytes();
+    if (!mounted) return;
 
     setState(() {
       avatarUrl = null;
@@ -151,7 +154,10 @@ class NewGroupController extends State<NewGroup> {
     try {
       if (nameController.text.trim().isEmpty &&
           createGroupType == CreateGroupType.space) {
-        setState(() => error = L10n.of(context).pleaseFillOut);
+        setState(() {
+          error = L10n.of(context).pleaseFillOut;
+          attempt++;
+        });
         return;
       }
 
@@ -173,9 +179,11 @@ class NewGroupController extends State<NewGroup> {
       }
     } catch (e, s) {
       sdk.Logs().d('Unable to create group', e, s);
+      if (!mounted) return;
       setState(() {
         error = e;
         loading = false;
+        attempt++;
       });
     }
   }

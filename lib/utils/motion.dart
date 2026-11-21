@@ -51,3 +51,13 @@ class DecelerateCurve extends Curve {
   double transformInternal(double t) =>
       1 - math.pow(1 - t, 2 * factor).toDouble();
 }
+
+// Telegram's SharedMediaLayout page interpolator: (t - 1)^5 + 1.
+class PolyOutCurve extends Curve {
+  final int power;
+
+  const PolyOutCurve([this.power = 5]) : assert(power % 2 == 1);
+
+  @override
+  double transformInternal(double t) => 1 + math.pow(t - 1, power).toDouble();
+}

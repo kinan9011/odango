@@ -67,7 +67,7 @@ extension on FluffyChatTester {
     await tapOn(const Key('accounts_and_settings_buttons'));
     await tapOn(find.widgetWithText(PopupMenuItem<Object>, 'New space'));
     await enterText(TextField, _spaceName);
-    await tapOn(find.widgetWithText(ElevatedButton, 'New space'));
+    await tapOn(find.byKey(const ValueKey('create_group_button')));
     await waitFor(find.widgetWithText(InkWell, _spaceName));
     await waitFor(ChatFlows.groupChatName);
 
@@ -126,6 +126,7 @@ extension on FluffyChatTester {
     expect((stored as Map)['version'], 1);
     expect(folders.map((f) => (f as Map)['name']), [_folderName]);
 
+    await waitForGone(find.byKey(const ValueKey('save_folder')));
     await tapOn('Create folder');
     await enterText(find.byKey(const ValueKey('folder_name')), 'Home');
     await tapOn(find.byKey(const ValueKey('save_folder')));
