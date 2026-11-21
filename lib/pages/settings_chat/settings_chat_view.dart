@@ -82,6 +82,12 @@ class SettingsChatView extends StatelessWidget {
                 setting: AppSettings.hideRedactedEvents,
               ),
               AppSettingToggleRow(
+                icon: Icons.view_carousel_outlined,
+                title: l10n.showTopicBarInThread,
+                subtitle: l10n.showTopicBarInThreadDescription,
+                setting: AppSettings.showTopicBarInThread,
+              ),
+              AppSettingToggleRow(
                 icon: Icons.report_gmailerrorred_rounded,
                 title: l10n.hideInvalidOrUnknownMessageFormats,
                 setting: AppSettings.hideUnknownEvents,

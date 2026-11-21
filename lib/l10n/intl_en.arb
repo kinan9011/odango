@@ -919,6 +919,8 @@
     },
     "hideRedactedMessages": "Hide redacted messages",
     "hideRedactedMessagesBody": "If someone redacts a message, this message won't be visible in the chat anymore.",
+    "showTopicBarInThread": "Show topics bar inside threads",
+    "showTopicBarInThreadDescription": "Keep the row of topic chips visible while reading a thread.",
     "hideInvalidOrUnknownMessageFormats": "Hide invalid or unknown message formats",
     "block": "Block",
     "blockedUsers": "Blocked users",

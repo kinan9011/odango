@@ -44,6 +44,10 @@ enum AppSettings<T> {
   renderHtml<bool>('com.swovo.odango.renderHtml', true),
   fontSizeFactor<double>('com.swovo.odango.font_size_factor', 1.0),
   hideRedactedEvents<bool>('com.swovo.odango.hideRedactedEvents', false),
+  showTopicBarInThread<bool>(
+    'com.swovo.odango.show_topic_bar_in_thread',
+    false,
+  ),
   hideUnknownEvents<bool>('com.swovo.odango.hideUnknownEvents', true),
   autoplayImages<bool>('com.swovo.odango.autoplay_images', true),
   sendTypingNotifications<bool>(
