@@ -17,6 +17,16 @@ extension type FluffyChatTester(WidgetTester tester) {
     );
   }
 
+  /// A finder describes itself by walking the tree, which throws while an
+  /// element is leaving it.
+  String _describe(Object object) {
+    try {
+      return '$object';
+    } catch (_) {
+      return object.runtimeType.toString();
+    }
+  }
+
   Future<bool> isVisible(
     Object object, {
     Duration timeout = const Duration(seconds: 3),
@@ -35,7 +45,7 @@ extension type FluffyChatTester(WidgetTester tester) {
     Object object, {
     Duration timeout = const Duration(seconds: 60),
   }) async {
-    _print('👀 Waiting for "$object" (${timeout.inSeconds}s)');
+    _print('👀 Waiting for "${_describe(object)}" (${timeout.inSeconds}s)');
     final end = DateTime.now().add(timeout);
     while (object.toFinder().evaluate().isEmpty) {
       if (DateTime.now().isAfter(end)) {
@@ -49,7 +59,9 @@ extension type FluffyChatTester(WidgetTester tester) {
     Object object, {
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    _print('👀 Waiting for "$object" to disappear (${timeout.inSeconds}s)');
+    _print(
+      '👀 Waiting for "${_describe(object)}" to disappear (${timeout.inSeconds}s)',
+    );
     final end = DateTime.now().add(timeout);
     while (object.toFinder().evaluate().isNotEmpty) {
       if (DateTime.now().isAfter(end)) {
@@ -107,7 +119,7 @@ extension type FluffyChatTester(WidgetTester tester) {
     final finder = await _ensureVisible(object, index: index);
     await _clearOfOverlays(finder);
 
-    _print('👆 Tapping on "$object"');
+    _print('👆 Tapping on "${_describe(object)}"');
     await tester.tap(finder);
     if (pumpAndSettle) await tester.pumpAndSettle();
   }
@@ -120,7 +132,7 @@ extension type FluffyChatTester(WidgetTester tester) {
   Future<void> longPressOn(Object object, {int? index}) async {
     final finder = await _ensureVisible(object, index: index);
 
-    _print('👆 Long pressing on "$object"');
+    _print('👆 Long pressing on "${_describe(object)}"');
     final binding = tester.binding;
     binding.shouldPropagateDevicePointerEvents = true;
     try {
@@ -141,7 +153,7 @@ extension type FluffyChatTester(WidgetTester tester) {
   }) async {
     final finder = await _ensureVisible(object, index: index);
 
-    _print('⌨️ Enter "$text" into "$object"');
+    _print('⌨️ Enter "$text" into "${_describe(object)}"');
     await tester.enterText(finder, text);
     FocusManager.instance.primaryFocus?.unfocus();
     if (pumpAndSettle) await tester.pumpAndSettle();
@@ -152,7 +164,7 @@ extension type FluffyChatTester(WidgetTester tester) {
     int? index,
     Object? scrollable,
   }) async {
-    _print('📜 Scrolling to "$object"');
+    _print('📜 Scrolling to "${_describe(object)}"');
     await tester.scrollUntilVisible(
       object.toFinder(),
       500.0,
