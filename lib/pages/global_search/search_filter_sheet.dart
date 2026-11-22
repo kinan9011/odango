@@ -12,6 +12,7 @@ import 'package:odango/pages/global_search/search_result_widgets.dart';
 import 'package:odango/utils/adaptive_bottom_sheet.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/search/search_filter.dart';
 import 'package:odango/utils/search/search_kind.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -119,7 +120,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     final room = client.getRoomById(id);
     if (room == null) return id;
     return safeDisplayText(
-      room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+      room.safeLocalizedDisplayname(MatrixLocals(L10n.of(context))),
       maxGraphemes: 24,
     );
   }
@@ -390,7 +391,7 @@ class _RoomPickerDialogState extends State<_RoomPickerDialog> {
         .where((room) => room.membership == Membership.join && !room.isSpace)
         .where(
           (room) => room
-              .getLocalizedDisplayname(locals)
+              .safeLocalizedDisplayname(locals)
               .toLowerCase()
               .contains(needle),
         )
@@ -421,7 +422,7 @@ class _RoomPickerDialogState extends State<_RoomPickerDialog> {
                 itemBuilder: (context, i) {
                   final room = rooms[i];
                   final name = safeDisplayText(
-                    room.getLocalizedDisplayname(locals),
+                    room.safeLocalizedDisplayname(locals),
                   );
                   return ListTile(
                     leading: Avatar(

@@ -3,9 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter/services.dart' show TextInputFormatter;
 import 'package:material_ui/material_ui.dart';
-import 'package:odango/config/app_config.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 
 class DialogTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -17,14 +18,21 @@ class DialogTextField extends StatelessWidget {
   final String? suffixText;
   final String? errorText;
   final bool obscureText;
-  final bool isDestructive = false;
+  final bool password;
   final int? minLines;
   final int? maxLines;
   final TextInputType? keyboardType;
   final int? maxLength;
-  final bool autocorrect = true;
   final bool readOnly;
+  final bool autofocus;
   final TextStyle? textStyle;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool autocorrect;
 
   const DialogTextField({
     super.key,
@@ -34,87 +42,80 @@ class DialogTextField extends StatelessWidget {
     this.prefixText,
     this.suffixText,
     this.minLines,
-    this.maxLines,
+    this.maxLines = 1,
     this.keyboardType,
     this.maxLength,
     this.controller,
     this.counterText,
     this.errorText,
     this.obscureText = false,
+    this.password = false,
     this.readOnly = false,
+    this.autofocus = false,
     this.textStyle,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.onChanged,
+    this.onSubmitted,
+    this.textInputAction,
+    this.inputFormatters,
+    this.autocorrect = true,
   });
+
+  OutlineInputBorder _border(BorderSide side) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(AppDialog.fieldRadius),
+    borderSide: side,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final prefixText = this.prefixText;
-    final suffixText = this.suffixText;
-    final errorText = this.errorText;
-    final theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return TextField(
-          readOnly: readOnly,
-          controller: controller,
-          obscureText: obscureText,
-          minLines: minLines,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          keyboardType: keyboardType,
-          autocorrect: autocorrect,
-          style: textStyle,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-              borderSide: BorderSide(color: theme.dividerColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-              borderSide: BorderSide(color: theme.dividerColor),
-            ),
-            filled: true,
-            fillColor: theme.colorScheme.surfaceBright,
-            errorText: errorText,
-            hintText: hintText,
-            labelText: labelText,
-            prefixText: prefixText,
-            suffixText: suffixText,
-            counterText: counterText,
-          ),
-        );
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        final placeholder = labelText ?? hintText;
-        return Column(
-          children: [
-            SizedBox(
-              height: placeholder == null ? null : ((maxLines ?? 1) + 1) * 20,
-              child: CupertinoTextField(
-                controller: controller,
-                readOnly: readOnly,
-                obscureText: obscureText,
-                minLines: minLines,
-                maxLines: maxLines,
-                maxLength: maxLength,
-                keyboardType: keyboardType,
-                autocorrect: autocorrect,
-                style: textStyle,
-                prefix: prefixText != null ? Text(prefixText) : null,
-                suffix: suffixText != null ? Text(suffixText) : null,
-                placeholder: placeholder,
-              ),
-            ),
-            if (errorText != null)
-              Text(
-                errorText,
-                style: TextStyle(fontSize: 11, color: theme.colorScheme.error),
-                textAlign: TextAlign.start,
-              ),
-          ],
-        );
-    }
+    final tokens = AppTokens.of(context);
+    final secret = obscureText || password;
+    final focused = BorderSide(
+      color: tokens.acc,
+      width: AppDialog.fieldFocusWidth,
+    );
+    final invalid = BorderSide(
+      color: tokens.red,
+      width: AppDialog.fieldFocusWidth,
+    );
+    return TextField(
+      readOnly: readOnly,
+      controller: controller,
+      autofocus: autofocus,
+      obscureText: obscureText,
+      minLines: minLines,
+      maxLines: secret ? 1 : maxLines,
+      maxLength: maxLength,
+      keyboardType: password && !obscureText
+          ? TextInputType.visiblePassword
+          : keyboardType,
+      autocorrect: autocorrect && !secret,
+      enableSuggestions: !secret,
+      enableIMEPersonalizedLearning: !secret,
+      style: textStyle,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: textInputAction,
+      inputFormatters: inputFormatters,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: tokens.surf2,
+        border: _border(BorderSide.none),
+        enabledBorder: _border(BorderSide.none),
+        focusedBorder: _border(focused),
+        errorBorder: _border(invalid),
+        focusedErrorBorder: _border(invalid),
+        errorText: errorText,
+        errorStyle: TextStyle(color: tokens.fg),
+        hintText: hintText,
+        labelText: labelText,
+        prefixText: prefixText,
+        suffixText: suffixText,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        counterText: counterText,
+      ),
+    );
   }
 }

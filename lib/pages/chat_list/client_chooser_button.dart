@@ -9,7 +9,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart' hide Result;
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/status/status_sheet.dart';
-import 'package:odango/pages/support/support_dialog.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/matrix.dart';
 
@@ -94,16 +93,6 @@ class ClientChooserButton extends StatelessWidget {
             const Icon(Icons.settings_outlined),
             const SizedBox(width: 18),
             Text(L10n.of(context).settings),
-          ],
-        ),
-      ),
-      PopupMenuItem(
-        value: SettingsAction.support,
-        child: Row(
-          children: [
-            Icon(Icons.favorite, color: Colors.red),
-            const SizedBox(width: 18),
-            Text(L10n.of(context).supportOdango),
           ],
         ),
       ),
@@ -234,9 +223,6 @@ class ClientChooserButton extends StatelessWidget {
         case SettingsAction.invite:
           FluffyShare.shareInviteLink(context);
           break;
-        case SettingsAction.support:
-          showSupportDialog(context);
-          break;
         case SettingsAction.settings:
           context.go('/settings');
           break;
@@ -257,7 +243,6 @@ enum SettingsAction {
   newSpace,
   setStatus,
   invite,
-  support,
   settings,
   archive,
 }

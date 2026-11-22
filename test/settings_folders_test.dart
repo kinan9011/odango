@@ -3,18 +3,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/routes.dart';
+import 'package:odango/pages/settings_folders/folder_chat_picker.dart';
 import 'package:odango/utils/chat_list/folder_store.dart';
 import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
+import 'package:odango/widgets/app_sheet.dart';
 import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:odango/widgets/layouts/app_bottom_bar.dart';
 import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_check_row.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/space_fixtures.dart';
@@ -136,7 +144,7 @@ void main() {
     await settle(tester);
     expect(location(), '/settings/chat/folders/edit');
     await tester.enterText(find.byKey(const ValueKey('folder_name')), 'Work');
-    await tester.tap(find.widgetWithText(CheckboxListTile, 'Groups'));
+    await tester.tap(find.widgetWithText(SettingsCheckRow, 'Groups'));
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('save_folder')));
     await settle(tester);
@@ -162,20 +170,20 @@ void main() {
     });
     expect(puts(apiSecond), isEmpty);
     expect(location(), '/settings/chat/folders');
-    expect(find.widgetWithText(ListTile, 'Work'), findsOneWidget);
+    expect(find.widgetWithText(SettingsRow, 'Work'), findsOneWidget);
     await finish(tester);
   });
 
   testWidgets('a folder cannot be saved without a name', (tester) async {
     await pumpAt(tester, '/settings/chat/folders/edit');
     final save = find.byKey(const ValueKey('save_folder'));
-    expect(tester.widget<TextButton>(save).onPressed, isNull);
+    expect(tester.widget<SettingsPillButton>(save).onPressed, isNull);
     await tester.enterText(find.byKey(const ValueKey('folder_name')), ' ');
     await tester.pump();
-    expect(tester.widget<TextButton>(save).onPressed, isNull);
+    expect(tester.widget<SettingsPillButton>(save).onPressed, isNull);
     await tester.enterText(find.byKey(const ValueKey('folder_name')), 'A');
     await tester.pump();
-    expect(tester.widget<TextButton>(save).onPressed, isNotNull);
+    expect(tester.widget<SettingsPillButton>(save).onPressed, isNotNull);
     await finish(tester);
   });
 
@@ -290,7 +298,7 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<TextButton>(find.byKey(const ValueKey('save_folder')))
+          .widget<SettingsPillButton>(find.byKey(const ValueKey('save_folder')))
           .onPressed,
       isNull,
     );
@@ -307,7 +315,7 @@ void main() {
       folder('k1', 'Family', rooms: ['!foa:x', '!fob:x'], types: []),
     ]);
     await pumpAt(tester, '/settings/chat/folders');
-    expect(find.text('1 chats'), findsOneWidget);
+    expect(find.text('1 chat'), findsOneWidget);
     await finish(tester);
   });
 
@@ -315,10 +323,9 @@ void main() {
     withFolders(first, [for (var i = 0; i < 30; i++) folder('f$i', 'F$i')]);
     await pumpAt(tester, '/settings/chat/folders');
     expect(find.text('You can have up to 30 folders'), findsOneWidget);
-    final tile = tester.widget<ListTile>(
+    final tile = tester.widget<SettingsRow>(
       find.byKey(const ValueKey('create_folder')),
     );
-    expect(tile.enabled, isFalse);
     expect(tile.onTap, isNull);
     await finish(tester);
   });
@@ -594,5 +601,407 @@ void main() {
     expect(find.text('Family'), findsNothing);
     expect(find.byKey(const Key('chat_list_item_!foa:x')), findsOneWidget);
     await finish(tester);
+  });
+
+  group('reorder', () {
+    List<String> storedOrder(FakeMatrixApi api) {
+      final bodies = puts(api);
+      final body = jsonDecode(bodies.last! as String) as Map<String, Object?>;
+      return [
+        for (final f in body['folders']! as List) (f as Map)['id']! as String,
+      ];
+    }
+
+    void three() => withFolders(first, [
+      folder('k1', 'One'),
+      folder('k2', 'Two'),
+      folder('k3', 'Three'),
+    ]);
+
+    Future<void> dragHandle(WidgetTester tester, String id, double dy) async {
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(ValueKey('folder_handle_$id'))),
+      );
+      await gesture.moveBy(const Offset(0, 12));
+      await tester.pump(const Duration(milliseconds: 50));
+      for (var i = 0; i < 10; i++) {
+        await gesture.moveBy(Offset(0, dy / 10));
+        await tester.pump(const Duration(milliseconds: 40));
+      }
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.up();
+      await settle(tester);
+    }
+
+    testWidgets('every row has a handle while the document is editable', (
+      tester,
+    ) async {
+      three();
+      await pumpAt(tester, '/settings/chat/folders');
+      for (final id in ['k1', 'k2', 'k3']) {
+        expect(find.byKey(ValueKey('folder_handle_$id')), findsOneWidget);
+      }
+      expect(find.byType(ReorderableListView), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('a cut document has no handles', (tester) async {
+      first.accountData[FolderStore.accountDataType] = BasicEvent(
+        type: FolderStore.accountDataType,
+        content: {
+          'version': 1,
+          'folders': [
+            folder(
+              'k1',
+              'One',
+              rooms: [
+                for (var i = 0; i < 501; i++)
+                  '!${i.toString().padLeft(18, 'a')}:matrix.org',
+              ],
+            ),
+            folder('k2', 'Two'),
+          ],
+        },
+      );
+      await pumpAt(tester, '/settings/chat/folders');
+      expect(find.byKey(const ValueKey('folder_k1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('folder_handle_k1')), findsNothing);
+      expect(find.byType(ReorderableListView), findsNothing);
+      await finish(tester);
+    });
+
+    testWidgets('dragging a handle saves the new order once', (tester) async {
+      three();
+      FakeMatrixApi.currentApi = apiFirst;
+      FakeMatrixApi.calledEndpoints.clear();
+      await pumpAt(tester, '/settings/chat/folders');
+      await dragHandle(tester, 'k1', 150);
+      expect(puts(apiFirst), hasLength(1));
+      expect(storedOrder(apiFirst), ['k2', 'k3', 'k1']);
+      final tops = [
+        for (final id in ['k2', 'k3', 'k1'])
+          tester.getTopLeft(find.byKey(ValueKey('folder_$id'))).dy,
+      ];
+      expect(tops, [...tops]..sort());
+      await finish(tester);
+    });
+
+    testWidgets('a second move builds on the first', (tester) async {
+      three();
+      FakeMatrixApi.currentApi = apiFirst;
+      FakeMatrixApi.calledEndpoints.clear();
+      await pumpAt(tester, '/settings/chat/folders');
+      await dragHandle(tester, 'k1', 150);
+      await dragHandle(tester, 'k3', -150);
+      expect(puts(apiFirst), hasLength(2));
+      expect(
+        storedOrder(apiFirst),
+        ['k2', 'k3', 'k1'].toList()..replaceRange(0, 3, ['k3', 'k2', 'k1']),
+      );
+      await finish(tester);
+    });
+
+    testWidgets('a drag that ends where it began writes nothing', (
+      tester,
+    ) async {
+      three();
+      FakeMatrixApi.currentApi = apiFirst;
+      FakeMatrixApi.calledEndpoints.clear();
+      await pumpAt(tester, '/settings/chat/folders');
+      await dragHandle(tester, 'k2', 2);
+      expect(puts(apiFirst), isEmpty);
+      await finish(tester);
+    });
+
+    testWidgets('screen readers can move a row down and up', (tester) async {
+      final handle = tester.ensureSemantics();
+      three();
+      FakeMatrixApi.currentApi = apiFirst;
+      FakeMatrixApi.calledEndpoints.clear();
+      await pumpAt(tester, '/settings/chat/folders');
+      final node = tester.getSemantics(find.byKey(const ValueKey('folder_k1')));
+      final actions = node
+          .getSemanticsData()
+          .customSemanticsActionIds!
+          .map((id) => CustomSemanticsAction.getAction(id)!.label)
+          .toList();
+      expect(actions, ['Move down']);
+      tester.semantics.performAction(
+        find.semantics.byPredicate(
+          (node) =>
+              node.label.startsWith('One') &&
+              (node.getSemanticsData().customSemanticsActionIds ?? [])
+                  .isNotEmpty,
+        ),
+        SemanticsAction.customAction,
+        args: CustomSemanticsAction.getIdentifier(
+          CustomSemanticsAction.getAction(
+            node.getSemanticsData().customSemanticsActionIds!.single,
+          )!,
+        ),
+      );
+      await settle(tester);
+      expect(storedOrder(apiFirst), ['k2', 'k1', 'k3']);
+      handle.dispose();
+      await finish(tester);
+    });
+
+    testWidgets('the lifted row grows in 420 ms', (tester) async {
+      three();
+      await pumpAt(tester, '/settings/chat/folders');
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('folder_handle_k1'))),
+      );
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump(const Duration(milliseconds: 10));
+      await tester.pump(const Duration(milliseconds: 100));
+      double blur() {
+        final box = tester.widget<DecoratedBox>(
+          find.byKey(const ValueKey('folder_lift')),
+        );
+        return (box.decoration as BoxDecoration).boxShadow!.single.blurRadius;
+      }
+
+      final early = blur();
+      expect(early, greaterThan(0));
+      expect(early, lessThan(12));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(blur(), closeTo(12, 1e-6));
+      final decoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const ValueKey('folder_lift')),
+                  )
+                  .decoration
+              as BoxDecoration;
+      expect(decoration.borderRadius, BorderRadius.circular(12));
+      await gesture.up();
+      await settle(tester);
+      await finish(tester);
+    });
+  });
+
+  group('chat picker', () {
+    void rooms() {
+      first.rooms.addAll([
+        testSpaceChild(first, '!foa:x'),
+        testSpaceChild(first, '!fob:x'),
+      ]);
+    }
+
+    Future<void> openPicker(WidgetTester tester) async {
+      await pumpAt(tester, '/settings/chat/folders/edit?id=k1');
+      await tester.tap(find.byKey(const ValueKey('add_chats')));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    testWidgets('opens as a sheet with a count and a Done button', (
+      tester,
+    ) async {
+      rooms();
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!foa:x'], types: []),
+      ]);
+      await openPicker(tester);
+      expect(find.byType(AppSheet), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('folder_picker_count')))
+            .data,
+        '1 of 500',
+      );
+      expect(
+        find.byKey(const ValueKey('folder_chat_picker_done')),
+        findsOneWidget,
+      );
+      await finish(tester);
+    });
+
+    testWidgets('picking a chat and Done adds it to the folder', (
+      tester,
+    ) async {
+      rooms();
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!foa:x'], types: []),
+      ]);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const ValueKey('picker_!fob:x')));
+      await tester.pump();
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('folder_picker_count')))
+            .data,
+        '2 of 500',
+      );
+      await tester.tap(find.byKey(const ValueKey('folder_chat_picker_done')));
+      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('folder_room_!fob:x')), findsOneWidget);
+      expect(find.byKey(const ValueKey('folder_room_!foa:x')), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('closing the sheet changes nothing', (tester) async {
+      rooms();
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!foa:x'], types: []),
+      ]);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const ValueKey('picker_!fob:x')));
+      await tester.pump();
+      await tester.tap(find.byTooltip('Close').last);
+      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('folder_room_!fob:x')), findsNothing);
+      await finish(tester);
+    });
+
+    testWidgets('a tap on the barrier changes nothing', (tester) async {
+      rooms();
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!foa:x'], types: []),
+      ]);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const ValueKey('picker_!fob:x')));
+      await tester.pump();
+      await tester.tapAt(const Offset(200, 10));
+      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('folder_room_!fob:x')), findsNothing);
+      await finish(tester);
+    });
+
+    testWidgets('the filter narrows the list', (tester) async {
+      rooms();
+      withFolders(first, [folder('k1', 'Family', rooms: [], types: [])]);
+      await openPicker(tester);
+      final rows = find.descendant(
+        of: find.byType(AppSheet),
+        matching: find.byType(SettingsCheckRow),
+      );
+      final before = rows.evaluate().length;
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('folder_chat_search')),
+          matching: find.byType(TextField),
+        ),
+        'zzzzzz-no-chat-has-this-name',
+      );
+      await tester.pump();
+      expect(rows, findsNothing);
+      expect(before, greaterThan(0));
+      await finish(tester);
+    });
+
+    testWidgets('at 500 chats the others cannot be added', (tester) async {
+      rooms();
+      await pumpAt(tester, '/rooms');
+      unawaited(
+        showFolderChatPicker(
+          tester.element(find.byType(Scaffold).first),
+          first,
+          selected: [
+            '!foa:x',
+            for (var i = 0; i < 498; i++) '!${i.toString().padLeft(18, 'b')}:x',
+          ],
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.byKey(const ValueKey('picker_!fob:x')));
+      await tester.pump();
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('folder_picker_count')))
+            .data,
+        '500 of 500',
+      );
+      final others = tester
+          .widgetList<SettingsCheckRow>(
+            find.descendant(
+              of: find.byType(AppSheet),
+              matching: find.byType(SettingsCheckRow),
+            ),
+          )
+          .where((row) => !row.value);
+      expect(others, isNotEmpty);
+      expect(others.every((row) => row.onChanged == null), isTrue);
+      await finish(tester);
+    });
+
+    testWidgets('chats that left the list stay in the folder', (tester) async {
+      rooms();
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!gone:x'], types: []),
+      ]);
+      await openPicker(tester);
+      await tester.tap(find.byKey(const ValueKey('picker_!fob:x')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('folder_chat_picker_done')));
+      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
+      expect(find.byKey(const ValueKey('folder_room_!gone:x')), findsOneWidget);
+      expect(find.byKey(const ValueKey('folder_room_!fob:x')), findsOneWidget);
+      await finish(tester);
+    });
+  });
+
+  group('editor', () {
+    testWidgets('a chat that is not in the list shows its id left to right', (
+      tester,
+    ) async {
+      withFolders(first, [
+        folder('k1', 'Family', rooms: ['!gone:x'], types: []),
+      ]);
+      await pumpAt(tester, '/settings/chat/folders/edit?id=k1');
+      expect(find.text('\u2066!gone:x\u2069'), findsOneWidget);
+      await finish(tester);
+    });
+
+    testWidgets('the types are check rows and the filters are switches', (
+      tester,
+    ) async {
+      withFolders(first, [folder('k1', 'Family', types: [])]);
+      await pumpAt(tester, '/settings/chat/folders/edit?id=k1');
+      expect(find.byType(SettingsCheckRow), findsNWidgets(2));
+      expect(find.byType(SettingsToggleRow), findsNWidgets(2));
+      expect(find.byType(CheckboxListTile), findsNothing);
+      expect(find.byType(SwitchListTile), findsNothing);
+      expect(find.byType(ListTile), findsNothing);
+      await finish(tester);
+    });
+
+    testWidgets('a newer document is shown read only', (tester) async {
+      first.accountData[FolderStore.accountDataType] = BasicEvent(
+        type: FolderStore.accountDataType,
+        content: {
+          'version': 99,
+          'folders': [folder('k1', 'Family')],
+        },
+      );
+      await pumpAt(tester, '/settings/chat/folders/edit?id=k1');
+      expect(find.byKey(const ValueKey('add_chats')), findsNothing);
+      expect(find.byKey(const ValueKey('delete_folder')), findsNothing);
+      for (final row in tester.widgetList<SettingsCheckRow>(
+        find.byType(SettingsCheckRow),
+      )) {
+        expect(row.onChanged, isNull);
+      }
+      await finish(tester);
+    });
+
+    testWidgets('the delete row is red', (tester) async {
+      withFolders(first, [folder('k1', 'Family', types: [])]);
+      await pumpAt(tester, '/settings/chat/folders/edit?id=k1');
+      expect(
+        tester
+            .widget<SettingsRow>(find.byKey(const ValueKey('delete_folder')))
+            .destructive,
+        isTrue,
+      );
+      await finish(tester);
+    });
   });
 }

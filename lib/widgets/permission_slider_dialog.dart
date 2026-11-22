@@ -17,7 +17,7 @@ Future<int?> showPermissionChooser(
   final error = ValueNotifier<String?>(null);
   return await showAdaptiveDialog<int>(
     context: context,
-    builder: (context) => AlertDialog.adaptive(
+    builder: (context) => AlertDialog(
       title: Center(child: Text(L10n.of(context).chatPermissions)),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 256, maxHeight: 256),

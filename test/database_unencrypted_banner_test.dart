@@ -8,12 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/client_manager.dart';
 import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/cipher.dart';
 import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart';
 import 'package:odango/widgets/database_unencrypted_warning.dart';
+import 'package:odango/widgets/shell_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/golden.dart';
@@ -54,6 +56,7 @@ void main() {
   Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp.router(
+        theme: ThemeData(extensions: [AppTokens.light()]),
         routerConfig: _router(),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
@@ -64,7 +67,7 @@ void main() {
 
   testWidgets('no banner while the database is encrypted', (tester) async {
     await pumpApp(tester);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
   });
 
   testWidgets('banner is shown when the database is unencrypted', (
@@ -72,7 +75,7 @@ void main() {
   ) async {
     await markUnencrypted();
     await pumpApp(tester);
-    expect(find.byType(MaterialBanner), findsOneWidget);
+    expect(find.byKey(ShellBanner.bannerKey), findsOneWidget);
     expect(find.text('Your local data is not encrypted'), findsOneWidget);
   });
 
@@ -96,16 +99,16 @@ void main() {
 
     await pumpApp(tester);
 
-    expect(find.byType(MaterialBanner), findsOneWidget);
+    expect(find.byKey(ShellBanner.bannerKey), findsOneWidget);
   });
 
   testWidgets('close button semantics name the notice (n4)', (tester) async {
     final handle = tester.ensureSemantics();
     await markUnencrypted();
     await pumpApp(tester);
-    final l10n = L10n.of(tester.element(find.byType(MaterialBanner)));
+    final l10n = L10n.of(tester.element(find.byKey(ShellBanner.bannerKey)));
     final label = tester
-        .getSemantics(find.widgetWithText(TextButton, 'Close'))
+        .getSemantics(find.widgetWithText(ShellBannerAction, 'Close'))
         .label;
     expect(label, l10n.closeNotice(l10n.databaseNotEncrypted));
     handle.dispose();
@@ -118,10 +121,10 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
     expect(AppSettings.databaseUnencryptedNoticeDismissed.value, isTrue);
     await pumpApp(tester);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
   });
 
   testWidgets('security opens the security settings', (tester) async {
@@ -132,7 +135,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('security page'), findsOneWidget);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
   });
 
   testGoldens('DatabaseUnencryptedBanner', (tester) async {
@@ -141,7 +144,8 @@ void main() {
       tester,
       'database_unencrypted_banner',
       InheritedGoRouter(goRouter: _router(), child: const _BannerHost()),
-      size: const Size(400, 160),
+      size: const Size(400, 260),
+      afterAssets: const Duration(milliseconds: 400),
     );
   });
 }

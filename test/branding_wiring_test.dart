@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:odango/config/app_config.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/utils/error_reporter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -148,14 +149,17 @@ void main() {
   });
 
   group('support entry points open the dialog, not a link', () {
-    test('the overflow menu entry', () {
+    test('the overflow menu has no support entry any more', () {
       final source = _source('lib/pages/chat_list/client_chooser_button.dart');
-      final start = source.indexOf('case SettingsAction.support:');
-      expect(start, greaterThan(0));
-      final entry = source.substring(start, source.indexOf('break;', start));
-      expect(entry, contains('showSupportDialog(context)'));
-      expect(entry, isNot(contains('launchWebUrl')));
-      expect(source, contains('supportOdango'));
+      expect(source, isNot(contains('SettingsAction.support')));
+      expect(source, isNot(contains('supportOdango')));
+      expect(source, isNot(contains('showSupportDialog')));
+    });
+
+    test('the About dialog opens the upstream support page', () {
+      final source = _source('lib/utils/platform_infos.dart');
+      expect(source, contains('launch(AppConfig.upstreamSupportUrl)'));
+      expect(source, contains('aboutSupportFluffyChat'));
     });
 
     test('the update check obeys the setting and the repository setting', () {
@@ -177,11 +181,28 @@ void main() {
     });
 
     test('no donation page of the upstream author is linked as support', () {
+      const allowed =
+          'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I';
       final hits = [
         for (final file in _libFiles())
-          if (file.readAsStringSync().contains('ko-fi.com')) file.path,
+          if (file
+              .readAsStringSync()
+              .replaceAll(allowed, '')
+              .contains('ko-fi.com'))
+            file.path,
       ];
       expect(hits, isEmpty);
+    });
+
+    test('the one allowed upstream support link lives in app_config only', () {
+      const allowed =
+          'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I';
+      final hits = [
+        for (final file in _libFiles())
+          if (file.readAsStringSync().contains(allowed)) file.path,
+      ];
+      expect(hits, [endsWith('lib/config/app_config.dart')]);
+      expect(AppConfig.upstreamSupportUrl, allowed);
     });
   });
 }

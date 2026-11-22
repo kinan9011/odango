@@ -17,6 +17,7 @@ import 'package:odango/pages/call/start_time.dart';
 import 'package:odango/pages/call/utils/get_call_tiles.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
@@ -133,7 +134,7 @@ class CallPage extends StatelessWidget {
                   mainAxisSize: .min,
                   children: [
                     Text(
-                      room.getLocalizedDisplayname(),
+                      room.safeLocalizedDisplayname(),
                       maxLines: 1,
                       overflow: .ellipsis,
                       style: mini

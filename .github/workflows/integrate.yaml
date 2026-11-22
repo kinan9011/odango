@@ -58,6 +58,8 @@ jobs:
 
   flutter_tests:
     runs-on: ubuntu-26.04
+    env:
+      TZ: Europe/Berlin
     steps:
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
@@ -65,7 +67,9 @@ jobs:
           flutter-version-file: .fvmrc
           cache: true
       - uses: dtolnay/rust-toolchain@stable
+      - run: sudo apt-get update && sudo apt-get install -y libmpv-dev
       - run: flutter pub get
+      - run: ./scripts/prepare_vodozemac.sh
       - run: dart run golden_screenshot:download_apple_fonts
       - run: flutter test
 
@@ -198,7 +202,7 @@ jobs:
 
   integration_test:
     runs-on: ubuntu-26.04
-    timeout-minutes: 60
+    timeout-minutes: 100
     needs: [ code_tests ]
     strategy:
       matrix:
@@ -280,4 +284,15 @@ jobs:
           ram-size: 4096M
           sdcard-path-or-size: 4096M
           emulator-options: -no-snapshot-save -no-window -wipe-data -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: flutter test integration_test/mobile_test.dart
+          # ponytail: the emulator crashes in about half the runs; the script restarts it and runs again, see its header
+          script: bash scripts/ci_integration_tests.sh
+      - name: Upload integration logs
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-logs
+          path: |
+            integration_test.log
+            logcat.txt
+            logcat_stream.txt
+            emulator.log

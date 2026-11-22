@@ -34,6 +34,9 @@ abstract class AppConfig {
   static const String upstreamRepoUrl =
       'https://github.com/krille-chan/fluffychat';
 
+  static const String upstreamSupportUrl =
+      'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I';
+
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
   static const String mainIsolatePortName = 'main_isolate';

@@ -17,6 +17,7 @@ import 'package:odango/utils/chat_list/space_tabs_model.dart';
 import 'package:odango/utils/chat_list/swipe_actions.dart';
 import 'package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/route_path.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -232,7 +233,7 @@ class ChatListController extends State<ChatList>
       cancelLabel: L10n.of(context).cancel,
       isDestructive: true,
     );
-    if (confirmed == OkCancelResult.cancel) return;
+    if (confirmed != OkCancelResult.ok) return;
     if (!mounted) return;
     await showFutureLoadingDialog(context: context, future: room.leave);
   }
@@ -280,12 +281,12 @@ class ChatListController extends State<ChatList>
                 Avatar(
                   mxContent: space.avatar,
                   size: Avatar.defaultSize / 2,
-                  name: space.getLocalizedDisplayname(),
+                  name: space.safeLocalizedDisplayname(),
                   colorSeed: space.id,
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  L10n.of(context).goToSpace(space.getLocalizedDisplayname()),
+                  L10n.of(context).goToSpace(space.safeLocalizedDisplayname()),
                 ),
               ],
             ),
@@ -546,7 +547,7 @@ class ChatListController extends State<ChatList>
               .map(
                 (space) => AdaptiveModalAction(
                   value: space,
-                  label: space.getLocalizedDisplayname(
+                  label: space.safeLocalizedDisplayname(
                     MatrixLocals(L10n.of(context)),
                   ),
                 ),

@@ -55,6 +55,7 @@ class SettingsRow extends StatelessWidget {
   final bool destructive;
   final bool neutralTile;
   final bool showChevron;
+  final int? titleMaxLines;
 
   const SettingsRow({
     required this.title,
@@ -67,6 +68,7 @@ class SettingsRow extends StatelessWidget {
     this.destructive = false,
     this.neutralTile = false,
     this.showChevron = true,
+    this.titleMaxLines,
     super.key,
   });
 
@@ -121,6 +123,10 @@ class SettingsRow extends StatelessWidget {
                     children: [
                       Text(
                         title,
+                        maxLines: titleMaxLines,
+                        overflow: titleMaxLines == null
+                            ? null
+                            : TextOverflow.ellipsis,
                         style: TextStyle(
                           color: titleColor,
                           fontSize: 15,

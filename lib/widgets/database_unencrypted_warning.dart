@@ -33,15 +33,11 @@ class DatabaseUnencryptedWarningTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final l10n = L10n.of(context);
-    return ListTile(
-      tileColor: colorScheme.errorContainer,
-      textColor: colorScheme.onErrorContainer,
-      iconColor: colorScheme.onErrorContainer,
-      leading: const Icon(Icons.lock_open_outlined),
-      title: Text(l10n.databaseNotEncrypted),
-      subtitle: Text(databaseUnencryptedDescription(l10n, isLinux: isLinux)),
+    return WarningCard(
+      icon: Icons.lock_open_rounded,
+      message: l10n.databaseNotEncrypted,
+      body: databaseUnencryptedDescription(l10n, isLinux: isLinux),
     );
   }
 }
@@ -61,22 +57,21 @@ class DatabaseUnencryptedBanner extends StatelessWidget {
       icon: Icons.lock_open_outlined,
       message: l10n.databaseNotEncrypted,
       actions: (hide) => [
-        TextButton(
+        ShellBannerAction(
+          label: l10n.close,
+          semanticsLabel: l10n.closeNotice(l10n.databaseNotEncrypted),
           onPressed: () {
             AppSettings.databaseUnencryptedNoticeDismissed.setItem(true);
             hide();
           },
-          child: Text(
-            l10n.close,
-            semanticsLabel: l10n.closeNotice(l10n.databaseNotEncrypted),
-          ),
         ),
-        TextButton(
+        ShellBannerAction(
+          label: l10n.security,
+          primary: true,
           onPressed: () {
             hide();
             GoRouter.of(context).go('/settings/security');
           },
-          child: Text(l10n.security),
         ),
       ],
       child: child,

@@ -7,7 +7,7 @@ name: odango
 description: Chat with your friends.
 publish_to: none
 # On version bump please also increase the build number (for F-Droid)
-version: 2.11.5+3578
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.11.1 <4.0.0"

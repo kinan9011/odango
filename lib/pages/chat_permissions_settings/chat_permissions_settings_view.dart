@@ -5,12 +5,15 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_permissions_settings/chat_permissions_settings.dart';
-import 'package:odango/pages/chat_permissions_settings/permission_list_tile.dart';
+import 'package:odango/pages/chat_permissions_settings/permission_row.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call_member.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
 import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
 
 class ChatPermissionsSettingsView extends StatelessWidget {
   final ChatPermissionsSettingsController controller;
@@ -19,15 +22,11 @@ class ChatPermissionsSettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: const Center(child: BackButton()),
-        title: Text(L10n.of(context).chatPermissions),
-      ),
-      body: MaxWidthBody(
-        child: ListenableBuilder(
+    final l10n = L10n.of(context);
+    return SettingsScaffold(
+      title: l10n.chatPermissions,
+      children: [
+        ListenableBuilder(
           listenable: Matrix.of(context).callsAvailability,
           builder: (context, _) => StreamBuilder(
             stream: controller.onChanged,
@@ -37,7 +36,7 @@ class ChatPermissionsSettingsView extends StatelessWidget {
                   ? null
                   : Matrix.of(context).client.getRoomById(roomId);
               if (room == null) {
-                return Center(child: Text(L10n.of(context).noRoomsFound));
+                return SettingsNotice(text: l10n.noRoomsFound);
               }
               final powerLevelsContent = Map<String, Object?>.from(
                 room.getState(EventTypes.RoomPowerLevels)?.content ?? {},
@@ -55,106 +54,91 @@ class ChatPermissionsSettingsView extends StatelessWidget {
                 eventsPowerLevels[MatrixRtcCallMember.eventType] ??=
                     powerLevelsContent['state_default'] as int? ?? 50;
               }
+              final cut =
+                  eventsPowerLevels.length - AppMembers.permissionRowsCap;
+              final topCut = powerLevels.length - AppMembers.permissionRowsCap;
+              final topLevels = powerLevels.entries
+                  .take(AppMembers.permissionRowsCap)
+                  .toList();
+              final events = eventsPowerLevels.entries
+                  .take(AppMembers.permissionRowsCap)
+                  .toList();
+              final notificationLevel =
+                  powerLevelsContent
+                      .tryGetMap<String, Object?>('notifications')
+                      ?.tryGet<int>('rooms') ??
+                  0;
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ListTile(
-                    leading: const Icon(Icons.info_outlined),
-                    subtitle: Text(L10n.of(context).chatPermissionsDescription),
-                  ),
-                  Divider(color: theme.dividerColor),
-                  ListTile(
-                    title: Text(
-                      L10n.of(context).chatPermissions,
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: .min,
-                    children: [
-                      for (final entry in powerLevels.entries)
-                        PermissionsListTile(
-                          permissionKey: entry.key,
-                          permission: entry.value,
-                          onChanged: (level) => controller.editPowerLevel(
-                            context,
-                            entry.key,
-                            entry.value,
-                            newLevel: level,
-                          ),
-                          canEdit: room.canChangePowerLevel,
-                        ),
-                      Divider(color: theme.dividerColor),
-                      ListTile(
-                        title: Text(
-                          L10n.of(context).notifications,
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Builder(
-                        builder: (context) {
-                          const key = 'rooms';
-                          final value =
-                              powerLevelsContent.containsKey('notifications')
-                              ? powerLevelsContent
-                                        .tryGetMap<String, Object?>(
-                                          'notifications',
-                                        )
-                                        ?.tryGet<int>('rooms') ??
-                                    0
-                              : 0;
-                          return PermissionsListTile(
-                            permissionKey: key,
-                            permission: value,
-                            category: 'notifications',
+                  SettingsNotice(text: l10n.chatPermissionsDescription),
+                  if (powerLevels.isNotEmpty)
+                    SettingsGroup(
+                      header: l10n.chatPermissions,
+                      footer: topCut > 0 ? l10n.entriesNotShown(topCut) : null,
+                      rows: [
+                        for (final entry in topLevels)
+                          PermissionRow(
+                            key: ValueKey('perm__${entry.key}'),
+                            permissionKey: entry.key,
+                            permission: entry.value,
                             canEdit: room.canChangePowerLevel,
                             onChanged: (level) => controller.editPowerLevel(
                               context,
-                              key,
-                              value,
+                              entry.key,
+                              entry.value,
                               newLevel: level,
-                              category: 'notifications',
                             ),
-                          );
-                        },
-                      ),
-                      Divider(color: theme.dividerColor),
-                      ListTile(
-                        title: Text(
-                          L10n.of(context).configureChat,
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
                           ),
+                      ],
+                    ),
+                  SettingsGroup(
+                    header: l10n.notifications,
+                    rows: [
+                      PermissionRow(
+                        key: const ValueKey('perm_notifications_rooms'),
+                        permissionKey: 'rooms',
+                        permission: notificationLevel,
+                        category: 'notifications',
+                        canEdit: room.canChangePowerLevel,
+                        onChanged: (level) => controller.editPowerLevel(
+                          context,
+                          'rooms',
+                          notificationLevel,
+                          newLevel: level,
+                          category: 'notifications',
                         ),
                       ),
-                      for (final entry in eventsPowerLevels.entries)
-                        PermissionsListTile(
-                          permissionKey: entry.key,
-                          category: 'events',
-                          permission: entry.value ?? 0,
-                          canEdit: room.canChangePowerLevel,
-                          onChanged: (level) => controller.editPowerLevel(
-                            context,
-                            entry.key,
-                            entry.value ?? 0,
-                            newLevel: level,
-                            category: 'events',
-                          ),
-                        ),
                     ],
                   ),
+                  if (events.isNotEmpty)
+                    SettingsGroup(
+                      header: l10n.configureChat,
+                      footer: cut > 0 ? l10n.entriesNotShown(cut) : null,
+                      rows: [
+                        for (final entry in events)
+                          PermissionRow(
+                            key: ValueKey('perm_events_${entry.key}'),
+                            permissionKey: entry.key,
+                            category: 'events',
+                            permission: entry.value ?? 0,
+                            canEdit: room.canChangePowerLevel,
+                            onChanged: (level) => controller.editPowerLevel(
+                              context,
+                              entry.key,
+                              entry.value ?? 0,
+                              newLevel: level,
+                              category: 'events',
+                            ),
+                          ),
+                      ],
+                    ),
                 ],
               );
             },
           ),
         ),
-      ),
+      ],
     );
   }
 }

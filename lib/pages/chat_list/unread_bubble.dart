@@ -5,7 +5,9 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/themes.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/motion.dart';
 
 class UnreadBubble extends StatelessWidget {
@@ -14,49 +16,88 @@ class UnreadBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final unread = room.isUnreadOrInvited;
-    final hasNotifications = room.notificationCount > 0;
-    final unreadBubbleSize = unread || room.hasNewMessages
-        ? room.notificationCount > 0
-              ? 20.0
-              : 14.0
-        : 0.0;
-    return AnimatedContainer(
-      duration: motionDuration(context, FluffyThemes.animationDuration),
-      curve: FluffyThemes.animationCurve,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 7),
-      height: unreadBubbleSize,
-      width: !hasNotifications && !unread && !room.hasNewMessages
-          ? 0
-          : (unreadBubbleSize - 9) * room.notificationCount.toString().length +
-                9,
-      decoration: BoxDecoration(
-        color: room.highlightCount > 0
-            ? theme.colorScheme.error
-            : hasNotifications ||
-                  room.markedUnread ||
-                  room.membership == .invite
-            ? theme.colorScheme.primary
-            : theme.colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(unreadBubbleSize),
-      ),
-      child: hasNotifications || room.markedUnread
-          ? Text(
-              room.notificationCount.toString(),
-              style: TextStyle(
-                color: room.highlightCount > 0
-                    ? theme.colorScheme.onError
-                    : hasNotifications
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onPrimaryContainer,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+    final tokens = AppTokens.of(context);
+    final count = room.notificationCount;
+    final muted = room.pushRuleState != PushRuleState.notify;
+    final loud = !muted;
+    final fill = muted ? tokens.mbad : tokens.acc;
+    final onFill = muted ? Colors.white : tokens.onacc;
+    final showDot =
+        count == 0 &&
+        (room.markedUnread ||
+            room.membership == Membership.invite ||
+            room.hasNewMessages);
+    return Semantics(
+      label: count > 0 ? '${L10n.of(context).unread}: $count' : null,
+      excludeSemantics: true,
+      child: AnimatedSize(
+        duration: motionDuration(context, AppMotion.counterUp),
+        curve: AppMotion.standard,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 6,
+          children: [
+            if (room.highlightCount > 0)
+              Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: tokens.acc,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.alternate_email_rounded,
+                  size: 15,
+                  color: tokens.onacc,
+                ),
               ),
-              textAlign: .center,
-            )
-          : const SizedBox.shrink(),
+            if (count > 0)
+              Container(
+                constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
+                padding: const EdgeInsets.symmetric(horizontal: 7),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: fill,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: AnimatedSwitcher(
+                  duration: motionDuration(context, AppMotion.counterUp),
+                  reverseDuration: motionDuration(
+                    context,
+                    AppMotion.counterDown,
+                  ),
+                  switchInCurve: const OvershootCurve(),
+                  switchOutCurve: AppMotion.standard,
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: Text(
+                    count > 99 ? '99+' : '$count',
+                    key: ValueKey(count),
+                    style: TextStyle(
+                      color: onFill,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            if (showDot)
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color:
+                      loud &&
+                          (room.markedUnread ||
+                              room.membership == Membership.invite)
+                      ? tokens.acc
+                      : tokens.mbad,
+                  shape: BoxShape.circle,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

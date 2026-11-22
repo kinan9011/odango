@@ -11,6 +11,7 @@ import 'package:odango/pages/chat_search/chat_search_images_tab.dart';
 import 'package:odango/pages/chat_search/chat_search_message_tab.dart';
 import 'package:odango/pages/chat_search/chat_search_page.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/layouts/max_width_body.dart';
 
 class ChatSearchView extends StatelessWidget {
@@ -41,7 +42,7 @@ class ChatSearchView extends StatelessWidget {
         titleSpacing: 0,
         title: Text(
           L10n.of(context).searchIn(
-            room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+            room.safeLocalizedDisplayname(MatrixLocals(L10n.of(context))),
           ),
         ),
       ),

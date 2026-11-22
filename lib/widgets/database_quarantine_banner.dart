@@ -21,15 +21,13 @@ class DatabaseQuarantineBanner extends StatelessWidget {
       icon: Icons.warning_amber_rounded,
       message: l10n.databaseQuarantined,
       actions: (hide) => [
-        TextButton(
+        ShellBannerAction(
+          label: l10n.close,
+          semanticsLabel: l10n.closeNotice(l10n.databaseQuarantined),
           onPressed: () {
             dismissDatabaseQuarantineNotice();
             hide();
           },
-          child: Text(
-            l10n.close,
-            semanticsLabel: l10n.closeNotice(l10n.databaseQuarantined),
-          ),
         ),
       ],
       child: child,

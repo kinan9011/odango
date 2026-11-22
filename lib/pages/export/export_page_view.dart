@@ -11,6 +11,7 @@ import 'package:odango/pages/export/export_page.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/export/export_model.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/settings/settings_group.dart';
 import 'package:odango/widgets/settings/settings_scaffold.dart';
 import 'package:odango/widgets/settings/settings_segmented.dart';
@@ -29,7 +30,7 @@ class ExportPageView extends StatelessWidget {
     final name = room == null
         ? null
         : safeDisplayText(
-            room.getLocalizedDisplayname(MatrixLocals(l10n)),
+            room.safeLocalizedDisplayname(MatrixLocals(l10n)),
             maxGraphemes: 60,
           );
     final running = controller.running;

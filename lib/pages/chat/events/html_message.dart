@@ -11,16 +11,24 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/message_paragraphs.dart';
+import 'package:odango/utils/chat/room_mention.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/code_highlight_theme.dart';
 import 'package:odango/utils/event_checkbox_extension.dart';
 import 'package:odango/utils/html_image_size.dart';
 import 'package:odango/utils/html_limits.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/visible_id.dart';
+import 'package:odango/widgets/auto_direction.dart';
 import 'package:odango/widgets/avatar.dart';
+import 'package:odango/widgets/clamped_height.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
 import 'package:odango/widgets/mxc_image.dart';
 
@@ -36,6 +44,9 @@ class HtmlMessage extends StatelessWidget {
   final String? eventId;
   final Set<Event>? checkboxCheckedEvents;
 
+  /// The message notifies the whole room: its `@room` is drawn as a pill.
+  final bool roomMention;
+
   const HtmlMessage({
     super.key,
     required this.html,
@@ -46,6 +57,7 @@ class HtmlMessage extends StatelessWidget {
     required this.onOpen,
     this.eventId,
     this.checkboxCheckedEvents,
+    this.roomMention = false,
   });
 
   /// Keep in sync with: https://spec.matrix.org/latest/client-server-api/#mroommessage-msgtypes
@@ -148,7 +160,7 @@ class HtmlMessage extends StatelessWidget {
 
   InlineSpan _renderCodeBlockNode(dom.Node node) {
     if (node is! dom.Element) {
-      return TextSpan(text: node.text);
+      return TextSpan(text: stripBidiOverrides(node.text ?? ''));
     }
     final style =
         atomOneDarkTheme[node.className.split('-').last] ??
@@ -157,6 +169,51 @@ class HtmlMessage extends StatelessWidget {
     return TextSpan(
       children: node.nodes.map(_renderCodeBlockNode).toList(),
       style: style,
+    );
+  }
+
+  /// Code and links keep their text as it is: only plain text can mention.
+  bool _mayHoldRoomMention(dom.Node node, String text) {
+    if (!text.contains(roomMentionToken)) return false;
+    for (
+      dom.Node? parent = node.parent;
+      parent != null;
+      parent = parent.parent
+    ) {
+      if (parent is dom.Element &&
+          const {'a', 'code', 'pre'}.contains(parent.localName)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  InlineSpan _renderRoomMention(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: Semantics(
+        label: L10n.of(context).mentionsEveryone,
+        excludeSemantics: true,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: tokens.accs,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              roomMentionToken,
+              style: TextStyle(
+                color: tokens.acc,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -172,9 +229,25 @@ class HtmlMessage extends StatelessWidget {
 
     // This is a text node or not permitted node, so we render it as text:
     if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {
-      var text = node.text ?? '';
+      var text = stripBidiOverrides(node.text ?? '');
       // Single linebreak nodes between Elements are ignored:
       if (text == '\n') text = '';
+
+      if (roomMention && _mayHoldRoomMention(node, text)) {
+        return TextSpan(
+          children: [
+            for (final part in splitRoomMentions(text))
+              part.isRoom
+                  ? _renderRoomMention(context)
+                  : LinkifySpan(
+                      text: part.text,
+                      options: const LinkifyOptions(humanize: false),
+                      linkStyle: linkStyle,
+                      onOpen: onOpen,
+                    ),
+          ],
+        );
+      }
 
       return LinkifySpan(
         text: text,
@@ -185,7 +258,7 @@ class HtmlMessage extends StatelessWidget {
     }
 
     if (isMathsElement(node)) {
-      final tex = node.attributes['data-mx-maths']!;
+      final tex = stripBidiControls(node.attributes['data-mx-maths']!);
       final maths = _renderMaths(
         context,
         tex.length > RichLimits.maxRenderMathsUnits
@@ -228,7 +301,7 @@ class HtmlMessage extends StatelessWidget {
                 : this.room.client.getRoomByAlias(matrixId);
             return WidgetSpan(
               child: MatrixPill(
-                name: room?.getLocalizedDisplayname() ?? matrixId,
+                name: room?.safeLocalizedDisplayname() ?? matrixId,
                 colorSeed: matrixId,
                 avatar: room?.avatar,
                 uri: href,
@@ -247,7 +320,9 @@ class HtmlMessage extends StatelessWidget {
               onTap: () => UrlLauncher(
                 context,
                 href,
-                node.children.isEmpty ? node.text : _formattedLinkLabel,
+                node.children.isEmpty
+                    ? stripBidiOverrides(node.text)
+                    : _formattedLinkLabel,
               ).launchUrl(),
               child: Text.rich(
                 TextSpan(
@@ -286,84 +361,91 @@ class HtmlMessage extends StatelessWidget {
             node.children.firstOrNull?.attributes['checked'] == 'true';
 
         return WidgetSpan(
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(start: fontSize),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  if (!isCheckbox) ...[
-                    if (node.parent?.localName == 'ul')
-                      const TextSpan(text: '• '),
-                    if (node.parent?.localName == 'ol')
-                      TextSpan(
-                        text:
-                            '${(node.parent?.nodes.whereType<dom.Element>().toList().indexOf(node) ?? 0) + (int.tryParse(node.parent?.attributes['start'] ?? '1') ?? 1)}. ',
-                      ),
-                  ],
-                  if (node.className == 'task-list-item')
-                    WidgetSpan(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: SizedBox.square(
-                          dimension: fontSize + 2,
-                          child: CupertinoCheckbox(
-                            checkColor: textColor,
-                            side: BorderSide(color: textColor),
-                            activeColor: textColor.withAlpha(64),
-                            value:
-                                staticallyChecked || checkedByReaction != null,
-                            onChanged:
-                                eventId == null ||
-                                    checkboxIndex == null ||
-                                    staticallyChecked ||
-                                    !room.canSendDefaultMessages ||
-                                    (checkedByReaction != null &&
-                                        checkedByReaction.senderId !=
-                                            room.client.userID)
-                                ? null
-                                : (_) => showFutureLoadingDialog(
-                                    context: context,
-                                    future: () => checkedByReaction != null
-                                        ? room.redactEvent(
-                                            checkedByReaction.eventId,
-                                          )
-                                        : room.checkCheckbox(
-                                            eventId,
-                                            checkboxIndex,
-                                          ),
-                                  ),
+          child: AutoDirection(
+            text: leadingText(node),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: fontSize),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    if (!isCheckbox) ...[
+                      if (node.parent?.localName == 'ul')
+                        const TextSpan(text: '• '),
+                      if (node.parent?.localName == 'ol')
+                        TextSpan(
+                          text:
+                              '${(node.parent?.nodes.whereType<dom.Element>().toList().indexOf(node) ?? 0) + (int.tryParse(node.parent?.attributes['start'] ?? '1') ?? 1)}. ',
+                        ),
+                    ],
+                    if (node.className == 'task-list-item')
+                      WidgetSpan(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: SizedBox.square(
+                            dimension: fontSize + 2,
+                            child: CupertinoCheckbox(
+                              checkColor: textColor,
+                              side: BorderSide(color: textColor),
+                              activeColor: textColor.withAlpha(64),
+                              value:
+                                  staticallyChecked ||
+                                  checkedByReaction != null,
+                              onChanged:
+                                  eventId == null ||
+                                      checkboxIndex == null ||
+                                      staticallyChecked ||
+                                      !room.canSendDefaultMessages ||
+                                      (checkedByReaction != null &&
+                                          checkedByReaction.senderId !=
+                                              room.client.userID)
+                                  ? null
+                                  : (_) => showFutureLoadingDialog(
+                                      context: context,
+                                      future: () => checkedByReaction != null
+                                          ? room.redactEvent(
+                                              checkedByReaction.eventId,
+                                            )
+                                          : room.checkCheckbox(
+                                              eventId,
+                                              checkboxIndex,
+                                            ),
+                                    ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ..._renderWithLineBreaks(node.nodes, context, depth: depth),
-                ],
-                style: TextStyle(fontSize: fontSize, color: textColor),
+                    ..._renderWithLineBreaks(node.nodes, context, depth: depth),
+                  ],
+                  style: TextStyle(fontSize: fontSize, color: textColor),
+                ),
               ),
             ),
           ),
         );
       case 'blockquote':
         return WidgetSpan(
-          child: Container(
-            padding: const EdgeInsetsDirectional.only(start: 8.0),
-            decoration: BoxDecoration(
-              border: BorderDirectional(
-                start: BorderSide(color: textColor, width: 5),
-              ),
-            ),
-            child: Text.rich(
-              TextSpan(
-                children: _renderWithLineBreaks(
-                  node.nodes,
-                  context,
-                  depth: depth,
+          child: AutoDirection(
+            text: leadingText(node),
+            child: Container(
+              padding: const EdgeInsetsDirectional.only(start: 8.0),
+              decoration: BoxDecoration(
+                border: BorderDirectional(
+                  start: BorderSide(color: textColor, width: 5),
                 ),
               ),
-              style: TextStyle(
-                fontStyle: FontStyle.italic,
-                fontSize: fontSize,
-                color: textColor,
+              child: Text.rich(
+                TextSpan(
+                  children: _renderWithLineBreaks(
+                    node.nodes,
+                    context,
+                    depth: depth,
+                  ),
+                ),
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  fontSize: fontSize,
+                  color: textColor,
+                ),
               ),
             ),
           ),
@@ -408,7 +490,9 @@ class HtmlMessage extends StatelessWidget {
       case 'img':
         final mxcUrl = Uri.tryParse(node.attributes['src'] ?? '');
         if (mxcUrl == null || mxcUrl.scheme != 'mxc') {
-          return TextSpan(text: node.attributes['alt']);
+          return TextSpan(
+            text: stripBidiOverrides(node.attributes['alt'] ?? ''),
+          );
         }
 
         final size = htmlImageSize(
@@ -631,7 +715,7 @@ class HtmlMessage extends StatelessWidget {
     );
     if (!block) {
       return TextSpan(
-        text: tex,
+        text: '\u2068$tex\u2069',
         style: style.copyWith(backgroundColor: textColor.withAlpha(32)),
       );
     }
@@ -662,16 +746,19 @@ class HtmlMessage extends StatelessWidget {
     limitHtmlImages(element);
     final configuredMaxLines = AppSettings.messagePreviewMaxLines.value;
     final maxLines = configuredMaxLines <= 0 ? null : configuredMaxLines;
-    final span = _renderHtml(element, context);
     final style = TextStyle(fontSize: fontSize, color: textColor);
+    final body = _MessageParagraphs(
+      paragraphs: splitParagraphs(
+        element.nodes,
+        blockTags: blockHtmlTags,
+        lineTags: fullLineHtmlTag,
+      ),
+      render: (node) => _renderHtml(node, context),
+      style: style,
+      selectionColor: textColor.withAlpha(128),
+    );
 
-    if (maxLines == null) {
-      return Text.rich(
-        span,
-        style: style,
-        selectionColor: textColor.withAlpha(128),
-      );
-    }
+    if (maxLines == null) return body;
 
     // Heuristic: if plain text has enough newlines or length, it will overflow.
     final plainText = element.text;
@@ -679,40 +766,96 @@ class HtmlMessage extends StatelessWidget {
     final likelyOverflows =
         lineCount > maxLines || plainText.length > maxLines * 50;
 
-    if (!likelyOverflows) {
-      return Text.rich(
-        span,
-        style: style,
-        selectionColor: textColor.withAlpha(128),
-      );
-    }
+    if (!likelyOverflows) return body;
 
     return _CollapsibleText(
-      span: span,
-      style: style,
       maxLines: maxLines,
-      textColor: textColor,
+      style: style,
       linkColor: linkStyle.color ?? textColor,
-      fontSize: fontSize,
+      child: body,
+    );
+  }
+}
+
+double _lineHeight(
+  TextStyle style,
+  TextDirection direction,
+  TextScaler scaler,
+) {
+  final painter = TextPainter(
+    text: TextSpan(text: 'M', style: style),
+    textDirection: direction,
+    textScaler: scaler,
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
+}
+
+/// One text per paragraph, each laid out in the direction of its own first
+/// strong character, not in the direction of the app language.
+class _MessageParagraphs extends StatelessWidget {
+  final List<MessageParagraph> paragraphs;
+  final InlineSpan Function(dom.Node node) render;
+  final TextStyle style;
+  final Color selectionColor;
+
+  const _MessageParagraphs({
+    required this.paragraphs,
+    required this.render,
+    required this.style,
+    required this.selectionColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ambient = Directionality.of(context);
+    final texts = [
+      for (final paragraph in paragraphs)
+        Directionality(
+          textDirection: firstStrongDirection(paragraph.text) ?? ambient,
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: Text.rich(
+              TextSpan(
+                children: [for (final node in paragraph.nodes) render(node)],
+              ),
+              style: style,
+              selectionColor: selectionColor,
+            ),
+          ),
+        ),
+    ];
+    if (texts.length == 1) return texts.single;
+    final blankLine = _lineHeight(
+      style,
+      ambient,
+      MediaQuery.textScalerOf(context),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final (i, text) in texts.indexed) ...[
+          if (paragraphs[i].gapBefore >= 2) SizedBox(height: blankLine),
+          text,
+        ],
+      ],
     );
   }
 }
 
 class _CollapsibleText extends StatefulWidget {
-  final InlineSpan span;
+  final Widget child;
   final TextStyle style;
   final int maxLines;
-  final Color textColor;
   final Color linkColor;
-  final double fontSize;
 
   const _CollapsibleText({
-    required this.span,
+    required this.child,
     required this.style,
     required this.maxLines,
-    required this.textColor,
     required this.linkColor,
-    required this.fontSize,
   });
 
   @override
@@ -725,6 +868,13 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
+    final collapsedHeight =
+        _lineHeight(
+          widget.style,
+          Directionality.of(context),
+          MediaQuery.textScalerOf(context),
+        ) *
+        widget.maxLines;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -733,13 +883,13 @@ class _CollapsibleTextState extends State<_CollapsibleText> {
           duration: motionDuration(context, FluffyThemes.animationDuration),
           curve: FluffyThemes.animationCurve,
           alignment: AlignmentDirectional.topStart,
-          child: Text.rich(
-            widget.span,
-            style: widget.style,
-            maxLines: _expanded ? null : widget.maxLines,
-            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-            selectionColor: widget.textColor.withAlpha(128),
-          ),
+          child: _expanded
+              ? widget.child
+              : ClampedHeight(
+                  key: const ValueKey('collapsed_message'),
+                  maxHeight: collapsedHeight,
+                  child: widget.child,
+                ),
         ),
         Center(
           child: TextButton.icon(

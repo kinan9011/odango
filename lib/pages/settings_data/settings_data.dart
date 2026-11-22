@@ -11,6 +11,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/settings_data/search_index_group.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:odango/widgets/settings/settings_group.dart';
@@ -44,12 +45,12 @@ class SettingsData extends StatelessWidget {
                 key: ValueKey('export_room_${room.id}'),
                 leading: Avatar(
                   mxContent: room.avatar,
-                  name: room.getLocalizedDisplayname(MatrixLocals(l10n)),
+                  name: room.safeLocalizedDisplayname(MatrixLocals(l10n)),
                   colorSeed: room.avatarColorSeed,
                   size: 32,
                 ),
                 title: safeDisplayText(
-                  room.getLocalizedDisplayname(MatrixLocals(l10n)),
+                  room.safeLocalizedDisplayname(MatrixLocals(l10n)),
                   maxGraphemes: 60,
                 ),
                 trailing: Icon(

@@ -8,10 +8,13 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/topics/topic_hide_menu.dart';
 import 'package:odango/pages/topics/topic_row.dart';
 import 'package:odango/pages/topics/topics_page.dart';
 import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/topics/topic.dart';
 import 'package:odango/utils/topics/topics_model.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -69,7 +72,7 @@ class _Header extends StatelessWidget {
     final tokens = AppTokens.of(context);
     final l10n = L10n.of(context);
     final name = safeDisplayText(
-      room.getLocalizedDisplayname(MatrixLocals(l10n)),
+      room.safeLocalizedDisplayname(MatrixLocals(l10n)),
       maxGraphemes: 80,
     );
     final members = room.summary.mJoinedMemberCount ?? 0;
@@ -278,10 +281,29 @@ class _List extends StatelessWidget {
                 return _Message(text: l10n.topicsEmpty, scroll: false);
               }
               final topic = topics[index - 1];
-              return TopicRow(
-                key: ValueKey('topic_${topic.rootEventId}'),
-                topic: topic,
-                onTap: () => controller.openTopic(topic),
+              return ListenableBuilder(
+                listenable: HiddenTopicsStore.revision,
+                builder: (context, _) {
+                  final hidden = HiddenTopicsStore.of(
+                    room.client,
+                  ).isHidden(room.id, topic.rootEventId);
+                  return TopicRow(
+                    key: ValueKey('topic_${topic.rootEventId}'),
+                    topic: topic,
+                    hidden: hidden,
+                    onTap: () => controller.openTopic(topic),
+                    onMenu: (anchor, context) async {
+                      final chosen = await showTopicHideMenu(
+                        context,
+                        anchor: anchor,
+                        hidden: hidden,
+                      );
+                      if (chosen == true) {
+                        await controller.setHidden(topic, hidden: !hidden);
+                      }
+                    },
+                  );
+                },
               );
             },
           );

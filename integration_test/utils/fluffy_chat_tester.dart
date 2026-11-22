@@ -6,6 +6,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:odango/main.dart' as app;
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:odango/widgets/matrix.dart';
 
 extension type FluffyChatTester(WidgetTester tester) {
@@ -15,6 +16,16 @@ extension type FluffyChatTester(WidgetTester tester) {
     debugPrint(
       '[INTEGRATION TEST] ${DateTime.now().toIso8601String()} | Step ${_printCounter++} -  $message',
     );
+  }
+
+  /// A finder describes itself by walking the tree, which throws while an
+  /// element is leaving it.
+  String _describe(Object object) {
+    try {
+      return '$object';
+    } catch (_) {
+      return object.runtimeType.toString();
+    }
   }
 
   Future<bool> isVisible(
@@ -33,9 +44,9 @@ extension type FluffyChatTester(WidgetTester tester) {
 
   Future<void> waitFor(
     Object object, {
-    Duration timeout = const Duration(seconds: 30),
+    Duration timeout = const Duration(seconds: 60),
   }) async {
-    _print('👀 Waiting for "$object" (${timeout.inSeconds}s)');
+    _print('👀 Waiting for "${_describe(object)}" (${timeout.inSeconds}s)');
     final end = DateTime.now().add(timeout);
     while (object.toFinder().evaluate().isEmpty) {
       if (DateTime.now().isAfter(end)) {
@@ -49,7 +60,9 @@ extension type FluffyChatTester(WidgetTester tester) {
     Object object, {
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    _print('👀 Waiting for "$object" to disappear (${timeout.inSeconds}s)');
+    _print(
+      '👀 Waiting for "${_describe(object)}" to disappear (${timeout.inSeconds}s)',
+    );
     final end = DateTime.now().add(timeout);
     while (object.toFinder().evaluate().isNotEmpty) {
       if (DateTime.now().isAfter(end)) {
@@ -64,6 +77,14 @@ extension type FluffyChatTester(WidgetTester tester) {
   Future<Finder> _ensureVisible(Object object, {int? index}) async {
     var finder = object.toFinder();
     if (finder.evaluate().isEmpty) await waitFor(object);
+
+    if (index == null && finder.evaluate().length > 1) {
+      // A page that is leaving is still under the new one for a moment.
+      final end = DateTime.now().add(const Duration(seconds: 5));
+      while (finder.evaluate().length > 1 && DateTime.now().isBefore(end)) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+    }
 
     if (finder.evaluate().length > 1) {
       if (index == null) {
@@ -81,14 +102,25 @@ extension type FluffyChatTester(WidgetTester tester) {
     return finder;
   }
 
+  /// The list scrolls under the floating bottom bar and the glass header: a
+  /// row near an edge would take the tap on the bar. Scroll it to the middle.
+  Future<void> _clearOfOverlays(Finder finder) async {
+    if (finder.hitTestable().evaluate().isNotEmpty) return;
+    final element = finder.evaluate().first;
+    if (Scrollable.maybeOf(element) == null) return;
+    await Scrollable.ensureVisible(element, alignment: 0.5);
+    await tester.pumpAndSettle();
+  }
+
   Future<void> tapOn(
     Object object, {
     int? index,
     bool pumpAndSettle = true,
   }) async {
     final finder = await _ensureVisible(object, index: index);
+    await _clearOfOverlays(finder);
 
-    _print('👆 Tapping on "$object"');
+    _print('👆 Tapping on "${_describe(object)}"');
     await tester.tap(finder);
     if (pumpAndSettle) await tester.pumpAndSettle();
   }
@@ -101,7 +133,7 @@ extension type FluffyChatTester(WidgetTester tester) {
   Future<void> longPressOn(Object object, {int? index}) async {
     final finder = await _ensureVisible(object, index: index);
 
-    _print('👆 Long pressing on "$object"');
+    _print('👆 Long pressing on "${_describe(object)}"');
     final binding = tester.binding;
     binding.shouldPropagateDevicePointerEvents = true;
     try {
@@ -122,7 +154,7 @@ extension type FluffyChatTester(WidgetTester tester) {
   }) async {
     final finder = await _ensureVisible(object, index: index);
 
-    _print('⌨️ Enter "$text" into "$object"');
+    _print('⌨️ Enter "$text" into "${_describe(object)}"');
     await tester.enterText(finder, text);
     FocusManager.instance.primaryFocus?.unfocus();
     if (pumpAndSettle) await tester.pumpAndSettle();
@@ -133,7 +165,7 @@ extension type FluffyChatTester(WidgetTester tester) {
     int? index,
     Object? scrollable,
   }) async {
-    _print('📜 Scrolling to "$object"');
+    _print('📜 Scrolling to "${_describe(object)}"');
     await tester.scrollUntilVisible(
       object.toFinder(),
       500.0,
@@ -160,21 +192,25 @@ extension StartTest on WidgetTester {
     // The test binding resets the lifecycle state for every test, but the app
     // only sends read markers while it is resumed.
     binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    // The router is static and keeps the page the flow before ended on.
+    FluffyChatApp.router.go('/');
     app.main(['integration_test']);
-    // Every flow starts a new app with new clients. The clients of the flow
-    // before keep syncing with a token that a logout revoked and log
-    // M_UNKNOWN_TOKEN, so each flow disposes its own clients when it ends.
+    final tester = FluffyChatTester(this);
+    await tester.waitFor(Matrix);
+    final clients = state<MatrixState>(find.byType(Matrix)).widget.clients;
+    // Every flow starts a new app with new clients. A client that outlives its
+    // flow keeps syncing, and sqflite shares one database handle per path, so
+    // the next flow's clients lose their database when it is closed. A passing
+    // test unmounts the tree before the tear-down runs: the clients are kept
+    // from here, not looked up in the tree.
     addTearDown(() async {
-      final matrix = find.byType(Matrix);
-      if (matrix.evaluate().isEmpty) return;
-      final clients = state<MatrixState>(matrix).widget.clients.toList();
-      for (final client in clients) {
+      for (final client in clients.toList()) {
         try {
-          await client.dispose();
+          await client.dispose().timeout(const Duration(seconds: 30));
         } catch (_) {}
       }
     });
 
-    return FluffyChatTester(this);
+    return tester;
   }
 }

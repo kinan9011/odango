@@ -6,10 +6,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_screenshot/golden_screenshot.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine_notice.dart';
 import 'package:odango/widgets/database_quarantine_banner.dart';
+import 'package:odango/widgets/shell_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'utils/golden.dart';
@@ -52,7 +54,8 @@ void main() {
 
   Future<void> pumpHost(WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(extensions: [AppTokens.light()]),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         home: _Host(),
@@ -63,7 +66,7 @@ void main() {
 
   testWidgets('no banner without a quarantine', (tester) async {
     await pumpHost(tester);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
   });
 
   testWidgets('the banner says what happened and what it means', (
@@ -72,11 +75,11 @@ void main() {
     await markDatabaseQuarantined('a');
     await pumpHost(tester);
 
-    expect(find.byType(MaterialBanner), findsOneWidget);
+    expect(find.byKey(ShellBanner.bannerKey), findsOneWidget);
     final text = tester
         .widget<Text>(
           find.descendant(
-            of: find.byType(MaterialBanner),
+            of: find.byKey(ShellBanner.bannerKey),
             matching: find.byType(Text).first,
           ),
         )
@@ -92,9 +95,9 @@ void main() {
     final handle = tester.ensureSemantics();
     await markDatabaseQuarantined('a');
     await pumpHost(tester);
-    final l10n = L10n.of(tester.element(find.byType(MaterialBanner)));
+    final l10n = L10n.of(tester.element(find.byKey(ShellBanner.bannerKey)));
     final label = tester
-        .getSemantics(find.widgetWithText(TextButton, 'Close'))
+        .getSemantics(find.widgetWithText(ShellBannerAction, 'Close'))
         .label;
     expect(label, l10n.closeNotice(l10n.databaseQuarantined));
     handle.dispose();
@@ -107,10 +110,10 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
     expect(hasDatabaseQuarantineNotice, isFalse);
     await pumpHost(tester);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
   });
 
   testWidgets('hiding the banner keeps the state of the content', (
@@ -118,7 +121,8 @@ void main() {
   ) async {
     await markDatabaseQuarantined('a');
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(extensions: [AppTokens.light()]),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         home: DatabaseQuarantineBanner(child: _Counter()),
@@ -132,7 +136,7 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(ShellBanner.bannerKey), findsNothing);
     expect(find.text('tap 1'), findsOneWidget);
   });
 
@@ -143,6 +147,7 @@ void main() {
       'database_quarantine_banner',
       const _Host(),
       size: const Size(400, 400),
+      afterAssets: const Duration(milliseconds: 400),
     );
   });
 
@@ -153,6 +158,6 @@ void main() {
 
     await pumpHost(tester);
 
-    expect(find.byType(MaterialBanner), findsOneWidget);
+    expect(find.byKey(ShellBanner.bannerKey), findsOneWidget);
   });
 }

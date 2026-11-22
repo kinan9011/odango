@@ -111,26 +111,17 @@ void main() {
     });
   });
 
-  Future<void> openNewChatPage(
-    WidgetTester tester,
-    String path,
-    String Function(L10n l10n) button,
-  ) async {
+  Future<void> openNewChatPage(WidgetTester tester, String path) async {
     await harness.open(tester, path: path);
     joinNewRoom();
-    final l10n = L10n.of(tester.element(find.byType(Scaffold).first));
     await tester.enterText(find.byType(TextField).first, 'Project room');
-    await tester.tap(find.widgetWithText(ElevatedButton, button(l10n)));
+    await tester.tap(find.byKey(const ValueKey('create_group_button')));
     await harness.settle(tester, rounds: 8);
   }
 
   group('creating a group from the new group page', () {
     testWidgets('default timer Off: encryption, no retention', (tester) async {
-      await openNewChatPage(
-        tester,
-        '/rooms/newgroup',
-        (l10n) => l10n.createGroupAndInviteUsers,
-      );
+      await openNewChatPage(tester, '/rooms/newgroup');
       expect(ofType('m.room.encryption'), hasLength(1));
       expect(ofType('m.room.retention'), isEmpty);
       await harness.finish(tester);
@@ -144,11 +135,7 @@ void main() {
         'versions': ['v1.1'],
         'unstable_features': {'org.matrix.msc1763': true},
       };
-      await openNewChatPage(
-        tester,
-        '/rooms/newgroup',
-        (l10n) => l10n.createGroupAndInviteUsers,
-      );
+      await openNewChatPage(tester, '/rooms/newgroup');
       expect(ofType('m.room.encryption'), hasLength(1));
       expect(ofType('m.room.retention').single['content'], {
         'max_lifetime': 86400000,
@@ -163,11 +150,7 @@ void main() {
       tester,
     ) async {
       await AppSettings.defaultDisappearSeconds.setItem(86400);
-      await openNewChatPage(
-        tester,
-        '/rooms/newspace',
-        (l10n) => l10n.createNewSpace,
-      );
+      await openNewChatPage(tester, '/rooms/newspace');
       expect(createRoomBody()['name'], 'Project room');
       expect(ofType('m.room.retention'), isEmpty);
       await harness.finish(tester);

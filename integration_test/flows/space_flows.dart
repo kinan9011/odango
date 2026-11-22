@@ -26,7 +26,7 @@ extension on FluffyChatTester {
     await tapOn(const Key('accounts_and_settings_buttons'));
     await tapOn(find.widgetWithText(PopupMenuItem<Object>, 'New space'));
     await enterText(TextField, _spaceName);
-    await tapOn(find.widgetWithText(ElevatedButton, 'New space'));
+    await tapOn(find.byKey(const ValueKey('create_group_button')));
     await waitFor(find.widgetWithText(InkWell, _spaceName));
 
     await longPressOn(find.widgetWithText(InkWell, _spaceName));

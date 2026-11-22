@@ -242,6 +242,21 @@ class EmotesSettingsController extends State<EmotesSettings> {
       room != null &&
       room?.canChangeStateEvent('im.ponies.room_emotes') == false;
 
+  Future<void> onPopBlocked(bool didPop, Object? result) async {
+    if (didPop) return;
+    final l10n = L10n.of(context);
+    final confirmed = await showOkCancelAlertDialog(
+      context: context,
+      title: l10n.areYouSure,
+      message: l10n.discardEdits,
+      okLabel: l10n.ok,
+      cancelLabel: l10n.cancel,
+    );
+    if (confirmed != OkCancelResult.ok || !mounted) return;
+    resetAction();
+    Navigator.of(context).pop();
+  }
+
   void resetAction() {
     setState(() {
       _pack = _getPack();

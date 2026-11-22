@@ -19,7 +19,9 @@ import 'package:odango/pages/chat/seen_by_row.dart';
 import 'package:odango/pages/chat/typing_indicators.dart';
 import 'package:odango/utils/account_config.dart';
 import 'package:odango/utils/chat/message_ticks.dart';
+import 'package:odango/utils/chat/room_mention.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/mxc_image_viewer.dart';
@@ -69,7 +71,7 @@ class ChatEventList extends StatelessWidget {
             children: [
               Avatar(
                 mxContent: roomAvatar,
-                name: room.getLocalizedDisplayname(),
+                name: room.safeLocalizedDisplayname(),
                 colorSeed: room.avatarColorSeed,
                 size: Avatar.defaultSize * 2.5,
                 onTap: roomAvatar != null
@@ -114,7 +116,8 @@ class ChatEventList extends StatelessWidget {
     final client = controller.room.client;
     final ticks = ownMessageTicks(events, client.userID);
     bool isHighlight(Event event) =>
-        client.pushruleEvaluator.match(event).highlight;
+        client.pushruleEvaluator.match(event).highlight ||
+        roomMentionHighlight(event);
 
     // create a map of eventId --> index to greatly improve performance of
     // ListView's findChildIndexCallback

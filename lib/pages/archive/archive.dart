@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/archive/archive_view.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -30,7 +31,7 @@ class ArchiveController extends State<Archive> {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
-        Logs().v('Forget room ${archive.last.room.getLocalizedDisplayname()}');
+        Logs().v('Forget room ${archive.last.room.safeLocalizedDisplayname()}');
         await archive[i].room.forget();
         archive.removeAt(i);
       },
@@ -60,7 +61,7 @@ class ArchiveController extends State<Archive> {
         while (archive.isNotEmpty) {
           onProgress(1 - (archive.length / count));
           Logs().v(
-            'Forget room ${archive.last.room.getLocalizedDisplayname()}',
+            'Forget room ${archive.last.room.safeLocalizedDisplayname()}',
           );
           await archive.last.room.forget();
           archive.removeLast();

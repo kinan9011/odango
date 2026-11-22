@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 const _allowed = {
   'lib/config/themes.dart',
   'lib/pages/chat/chat.dart',
-  'lib/pages/image_viewer/image_viewer.dart',
   'lib/utils/motion.dart',
 };
 

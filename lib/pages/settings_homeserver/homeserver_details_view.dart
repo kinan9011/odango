@@ -5,18 +5,32 @@
 
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/app_config.dart';
-import 'package:odango/config/themes.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/launch_web_url.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
+import 'package:odango/utils/visible_id.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_row.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
 
 import '../../widgets/matrix.dart';
 import 'homeserver_details.dart';
+
+const maxWellKnownEntries = 20;
+const maxWellKnownValueUnits = 4000;
+const maxContacts = 20;
+const maxContactUnits = 512;
+
+String _contactText(String value) =>
+    visibleId(cappedText(value, maxUnits: maxContactUnits));
 
 class HomeserverDetailsView extends StatelessWidget {
   final HomeserverDetailsController controller;
@@ -25,208 +39,275 @@ class HomeserverDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final l10n = L10n.of(context);
     final client = Matrix.of(context).client;
-
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: !FluffyThemes.isColumnMode(context),
-        centerTitle: FluffyThemes.isColumnMode(context),
-        title: Text(
-          L10n.of(
-            context,
-          ).aboutHomeserver(client.userID?.domain ?? 'Homeserver'),
-        ),
-      ),
-      body: MaxWidthBody(
-        withScrolling: true,
-        child: SelectionArea(
+    return SettingsScaffold(
+      title: l10n.aboutHomeserver(client.userID?.domain ?? 'Homeserver'),
+      children: [
+        SelectionArea(
           child: Column(
-            mainAxisSize: .min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ListTile(
-                title: Text(
-                  L10n.of(context).serverInformation,
-                  style: TextStyle(
-                    color: theme.colorScheme.secondary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              FutureBuilder(
-                future: client.getWellknownSupport(),
-                builder: (context, snapshot) {
-                  final error = snapshot.error;
-                  final data = snapshot.data;
-                  if (error != null) {
-                    return ListTile(
-                      leading: const Icon(Icons.error_outlined),
-                      title: Text(
-                        error.toLocalizedString(
-                          context,
-                          ExceptionContext.checkServerSupportInfo,
-                        ),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    );
-                  }
-                  if (data == null) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    );
-                  }
-                  final supportPage = data.supportPage;
-                  final contacts = data.contacts;
-                  if (supportPage == null && contacts == null) {
-                    return ListTile(
-                      leading: const Icon(Icons.error_outlined),
-                      title: Text(
-                        L10n.of(context).noContactInformationProvided,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    );
-                  }
-                  return Column(
-                    mainAxisSize: .min,
-                    children: [
-                      if (supportPage != null)
-                        ListTile(
-                          title: Text(L10n.of(context).supportPage),
-                          subtitle: Text(supportPage.toString()),
-                        ),
-                      if (contacts != null)
-                        ...contacts.map((contact) {
-                          return ListTile(
-                            title: Text(
-                              contact.role.localizedString(L10n.of(context)),
-                            ),
-                            subtitle: Column(
-                              mainAxisSize: .min,
-                              children: [
-                                if (contact.emailAddress != null)
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text(contact.emailAddress!),
-                                  ),
-                                if (contact.matrixId != null)
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: Text(contact.matrixId!),
-                                  ),
-                              ],
-                            ),
-                          );
-                        }),
-                    ],
-                  );
-                },
-              ),
-              Divider(color: theme.dividerColor),
-              FutureBuilder(
-                future: client.getWellknown(),
-                builder: (context, snapshot) {
-                  final error = snapshot.error;
-                  if (error != null) {
-                    return Column(
-                      mainAxisAlignment: .center,
-                      children: [
-                        Icon(
-                          Icons.error_outlined,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          error.toLocalizedString(context),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                      ],
-                    );
-                  }
-                  final wellKnown = snapshot.data;
-                  if (wellKnown == null) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    );
-                  }
-                  final identityServer = wellKnown.mIdentityServer;
-                  return Column(
-                    mainAxisSize: .min,
-                    children: [
-                      ListTile(
-                        title: Text(
-                          L10n.of(context).clientWellKnownInformation,
-                          style: TextStyle(
-                            color: theme.colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text(L10n.of(context).baseUrl),
-                        subtitle: Linkify(
-                          text: wellKnown.mHomeserver.baseUrl.toString(),
-                          style: TextStyle(color: theme.colorScheme.onSurface),
-                          textScaleFactor: MediaQuery.textScalerOf(
+              SettingsGroup(
+                header: l10n.serverInformation,
+                rows: [
+                  FutureBuilder(
+                    future: controller.supportFuture,
+                    builder: (context, snapshot) {
+                      final error = snapshot.error;
+                      final data = snapshot.data;
+                      if (error != null) {
+                        return SettingsNotice(
+                          tone: SettingsNoticeTone.error,
+                          icon: Icons.error_outline_rounded,
+                          text: error.toLocalizedString(
                             context,
-                          ).scale(1),
-                          options: const LinkifyOptions(humanize: false),
-                          linkStyle: TextStyle(
-                            color: theme.colorScheme.primary,
-                            decorationColor: theme.colorScheme.primary,
+                            ExceptionContext.checkServerSupportInfo,
                           ),
-                          onOpen: (link) => launchWebUrl(link.url),
-                        ),
-                      ),
-                      if (identityServer != null)
-                        ListTile(
-                          title: Text(L10n.of(context).identityServer),
-                          subtitle: Linkify(
-                            text: identityServer.baseUrl.toString(),
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            textScaleFactor: MediaQuery.textScalerOf(
-                              context,
-                            ).scale(1),
-                            options: const LinkifyOptions(humanize: false),
-                            linkStyle: TextStyle(
-                              color: theme.colorScheme.primary,
-                              decorationColor: theme.colorScheme.primary,
-                            ),
-                            onOpen: (link) => launchWebUrl(link.url),
-                          ),
-                        ),
-                      ...wellKnown.additionalProperties.entries.map(
-                        (entry) => ListTile(
-                          title: Text(entry.key),
-                          subtitle: Material(
-                            borderRadius: BorderRadius.circular(
-                              AppConfig.borderRadius,
-                            ),
-                            color: theme.colorScheme.surfaceContainer,
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.all(16),
-                              scrollDirection: Axis.horizontal,
-                              child: Text(
-                                const JsonEncoder.withIndent(
-                                  '    ',
-                                ).convert(entry.value),
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurface,
+                        );
+                      }
+                      if (data == null) return const _LoadingRow();
+                      final supportPage = data.supportPage;
+                      final contacts = data.contacts;
+                      if (supportPage == null && contacts == null) {
+                        return SettingsNotice(
+                          icon: Icons.info_outline_rounded,
+                          text: l10n.noContactInformationProvided,
+                        );
+                      }
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (supportPage != null)
+                            SettingsRow(
+                              icon: Icons.support_agent_rounded,
+                              title: l10n.supportPage,
+                              subtitle: _contactText(supportPage.toString()),
+                              showChevron: false,
+                              onTap: () => _copy(
+                                context,
+                                cappedText(
+                                  supportPage.toString(),
+                                  maxUnits: maxContactUnits,
                                 ),
                               ),
                             ),
-                          ),
+                          for (final contact in (contacts ?? <Contact>[]).take(
+                            maxContacts,
+                          )) ...[
+                            if (contact.emailAddress != null)
+                              SettingsRow(
+                                icon: Icons.mail_outline_rounded,
+                                title: contact.role.localizedString(l10n),
+                                subtitle: _contactText(contact.emailAddress!),
+                                showChevron: false,
+                                onTap: () => _copy(
+                                  context,
+                                  cappedText(
+                                    contact.emailAddress!,
+                                    maxUnits: maxContactUnits,
+                                  ),
+                                ),
+                              ),
+                            if (contact.matrixId != null)
+                              SettingsRow(
+                                icon: Icons.alternate_email_rounded,
+                                title: contact.role.localizedString(l10n),
+                                subtitle: _contactText(contact.matrixId!),
+                                showChevron: false,
+                                onTap: () => _copy(
+                                  context,
+                                  cappedText(
+                                    contact.matrixId!,
+                                    maxUnits: maxContactUnits,
+                                  ),
+                                ),
+                              ),
+                          ],
+                          if ((contacts?.length ?? 0) > maxContacts)
+                            SettingsNotice(
+                              key: const ValueKey('contacts_hidden'),
+                              text: l10n.entriesNotShown(
+                                contacts!.length - maxContacts,
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+              FutureBuilder(
+                future: controller.wellKnownFuture,
+                builder: (context, snapshot) {
+                  final error = snapshot.error;
+                  final wellKnown = snapshot.data;
+                  return SettingsGroup(
+                    header: l10n.clientWellKnownInformation,
+                    dividerInset: AppSettingsLayout.rowPadding,
+                    rows: [
+                      if (error != null)
+                        SettingsNotice(
+                          tone: SettingsNoticeTone.error,
+                          icon: Icons.error_outline_rounded,
+                          text: error.toLocalizedString(context),
+                        )
+                      else if (wellKnown == null)
+                        const _LoadingRow()
+                      else ...[
+                        _LinkRow(
+                          title: l10n.baseUrl,
+                          url: wellKnown.mHomeserver.baseUrl.toString(),
                         ),
-                      ),
+                        if (wellKnown.mIdentityServer != null)
+                          _LinkRow(
+                            title: l10n.identityServer,
+                            url: wellKnown.mIdentityServer!.baseUrl.toString(),
+                          ),
+                        for (final entry
+                            in wellKnown.additionalProperties.entries.take(
+                              maxWellKnownEntries,
+                            ))
+                          _JsonRow(title: entry.key, value: entry.value),
+                        if (wellKnown.additionalProperties.length >
+                            maxWellKnownEntries)
+                          SettingsNotice(
+                            key: const ValueKey('well_known_hidden'),
+                            text: l10n.entriesNotShown(
+                              wellKnown.additionalProperties.length -
+                                  maxWellKnownEntries,
+                            ),
+                          ),
+                      ],
                     ],
                   );
                 },
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> _copy(BuildContext context, String value) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final message = L10n.of(context).copiedToClipboard;
+  await Clipboard.setData(ClipboardData(text: value));
+  messenger.showSnackBar(SnackBar(content: Text(message)));
+}
+
+class _LoadingRow extends StatelessWidget {
+  const _LoadingRow();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(
+    height: AppSettingsLayout.rowHeight,
+    child: Center(child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
+  );
+}
+
+class _LinkRow extends StatelessWidget {
+  final String title;
+  final String url;
+
+  const _LinkRow({required this.title, required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: AppSettingsLayout.rowHeightSub,
+        minWidth: double.infinity,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSettingsLayout.rowPadding,
+          vertical: AppSpacing.s,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: tokens.fg,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Linkify(
+              text: url,
+              style: TextStyle(color: tokens.mut, fontSize: 12.5, height: 1.3),
+              textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+              options: const LinkifyOptions(humanize: false),
+              linkStyle: TextStyle(
+                color: tokens.acc,
+                decorationColor: tokens.acc,
+              ),
+              onOpen: (link) => launchWebUrl(link.url),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _JsonRow extends StatelessWidget {
+  final String title;
+  final Object? value;
+
+  const _JsonRow({required this.title, required this.value});
+
+  String get _text => cappedText(
+    const JsonEncoder.withIndent('  ').convert(value),
+    maxUnits: maxWellKnownValueUnits,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSettingsLayout.rowPadding,
+          vertical: AppSpacing.s,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              visibleId(cappedText(title, maxUnits: 200)),
+              style: TextStyle(
+                color: tokens.fg,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: tokens.surf2,
+                borderRadius: BorderRadius.circular(AppDialog.fieldRadius),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.xxl),
+                scrollDirection: Axis.horizontal,
+                child: Text(
+                  _text,
+                  style: AppTypography.mono.copyWith(
+                    color: tokens.fg,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

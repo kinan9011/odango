@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
@@ -14,10 +15,22 @@ import 'package:odango/utils/topics/topic.dart';
 /// One row of the topic list (DESIGN 8, C4): 72 px, icon tile, title, time,
 /// last message and the unread / mention badges.
 class TopicRow extends StatelessWidget {
-  const TopicRow({required this.topic, required this.onTap, super.key});
+  const TopicRow({
+    required this.topic,
+    required this.onTap,
+    this.hidden = false,
+    this.onMenu,
+    super.key,
+  });
 
   final Topic topic;
   final VoidCallback onTap;
+
+  /// The user hid this topic from the chip bar; it stays in this list.
+  final bool hidden;
+
+  /// Opens the Hide / Show menu next to [anchor].
+  final Future<void> Function(Rect anchor, BuildContext context)? onMenu;
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +41,29 @@ class TopicRow extends StatelessWidget {
       if (topic.lastSender.isNotEmpty) topic.lastSender,
       if (topic.lastPreview.isNotEmpty) topic.lastPreview,
     ].join(': ');
+    final menu = onMenu;
+    void openMenu() {
+      final box = context.findRenderObject();
+      if (box is! RenderBox || !box.attached || menu == null) return;
+      menu(box.localToGlobal(Offset.zero) & box.size, context);
+    }
+
+    final semantics = l10n.topicRowSemantics(title, '${topic.unread}', preview);
     return Semantics(
       button: true,
       excludeSemantics: true,
-      label: l10n.topicRowSemantics(title, '${topic.unread}', preview),
+      label: hidden ? '$semantics, ${l10n.hiddenThread}' : semantics,
       onTap: onTap,
+      customSemanticsActions: {
+        if (menu != null)
+          CustomSemanticsAction(
+            label: hidden ? l10n.showThread : l10n.hideThread,
+          ): openMenu,
+      },
       child: InkWell(
         onTap: onTap,
+        onLongPress: menu == null ? null : openMenu,
+        onSecondaryTap: menu == null ? null : openMenu,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: AppTopics.rowHeight),
           child: Padding(
@@ -68,6 +97,18 @@ class TopicRow extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                              if (hidden)
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    end: 6,
+                                  ),
+                                  child: Icon(
+                                    Icons.visibility_off_outlined,
+                                    key: const ValueKey('topic_hidden_marker'),
+                                    size: 15,
+                                    color: tokens.mut,
+                                  ),
+                                ),
                               Text(
                                 topic.lastActivity.localizedTimeShort(context),
                                 style: TextStyle(

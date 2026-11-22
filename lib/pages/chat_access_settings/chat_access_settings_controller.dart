@@ -42,10 +42,50 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
 
   String get roomVersion =>
       room
-          .getState(EventTypes.RoomCreate)!
-          .content
+          .getState(EventTypes.RoomCreate)
+          ?.content
           .tryGet<String>('room_version') ??
       'Unknown';
+
+  Future<List<String>> _loadAliases() async {
+    try {
+      return await room.client.getLocalAliases(room.id);
+    } on MatrixException catch (e) {
+      if (e.error == MatrixError.M_UNRECOGNIZED) return <String>[];
+      rethrow;
+    }
+  }
+
+  Future<Visibility?> _loadDirectoryVisibility() =>
+      room.client.getRoomVisibilityOnDirectory(room.id);
+
+  late Future<List<String>> localAliases = _loadAliases();
+  late Future<Visibility?> directoryVisibility = _loadDirectoryVisibility();
+
+  void reloadAliases() => setState(() {
+    localAliases = _loadAliases();
+  });
+
+  void reloadDirectoryVisibility() => setState(() {
+    directoryVisibility = _loadDirectoryVisibility();
+  });
+
+  Future<bool> _confirm(
+    String message, {
+    String? okLabel,
+    bool isDestructive = false,
+  }) async {
+    final l10n = L10n.of(context);
+    final consent = await showOkCancelAlertDialog(
+      context: context,
+      title: l10n.areYouSure,
+      message: message,
+      okLabel: okLabel ?? l10n.yes,
+      cancelLabel: l10n.cancel,
+      isDestructive: isDestructive,
+    );
+    return consent == OkCancelResult.ok && mounted;
+  }
 
   /// Calculates which join rules are available based on the information on
   /// https://spec.matrix.org/v1.11/rooms/#feature-matrix
@@ -83,6 +123,11 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
 
   Future<void> setJoinRule(JoinRules? newJoinRules) async {
     if (newJoinRules == null) return;
+    if (newJoinRules == JoinRules.public &&
+        room.joinRules != JoinRules.public &&
+        !await _confirm(L10n.of(context).publicChatWarning)) {
+      return;
+    }
     setState(() {
       joinRulesLoading = true;
     });
@@ -118,6 +163,11 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     HistoryVisibility? historyVisibility,
   ) async {
     if (historyVisibility == null) return;
+    if (historyVisibility == HistoryVisibility.worldReadable &&
+        room.historyVisibility != HistoryVisibility.worldReadable &&
+        !await _confirm(L10n.of(context).worldReadableWarning)) {
+      return;
+    }
     setState(() {
       historyVisibilityLoading = true;
     });
@@ -166,10 +216,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
 
   Future<void> updateRoomAction() async {
     final l10n = L10n.of(context);
-    final roomVersion = room
-        .getState(EventTypes.RoomCreate)!
-        .content
-        .tryGet<String>('room_version');
+    final roomVersion = this.roomVersion;
     final capabilitiesResult = await showFutureLoadingDialog(
       context: context,
       future: () => room.client.getCapabilities(),
@@ -177,11 +224,18 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     final capabilities = capabilitiesResult.result;
     if (capabilities == null) return;
     if (!mounted) return;
+    final available = capabilities.mRoomVersions?.available;
+    if (available == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.oopsSomethingWentWrong)));
+      return;
+    }
     final newVersion = await showModalActionPopup<String>(
       context: context,
       title: l10n.replaceRoomWithNewerVersion,
       cancelLabel: l10n.cancel,
-      actions: capabilities.mRoomVersions!.available.entries
+      actions: available.entries
           .where((r) => r.key != roomVersion)
           .map(
             (version) => AdaptiveModalAction(
@@ -202,7 +256,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
       message: l10n.roomUpgradeDescription,
       isDestructive: true,
     );
-    if (confirmUpgrade == OkCancelResult.cancel) {
+    if (confirmUpgrade != OkCancelResult.ok) {
       return;
     }
     if (!mounted) return;
@@ -276,7 +330,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     );
     if (result.error != null) return;
     if (!mounted) return;
-    setState(() {});
+    reloadAliases();
 
     if (!room.canChangeStateEvent(EventTypes.RoomCanonicalAlias)) return;
 
@@ -286,8 +340,9 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
       message: alias,
       okLabel: l10n.yes,
       cancelLabel: l10n.no,
+      cancelIsAction: true,
     );
-    if (!mounted) return;
+    if (!mounted || canonicalAliasConsent == OkCancelResult.dismissed) return;
 
     final altAliases =
         room
@@ -317,11 +372,20 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   }
 
   Future<void> deleteAlias(String alias) async {
+    if (!await _confirm(
+      L10n.of(context).deleteAddressWarning,
+      okLabel: L10n.of(context).delete,
+      isDestructive: true,
+    )) {
+      return;
+    }
+    if (!mounted) return;
     await showFutureLoadingDialog(
       context: context,
       future: () => room.client.deleteRoomAlias(alias),
     );
-    setState(() {});
+    if (!mounted) return;
+    reloadAliases();
   }
 
   Future<void> setChatVisibilityOnDirectory(bool? visibility) async {
@@ -335,7 +399,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
         room.id,
         visibility: visibility == true ? Visibility.public : Visibility.private,
       );
-      setState(() {});
+      if (mounted) reloadDirectoryVisibility();
     } catch (e, s) {
       Logs().w('Unable to change visibility', e, s);
       if (mounted) {

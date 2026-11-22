@@ -72,7 +72,12 @@ abstract class FluffyThemes {
   }
 
   static const Duration animationDuration = Duration(milliseconds: 250);
+
   static const Curve animationCurve = Curves.easeInOut;
+
+  static final _snackShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(16),
+  );
 
   /// Precedence: the user's `accentHue` (a stored key is the user's intent,
   /// even if it equals the default), then deployer `accentHue`, then deployer
@@ -133,8 +138,44 @@ abstract class FluffyThemes {
       textTheme: _textTheme(brightness, tokens),
       scaffoldBackgroundColor: tokens.bg,
       dividerColor: tokens.line,
-      bottomSheetTheme: const BottomSheetThemeData(
+      dialogTheme: DialogThemeData(
+        backgroundColor: tokens.surf,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        titleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          color: tokens.fg,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+        contentTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          color: tokens.fg,
+          fontSize: 15.5,
+          fontWeight: FontWeight.w400,
+        ),
+        barrierColor: AppTokens.overlay(AppDialog.scrim),
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppDialog.sideInset,
+          vertical: AppSpacing.huge,
+        ),
+        actionsPadding: const EdgeInsetsDirectional.only(
+          start: 16,
+          end: 16,
+          bottom: 12,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: tokens.surf,
+        surfaceTintColor: Colors.transparent,
+        dragHandleColor: tokens.line,
+        dragHandleSize: const Size(
+          AppDialog.handleWidth,
+          AppDialog.handleHeight,
+        ),
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppRadius.sheet),
           ),
@@ -199,12 +240,17 @@ abstract class FluffyThemes {
         refreshBackgroundColor: colorScheme.primaryContainer,
       ),
       snackBarTheme: isColumnMode
-          ? const SnackBarThemeData(
+          ? SnackBarThemeData(
               showCloseIcon: true,
               behavior: SnackBarBehavior.floating,
+              shape: _snackShape,
               width: FluffyThemes.columnWidth * 1.5,
             )
-          : const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+          : SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+              shape: _snackShape,
+              insetPadding: const EdgeInsets.all(AppSpacing.l),
+            ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.secondaryContainer,

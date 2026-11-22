@@ -3,200 +3,211 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:material_ui/material_ui.dart';
-import 'package:odango/config/themes.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/new_group/new_group.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/motion.dart';
-import 'package:odango/widgets/avatar.dart';
-import 'package:odango/widgets/layouts/max_width_body.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:odango/widgets/settings/error_shake.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/settings/settings_segmented.dart';
+import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
 class NewGroupView extends StatelessWidget {
   final NewGroupController controller;
 
   const NewGroupView(this.controller, {super.key});
 
+  static const avatarSize = 64.0;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final l10n = L10n.of(context);
+    final tokens = AppTokens.of(context);
+    final space = controller.createGroupType == CreateGroupType.space;
+    final loading = controller.loading;
     final avatar = controller.avatar;
     final error = controller.error;
-    return Scaffold(
-      appBar: AppBar(
-        leading: Center(
-          child: BackButton(
-            onPressed: controller.loading ? null : Navigator.of(context).pop,
+    final reveal = motionDuration(context, AppMotion.profileList);
+    return PopScope(
+      canPop: !loading,
+      child: SettingsScaffold(
+        title: space ? l10n.newSpace : l10n.createGroup,
+        onBack: loading ? () {} : () => Navigator.of(context).maybePop(),
+        bottom: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSettingsLayout.sideMargin,
+            AppSpacing.s,
+            AppSettingsLayout.sideMargin,
+            AppSpacing.xl,
+          ),
+          child: SettingsPillButton(
+            key: const ValueKey('create_group_button'),
+            label: space ? l10n.createNewSpace : l10n.createGroupAndInviteUsers,
+            loading: loading,
+            onPressed: loading ? null : controller.submitAction,
           ),
         ),
-        title: Text(
-          controller.createGroupType == CreateGroupType.space
-              ? L10n.of(context).newSpace
-              : L10n.of(context).createGroup,
-        ),
-      ),
-      body: MaxWidthBody(
-        child: Column(
-          mainAxisSize: .min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SegmentedButton<CreateGroupType>(
-                selected: {controller.createGroupType},
-                onSelectionChanged: controller.setCreateGroupType,
-                segments: [
-                  ButtonSegment(
-                    value: CreateGroupType.group,
-                    label: Text(L10n.of(context).group),
+        children: [
+          ErrorShake(
+            trigger: error == null
+                ? null
+                : Object.hash(error, controller.attempt),
+            child: Container(
+              margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xxl,
+                vertical: AppSpacing.s,
+              ),
+              decoration: BoxDecoration(
+                color: tokens.surf,
+                borderRadius: BorderRadius.circular(
+                  AppSettingsLayout.cardRadius,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Semantics(
+                    button: true,
+                    label: l10n.editRoomAvatar,
+                    excludeSemantics: true,
+                    onTap: loading ? null : controller.selectPhoto,
+                    child: Tooltip(
+                      message: l10n.editRoomAvatar,
+                      child: InkResponse(
+                        key: const ValueKey('group_avatar'),
+                        onTap: loading ? null : controller.selectPhoto,
+                        radius: avatarSize / 2,
+                        child: ClipOval(
+                          child: SizedBox(
+                            width: avatarSize,
+                            height: avatarSize,
+                            child: AnimatedSwitcher(
+                              duration: motionDuration(
+                                context,
+                                AppMotion.avatarSwap,
+                              ),
+                              child: avatar == null
+                                  ? ColoredBox(
+                                      key: const ValueKey('avatar_empty'),
+                                      color: tokens.accs,
+                                      child: Icon(
+                                        Icons.add_a_photo_outlined,
+                                        color: tokens.acc,
+                                      ),
+                                    )
+                                  : Image.memory(
+                                      avatar,
+                                      key: const ValueKey('avatar_picked'),
+                                      width: avatarSize,
+                                      height: avatarSize,
+                                      cacheWidth: 256,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  ButtonSegment(
-                    value: CreateGroupType.space,
-                    label: Text(L10n.of(context).space),
+                  const SizedBox(width: AppSpacing.xxl),
+                  Expanded(
+                    child: DialogTextField(
+                      key: const ValueKey('group_name'),
+                      autofocus: true,
+                      controller: controller.nameController,
+                      autocorrect: false,
+                      readOnly: loading,
+                      maxLength: 255,
+                      textInputAction: TextInputAction.done,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'[\r\n]')),
+                      ],
+                      counterText: '',
+                      labelText: space ? l10n.spaceName : l10n.groupName,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Tooltip(
-              message: L10n.of(context).editRoomAvatar,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(90),
-                onTap: controller.loading ? null : controller.selectPhoto,
-                child: CircleAvatar(
-                  radius: Avatar.defaultSize,
-                  child: avatar == null
-                      ? const Icon(Icons.add_a_photo_outlined)
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(90),
-                          child: Image.memory(
-                            avatar,
-                            width: Avatar.defaultSize * 2,
-                            height: Avatar.defaultSize * 2,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: TextField(
-                autofocus: true,
-                controller: controller.nameController,
-                autocorrect: false,
-                readOnly: controller.loading,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.people_outlined),
-                  labelText: controller.createGroupType == CreateGroupType.space
-                      ? L10n.of(context).spaceName
-                      : L10n.of(context).groupName,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile.adaptive(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 32),
-              secondary: const Icon(Icons.public_outlined),
-              title: Text(
-                controller.createGroupType == CreateGroupType.space
-                    ? L10n.of(context).spaceIsPublic
-                    : L10n.of(context).groupIsPublic,
-              ),
-              value: controller.publicGroup,
-              onChanged: controller.loading ? null : controller.setPublicGroup,
-            ),
-            AnimatedSize(
-              duration: motionDuration(context, FluffyThemes.animationDuration),
-              curve: FluffyThemes.animationCurve,
-              child: controller.publicGroup
-                  ? SwitchListTile.adaptive(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                      ),
-                      secondary: const Icon(Icons.search_outlined),
-                      title: Text(L10n.of(context).groupCanBeFoundViaSearch),
-                      value: controller.groupCanBeFound,
-                      onChanged: controller.loading
-                          ? null
-                          : controller.setGroupCanBeFound,
-                    )
-                  : const SizedBox.shrink(),
-            ),
-            AnimatedSize(
-              duration: motionDuration(context, FluffyThemes.animationDuration),
-              curve: FluffyThemes.animationCurve,
-              child: controller.createGroupType == CreateGroupType.space
-                  ? const SizedBox.shrink()
-                  : SwitchListTile.adaptive(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                      ),
-                      secondary: Icon(
-                        Icons.lock_outlined,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      title: Text(
-                        L10n.of(context).enableEncryption,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
-                      ),
+          ),
+          SettingsSegmented<CreateGroupType>(
+            items: [
+              (CreateGroupType.group, l10n.group),
+              (CreateGroupType.space, l10n.space),
+            ],
+            value: controller.createGroupType,
+            onChanged: loading ? (_) {} : controller.setCreateGroupType,
+          ),
+          SettingsGroup(
+            rows: [
+              Column(
+                children: [
+                  SettingsToggleRow(
+                    key: const ValueKey('group_public'),
+                    icon: Icons.public_outlined,
+                    title: space ? l10n.spaceIsPublic : l10n.groupIsPublic,
+                    value: controller.publicGroup,
+                    onChanged: loading ? null : controller.setPublicGroup,
+                  ),
+                  AnimatedSize(
+                    duration: reveal,
+                    curve: AppMotion.easeOutQuint,
+                    alignment: Alignment.topCenter,
+                    child: controller.publicGroup
+                        ? Column(
+                            children: [
+                              const SettingsDivider(),
+                              SettingsToggleRow(
+                                key: const ValueKey('group_found'),
+                                icon: Icons.search_rounded,
+                                title: l10n.groupCanBeFoundViaSearch,
+                                value: controller.groupCanBeFound,
+                                onChanged: loading
+                                    ? null
+                                    : controller.setGroupCanBeFound,
+                              ),
+                            ],
+                          )
+                        : const SizedBox(width: double.infinity),
+                  ),
+                  if (!space) ...[
+                    const SettingsDivider(),
+                    SettingsToggleRow(
+                      key: const ValueKey('group_encryption'),
+                      icon: Icons.lock_outline_rounded,
+                      title: l10n.enableEncryption,
+                      subtitle: controller.publicGroup
+                          ? l10n.noEncryptionForPublicRooms
+                          : null,
                       value: !controller.publicGroup,
                       onChanged: null,
                     ),
-            ),
-            AnimatedSize(
-              duration: motionDuration(context, FluffyThemes.animationDuration),
-              curve: FluffyThemes.animationCurve,
-              child: controller.createGroupType == CreateGroupType.space
-                  ? ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                      ),
-                      trailing: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Icon(Icons.info_outlined),
-                      ),
-                      subtitle: Text(L10n.of(context).newSpaceDescription),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: controller.loading
-                      ? null
-                      : controller.submitAction,
-                  child: controller.loading
-                      ? const LinearProgressIndicator()
-                      : Text(
-                          controller.createGroupType == CreateGroupType.space
-                              ? L10n.of(context).createNewSpace
-                              : L10n.of(context).createGroupAndInviteUsers,
-                        ),
-                ),
+                  ],
+                ],
               ),
-            ),
-            AnimatedSize(
-              duration: motionDuration(context, FluffyThemes.animationDuration),
-              curve: FluffyThemes.animationCurve,
-              child: error == null
-                  ? const SizedBox.shrink()
-                  : ListTile(
-                      leading: Icon(
-                        Icons.warning_outlined,
-                        color: theme.colorScheme.error,
-                      ),
-                      title: Text(
-                        error.toLocalizedString(context),
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                    ),
-            ),
-          ],
-        ),
+            ],
+          ),
+          if (space) SettingsNotice(text: l10n.newSpaceDescription),
+          AnimatedSize(
+            duration: reveal,
+            curve: AppMotion.easeOutQuint,
+            alignment: Alignment.topCenter,
+            child: error == null
+                ? const SizedBox(width: double.infinity)
+                : SettingsNotice(
+                    tone: SettingsNoticeTone.error,
+                    text: error.toLocalizedString(context),
+                  ),
+          ),
+        ],
       ),
     );
   }

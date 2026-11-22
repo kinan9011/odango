@@ -72,7 +72,7 @@ class ErrorReporter {
     }
     showAdaptiveDialog(
       context: context,
-      builder: (context) => AlertDialog.adaptive(
+      builder: (context) => AlertDialog(
         title: Text(L10n.of(context).reportErrorDescription),
         content: SizedBox(
           height: 256,
