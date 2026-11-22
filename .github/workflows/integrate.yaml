@@ -294,3 +294,5 @@ jobs:
           path: |
             integration_test.log
             logcat.txt
+            logcat_stream.txt
+            emulator.log

@@ -16,7 +16,7 @@
 
 set -u
 
-attempts=4
+attempts=2
 expected=$(grep -c '^    flow(' integration_test/mobile_test.dart)
 
 device_ready() {
@@ -41,7 +41,11 @@ restart_emulator() {
 
 : > integration_test.log
 for attempt in $(seq "$attempts"); do
+    adb logcat -c
+    adb logcat -v time > logcat_stream.txt 2>&1 &
+    logcat_pid=$!
     timeout 35m flutter test integration_test/mobile_test.dart 2>&1 | tee attempt.log
+    kill "$logcat_pid" 2>/dev/null
     cat attempt.log >> integration_test.log
     grep -qE "^🎉 $expected tests passed" attempt.log && exit 0
 

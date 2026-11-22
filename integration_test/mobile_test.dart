@@ -35,6 +35,8 @@ void main() {
   group('Odango Integration Tests', () {
     flow('Login and logout flow', loginAndChatBackup);
     flow('Basic Messaging', basicMessaging);
+    // ponytail: experiment, the emulator died in this flow in every run; moved up to tell the flow from its position
+    flow('Settings export chat', settingsExportFlow);
     flow('Shell navigation', shellNavigation);
     flow('Odango branding and support dialog', odangoBranding);
     flow('Calls hidden without a call service', callsHiddenFlow);
@@ -78,7 +80,6 @@ void main() {
     flow('Settings blocked users', settingsBlockedUsersFlow);
     flow('Settings double-tap reaction', settingsDoubleTapReactionFlow);
     flow('Settings homeserver features', settingsHomeserverFlow);
-    flow('Settings export chat', settingsExportFlow);
     // Signs out every other session of the user: keep it after the flows that
     // use sessions of their own.
     flow('Settings linked devices', settingsLinkedDevicesFlow);
