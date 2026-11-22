@@ -35,7 +35,8 @@ void main() {
   group('Odango Integration Tests', () {
     flow('Login and logout flow', loginAndChatBackup);
     flow('Basic Messaging', basicMessaging);
-    // ponytail: experiment, the emulator died in this flow in every run; moved up to tell the flow from its position
+    // ponytail: run 42nd, this flow segfaulted the CI emulator in every run;
+    // early it passes. Move it back once the emulator is stable.
     flow('Settings export chat', settingsExportFlow);
     flow('Shell navigation', shellNavigation);
     flow('Odango branding and support dialog', odangoBranding);

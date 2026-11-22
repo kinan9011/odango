@@ -6,6 +6,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:odango/main.dart' as app;
+import 'package:odango/widgets/fluffy_chat_app.dart';
 import 'package:odango/widgets/matrix.dart';
 
 extension type FluffyChatTester(WidgetTester tester) {
@@ -191,6 +192,8 @@ extension StartTest on WidgetTester {
     // The test binding resets the lifecycle state for every test, but the app
     // only sends read markers while it is resumed.
     binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    // The router is static and keeps the page the flow before ended on.
+    FluffyChatApp.router.go('/');
     app.main(['integration_test']);
     final tester = FluffyChatTester(this);
     await tester.waitFor(Matrix);
