@@ -202,7 +202,7 @@ jobs:
 
   integration_test:
     runs-on: ubuntu-26.04
-    timeout-minutes: 70
+    timeout-minutes: 100
     needs: [ code_tests ]
     strategy:
       matrix:
@@ -277,10 +277,6 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: google_apis
           arch: x86_64
-          # ponytail: emulator 37.3.10 (latest) drops offline mid-run in about half the runs. The action's emulator-build input fetches a zip name that this build does not have, so the Jul 2025 build is unpacked over the SDK here; drop it once the latest is stable.
-          pre-emulator-launch-script: |
-            curl -fo emulator.zip https://dl.google.com/android/repository/emulator-linux_x64-13823996.zip
-            unzip -qo emulator.zip -d "$ANDROID_HOME"
           cores: 4
           ndk: 28.2.13676358
           force-avd-creation: false
@@ -288,8 +284,8 @@ jobs:
           ram-size: 4096M
           sdcard-path-or-size: 4096M
           emulator-options: -no-snapshot-save -no-window -wipe-data -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # ponytail: emulator can drop offline during flutter_tools teardown after all tests pass; trust the reporter summary instead of the exit code, but only when every flow passed. A device that drops mid-run still prints every flow as passed but counts 0, hence the flow count. The runner executes each script line in its own shell, so the gate stays one line. timeout covers a frozen emulator, where the on-device flow timeout never fires; adb logcat blocks forever on an offline device, so it needs one too.
-          script: timeout 50m flutter test integration_test/mobile_test.dart 2>&1 | tee integration_test.log; expected=$(grep -c '^    flow(' integration_test/mobile_test.dart); grep -qE "^🎉 $expected tests passed" integration_test.log || { adb devices; free -m; sudo dmesg | grep -iE 'oom|killed process' | tail -n 20; pgrep -l qemu; timeout 30s adb logcat -d > logcat.txt; exit 1; }
+          # ponytail: the emulator crashes in about half the runs; the script restarts it and runs again, see its header
+          script: bash scripts/ci_integration_tests.sh
       - name: Upload integration logs
         if: failure() || cancelled()
         uses: actions/upload-artifact@v7
