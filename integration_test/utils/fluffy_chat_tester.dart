@@ -89,12 +89,23 @@ extension type FluffyChatTester(WidgetTester tester) {
     return finder;
   }
 
+  /// The list scrolls under the floating bottom bar and the glass header: a
+  /// row near an edge would take the tap on the bar. Scroll it to the middle.
+  Future<void> _clearOfOverlays(Finder finder) async {
+    if (finder.hitTestable().evaluate().isNotEmpty) return;
+    final element = finder.evaluate().first;
+    if (Scrollable.maybeOf(element) == null) return;
+    await Scrollable.ensureVisible(element, alignment: 0.5);
+    await tester.pumpAndSettle();
+  }
+
   Future<void> tapOn(
     Object object, {
     int? index,
     bool pumpAndSettle = true,
   }) async {
     final finder = await _ensureVisible(object, index: index);
+    await _clearOfOverlays(finder);
 
     _print('👆 Tapping on "$object"');
     await tester.tap(finder);
