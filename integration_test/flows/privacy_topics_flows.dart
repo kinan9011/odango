@@ -180,7 +180,8 @@ extension on FluffyChatTester {
     expect(find.byKey(const ValueKey('thread_island')), findsOneWidget);
     expect(find.text('Reply in thread'), findsNothing);
 
-    await tapOn(const ValueKey('topic_chip_general'));
+    expect(find.byKey(const ValueKey('topic_chip_general')), findsNothing);
+    await tapOn(find.byTooltip('Back to main chat'));
     await waitForGone(find.byKey(const ValueKey('thread_island')));
     await waitFor(const ValueKey('topic_chip_all'));
 

@@ -6,6 +6,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/pages/chat_list/chat_list.dart';
+import 'package:odango/pages/chat_list/chat_list_item.dart';
 
 import '../utils/fluffy_chat_tester.dart';
 import 'auth_flows.dart';
@@ -31,7 +32,13 @@ extension ChatFlows on FluffyChatTester {
   Future<void> _archiveChats() async {
     await ensureLoggedIn();
     await ensureGroupChatCreated();
-    await tapOn(groupChatName);
+    // The list scrolls under the floating bottom bar: a row near the bottom
+    // edge would take the tap on the bar.
+    final row = find.widgetWithText(ChatListItem, groupChatName);
+    await waitFor(row);
+    await Scrollable.ensureVisible(tester.element(row), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tapOn(row);
     await tapOn(const Key('chat_overflow_button'));
     await tapOn('Leave chat');
     await waitFor('Are you sure?');

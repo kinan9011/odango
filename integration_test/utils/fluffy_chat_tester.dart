@@ -169,20 +169,22 @@ extension StartTest on WidgetTester {
     // only sends read markers while it is resumed.
     binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     app.main(['integration_test']);
-    // Every flow starts a new app with new clients. The clients of the flow
-    // before keep syncing with a token that a logout revoked and log
-    // M_UNKNOWN_TOKEN, so each flow disposes its own clients when it ends.
+    final tester = FluffyChatTester(this);
+    await tester.waitFor(Matrix);
+    final clients = state<MatrixState>(find.byType(Matrix)).widget.clients;
+    // Every flow starts a new app with new clients. A client that outlives its
+    // flow keeps syncing, and sqflite shares one database handle per path, so
+    // the next flow's clients lose their database when it is closed. A passing
+    // test unmounts the tree before the tear-down runs: the clients are kept
+    // from here, not looked up in the tree.
     addTearDown(() async {
-      final matrix = find.byType(Matrix);
-      if (matrix.evaluate().isEmpty) return;
-      final clients = state<MatrixState>(matrix).widget.clients.toList();
-      for (final client in clients) {
+      for (final client in clients.toList()) {
         try {
-          await client.dispose();
+          await client.dispose().timeout(const Duration(seconds: 30));
         } catch (_) {}
       }
     });
 
-    return FluffyChatTester(this);
+    return tester;
   }
 }

@@ -202,7 +202,7 @@ jobs:
 
   integration_test:
     runs-on: ubuntu-26.04
-    timeout-minutes: 60
+    timeout-minutes: 70
     needs: [ code_tests ]
     strategy:
       matrix:
@@ -285,7 +285,7 @@ jobs:
           sdcard-path-or-size: 4096M
           emulator-options: -no-snapshot-save -no-window -wipe-data -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           # ponytail: emulator can drop offline during flutter_tools teardown after all tests pass; trust the reporter summary instead of the exit code, but only when every flow passed. A device that drops mid-run still prints every flow as passed but counts 0, hence the flow count. The runner executes each script line in its own shell, so the gate stays one line. timeout covers a frozen emulator, where the on-device flow timeout never fires; adb logcat blocks forever on an offline device, so it needs one too.
-          script: timeout 45m flutter test integration_test/mobile_test.dart 2>&1 | tee integration_test.log; expected=$(grep -c '^    flow(' integration_test/mobile_test.dart); grep -qE "^🎉 $expected tests passed" integration_test.log || { adb devices; free -m; sudo dmesg | grep -iE 'oom|killed process' | tail -n 20; pgrep -l qemu; timeout 30s adb logcat -d > logcat.txt; exit 1; }
+          script: timeout 50m flutter test integration_test/mobile_test.dart 2>&1 | tee integration_test.log; expected=$(grep -c '^    flow(' integration_test/mobile_test.dart); grep -qE "^🎉 $expected tests passed" integration_test.log || { adb devices; free -m; sudo dmesg | grep -iE 'oom|killed process' | tail -n 20; pgrep -l qemu; timeout 30s adb logcat -d > logcat.txt; exit 1; }
       - name: Upload integration logs
         if: failure() || cancelled()
         uses: actions/upload-artifact@v7

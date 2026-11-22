@@ -1,16 +1,16 @@
-# Graph Report - fluffychat  (2026-11-21)
+# Graph Report - fluffychat  (2026-11-22)
 
 ## Corpus Check
-- 1043 files · ~1,297,472 words
+- 1043 files · ~1,299,772 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 12626 nodes · 20924 edges · 562 communities (509 shown, 53 thin omitted)
+- 12627 nodes · 20926 edges · 542 communities (488 shown, 54 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 32 edges (avg confidence: 0.78)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f269b2ee`
+- Built from commit: `49c69a55`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -479,13 +479,9 @@
 - [[_COMMUNITY_send_options.dart|send_options.dart]]
 - [[_COMMUNITY_chat_row_semantics_test.dart|chat_row_semantics_test.dart]]
 - [[_COMMUNITY_call_kit_params.dart|call_kit_params.dart]]
-- [[_COMMUNITY_database_key_error_page_test.dart|database_key_error_page_test.dart]]
 - [[_COMMUNITY_matrix_room_id.dart|matrix_room_id.dart]]
-- [[_COMMUNITY_device_extension.dart|device_extension.dart]]
 - [[_COMMUNITY_word_diff_test.dart|word_diff_test.dart]]
-- [[_COMMUNITY_archive.dart|archive.dart]]
 - [[_COMMUNITY_folder_chat_picker.dart|folder_chat_picker.dart]]
-- [[_COMMUNITY_folder_store_test.dart|folder_store_test.dart]]
 - [[_COMMUNITY_a11y_screens.dart|a11y_screens.dart]]
 - [[_COMMUNITY_file_selector.dart|file_selector.dart]]
 - [[_COMMUNITY_packageodangoutilsoklch.dart|package:odango/utils/oklch.dart]]
@@ -511,9 +507,7 @@
 - [[_COMMUNITY_SharedMediaType|SharedMediaType]]
 - [[_COMMUNITY_Uri|Uri]]
 - [[_COMMUNITY_device_model_test.dart|device_model_test.dart]]
-- [[_COMMUNITY_packageodangoutilsspacesspace_trail.dart|package:odango/utils/spaces/space_trail.dart]]
 - [[_COMMUNITY_ScheduleSheet|ScheduleSheet]]
-- [[_COMMUNITY_build|build]]
 - [[_COMMUNITY_search_source_scan_test.dart|search_source_scan_test.dart]]
 - [[_COMMUNITY_build|build]]
 - [[_COMMUNITY_app_temp_directory.dart|app_temp_directory.dart]]
@@ -530,29 +524,17 @@
 - [[_COMMUNITY_device_extension.dart|device_extension.dart]]
 - [[_COMMUNITY_focus_order_test.dart|focus_order_test.dart]]
 - [[_COMMUNITY_EditHistorySheet|EditHistorySheet]]
-- [[_COMMUNITY_ScheduleSheet|ScheduleSheet]]
 - [[_COMMUNITY_chat_permissions_page_test.dart|chat_permissions_page_test.dart]]
 - [[_COMMUNITY_message_focus_test.dart|message_focus_test.dart]]
-- [[_COMMUNITY_MatrixLocals|MatrixLocals]]
-- [[_COMMUNITY_message_download_content.dart|message_download_content.dart]]
 - [[_COMMUNITY_menu_placement_test.dart|menu_placement_test.dart]]
 - [[_COMMUNITY_Route backup|Route /backup]]
 - [[_COMMUNITY_send_rich_message_test.dart|send_rich_message_test.dart]]
 - [[_COMMUNITY_build|build]]
-- [[_COMMUNITY_web_auth_test.dart|web_auth_test.dart]]
 - [[_COMMUNITY_Duration|Duration]]
-- [[_COMMUNITY_bubble_shape.dart|bubble_shape.dart]]
 - [[_COMMUNITY_room_trust.dart|room_trust.dart]]
-- [[_COMMUNITY_chat_row_model.dart|chat_row_model.dart]]
-- [[_COMMUNITY_packagematrixencryption.dart|package:matrix/encryption.dart]]
-- [[_COMMUNITY_device_model_test.dart|device_model_test.dart]]
 - [[_COMMUNITY_typing_animation_test.dart|typing_animation_test.dart]]
 - [[_COMMUNITY_dartui|dart:ui]]
 - [[_COMMUNITY_homeserver_report_test.dart|homeserver_report_test.dart]]
-- [[_COMMUNITY_tab_swipe_test.dart|tab_swipe_test.dart]]
-- [[_COMMUNITY_settings_chat.dart|settings_chat.dart]]
-- [[_COMMUNITY_clamped_height_test.dart|clamped_height_test.dart]]
-- [[_COMMUNITY_chat_row_model.dart|chat_row_model.dart]]
 - [[_COMMUNITY_matrix_file_extension.dart|matrix_file_extension.dart]]
 - [[_COMMUNITY_chat_list_top_bar_test.dart|chat_list_top_bar_test.dart]]
 - [[_COMMUNITY_settings_b_goldens_rtl_test.dart|settings_b_goldens_rtl_test.dart]]
@@ -561,9 +543,7 @@
 - [[_COMMUNITY_retention_labels.dart|retention_labels.dart]]
 - [[_COMMUNITY_chats_badge.dart|chats_badge.dart]]
 - [[_COMMUNITY_reaction_summary_test.dart|reaction_summary_test.dart]]
-- [[_COMMUNITY_space_hierarchy_test.dart|space_hierarchy_test.dart]]
 - [[_COMMUNITY_@mara|@mara]]
-- [[_COMMUNITY_CustomPainter|CustomPainter]]
 - [[_COMMUNITY_packageodangoutilschatbubble_shape.dart|package:odango/utils/chat/bubble_shape.dart]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -593,7 +573,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (562 total, 53 thin omitted)
+## Communities (542 total, 54 thin omitted)
 
 ### Community 0 - "chat.dart"
 Cohesion: 0.01
@@ -613,7 +593,7 @@ Nodes (42): BoxConstraints?, activeChat, _activeClientSubscription, activeSpace,
 
 ### Community 4 - "send_file_dialog.dart"
 Cohesion: 0.03
-Nodes (65): CropController, _activeStroke, build, bytes, _calcCombinedFileSize, _color, _compose, compress (+57 more)
+Nodes (69): CropController, CustomPainter, WallpaperDots, _activeStroke, build, bytes, _calcCombinedFileSize, _color (+61 more)
 
 ### Community 5 - "push_helper.dart"
 Cohesion: 0.03
@@ -633,15 +613,15 @@ Nodes (85): AppLifecycleListener?, AppLifecycleState?, BuildContext get, _accoun
 
 ### Community 9 - "image_viewer.dart"
 Cohesion: 0.06
-Nodes (33): Event get, allEvents, build, canGoBack, canGoNext, chromeVisible, createState, currentEvent (+25 more)
+Nodes (35): Event get, allEvents, build, canGoBack, canGoNext, chromeVisible, createState, currentEvent (+27 more)
 
 ### Community 10 - "import_archive_dialog.dart"
 Cohesion: 0.08
 Nodes (25): _addEmotePack, build, completer, controller, createState, dispose, _EmojiImportPreview, _EmojiImportPreviewState (+17 more)
 
 ### Community 11 - "background_push.dart"
-Cohesion: 0.05
-Nodes (41): AudioElement, BackgroundPush, clientOnly, _clients, _fcmToken, features, firebaseEnabled, _flutterLocalNotificationsPlugin (+33 more)
+Cohesion: 0.03
+Nodes (70): @pragma, AudioElement, ../config/app_config.dart, ../config/setting_keys.dart, dart:isolate, BackgroundPush, clientOnly, _clients (+62 more)
 
 ### Community 12 - "package:fluffychat/widgets/matrix.dart"
 Cohesion: 0.18
@@ -656,8 +636,8 @@ Cohesion: 0.07
 Nodes (29): allowOtherHomeservers, AppConfig, appId, appleAppGroupId, appOpenUrlScheme, appSsoUrlScheme, borderRadius, chatColor (+21 more)
 
 ### Community 15 - "app_lock.dart"
-Cohesion: 0.05
-Nodes (43): bool isLoggedIn,, AppStarter, AppLock, AppLockWidget, build, changePincode, changeUseBiometrics, _checkLoggedIn (+35 more)
+Cohesion: 0.10
+Nodes (20): bool isLoggedIn,, build, changePincode, changeUseBiometrics, _checkLoggedIn, child, createState, didChangeAppLifecycleState (+12 more)
 
 ### Community 16 - "package:fluffychat/utils/platform_infos.dart"
 Cohesion: 0.05
@@ -673,15 +653,15 @@ Nodes (32): animated, animationCurve, animationDuration, borderRadius, build, ca
 
 ### Community 19 - "settings_emotes.dart"
 Cohesion: 0.06
-Nodes (36): ImagePackContent?, import_archive_dialog.dart, build, createImagePack, createState, createStickers, dispose, EmotesSettings (+28 more)
+Nodes (34): ImagePackContent?, import_archive_dialog.dart, build, createImagePack, createState, createStickers, dispose, EmotesSettings (+26 more)
 
 ### Community 20 - "GeneratedPluginRegistrant.swift"
 Cohesion: 0.10
 Nodes (31): audio_session, connectivity_plus, desktop_drop, desktop_webview_window, device_info_plus, dynamic_color, emoji_picker_flutter, file_picker_darwin (+23 more)
 
 ### Community 21 - "message.dart"
-Cohesion: 0.02
-Nodes (83): chat.dart, ../../config/themes.dart, deleted_bubble_content.dart, Event?, events/reply_content.dart, build, event, EventInfoDialog (+75 more)
+Cohesion: 0.03
+Nodes (60): deleted_bubble_content.dart, _animationFinished, bigEmojis, brightness, build, child, children, createState (+52 more)
 
 ### Community 22 - "ogg_opus_remuxer.dart"
 Cohesion: 0.06
@@ -697,8 +677,8 @@ Nodes (25): ExceptionContext? exceptionContext,
   bool, backLabel, barrierDismissible, build, createState, delay, DeprecatedApiAccessExtension, error (+17 more)
 
 ### Community 25 - "package:fluffychat/widgets/future_loading_dialog.dart"
-Cohesion: 0.08
-Nodes (24): file, matrix, picked, result, _activeClientSubscription, AvatarAction, build, checkBootstrap (+16 more)
+Cohesion: 0.10
+Nodes (20): _activeClientSubscription, AvatarAction, build, checkBootstrap, createState, cryptoIdentityConnected, dispose, firstRunBootstrapAction (+12 more)
 
 ### Community 26 - "StatelessWidget"
 Cohesion: 0.03
@@ -714,7 +694,7 @@ Nodes (39): account_secret_purge.dart, cipher.dart, database_file_state.dart, da
 
 ### Community 29 - "input_bar.dart"
 Cohesion: 0.08
-Nodes (24): command_hints.dart, InputDecoration, autofocus, build, buildSuggestion, controller, decoration, focusNode (+16 more)
+Nodes (25): command_hints.dart, InputDecoration, autofocus, build, buildSuggestion, controller, decoration, focusNode (+17 more)
 
 ### Community 30 - "chat_list_item.dart"
 Cohesion: 0.05
@@ -722,7 +702,7 @@ Nodes (36): allowed, unread, fallback, _firstLine, fromRoot, hashCode, hue, hueF
 
 ### Community 31 - "package:go_router/go_router.dart"
 Cohesion: 0.06
-Nodes (32): input_bar.dart, build, _ChatAccountPicker, ChatInputRow, controller, _formatShortcuts, height, _popupMenuButtonSelected (+24 more)
+Nodes (33): chat.dart, ../../config/themes.dart, events/reply_content.dart, input_bar.dart, build, _ChatAccountPicker, ChatInputRow, controller (+25 more)
 
 ### Community 32 - "chat_permissions_settings.dart"
 Cohesion: 0.06
@@ -761,8 +741,8 @@ Cohesion: 0.10
 Nodes (20): FlPluginRegistry, GApplication, gboolean, gchar, GtkApplication, fl_register_plugins(), main(), GObject (+12 more)
 
 ### Community 41 - "main.dart"
-Cohesion: 0.13
-Nodes (13): DeviceRow, _actions, build, controller, _DeviceAction, DevicesSettingsView, _DeviceTile, iconFor (+5 more)
+Cohesion: 0.05
+Nodes (39): DeviceRow, build, isLoading, searchedUntil, SearchFooter, _actions, build, controller (+31 more)
 
 ### Community 42 - "public_homeserver_data.dart"
 Cohesion: 0.08
@@ -777,16 +757,16 @@ Cohesion: 0.04
 Nodes (52): accountClient, _accountSub, accumulator, addAnnouncementsRoom, addRoom, announcementsPreview, build, canEnter (+44 more)
 
 ### Community 45 - "recording_view_model.dart"
-Cohesion: 0.15
-Nodes (12): api, cachePassword, confirm, deletes, device, done, harness, launched (+4 more)
+Cohesion: 0.04
+Nodes (48): reason, toString, UiaException, uiaRequestHandler, UiaRequestManager, build, CallsGate, client (+40 more)
 
 ### Community 46 - "package:material_ui/material_ui.dart"
-Cohesion: 0.10
-Nodes (20): buffer, context, displayUrl, _invisibleRuneRanges, launchUrl, _maxSnackBarUrlLength, name, openMatrixToUrl (+12 more)
+Cohesion: 0.08
+Nodes (22): buffer, context, displayUrl, _invisibleRuneRanges, launchUrl, _maxSnackBarUrlLength, name, openMatrixToUrl (+14 more)
 
 ### Community 47 - "audio_player.dart"
-Cohesion: 0.07
-Nodes (28): AudioPlayerState, AudioPlayerStatus, AudioPlayerWidget, build, buttonSize, color, createState, dispose (+20 more)
+Cohesion: 0.06
+Nodes (30): AudioPlayerState, AudioPlayerStatus, AudioPlayerWidget, build, buttonSize, color, createState, dispose (+22 more)
 
 ### Community 48 - "matrix_live_kit_call_member.dart"
 Cohesion: 0.08
@@ -801,16 +781,16 @@ Cohesion: 0.07
 Nodes (28): dart:collection, _boolMap, capabilitiesJson, _checked, derive, fallbackLiveKitConfigured, features, fillUnknownFrom (+20 more)
 
 ### Community 51 - "video_player.dart"
-Cohesion: 0.03
-Nodes (67): actionLabel, build, child, enabled, MessageFocus, onOpenMenu, _opensMenu, build (+59 more)
+Cohesion: 0.04
+Nodes (48): actionLabel, build, child, enabled, MessageFocus, onOpenMenu, _opensMenu, activeThreadId (+40 more)
 
 ### Community 52 - "dart:convert"
 Cohesion: 0.11
 Nodes (19): avatar, build, _controller, _copied, _copy, createState, dispose, id (+11 more)
 
 ### Community 53 - "new_private_chat.dart"
-Cohesion: 0.08
-Nodes (23): AnimatedBuilder, chat_list_body.dart, FloatingActionButton, build, ChatListView, controller, package:odango/pages/chat_list/dummy_chat_list_item.dart, package:odango/pages/chat_list/start_chat_fab.dart (+15 more)
+Cohesion: 0.07
+Nodes (25): AnimatedBuilder, AnimatedSwitcher, chat_list_body.dart, FloatingActionButton, build, ChatListView, controller, package:odango/pages/chat_list/chat_list.dart (+17 more)
 
 ### Community 54 - "routes.dart"
 Cohesion: 0.07
@@ -821,20 +801,21 @@ Cohesion: 0.05
 Nodes (41): build, RichEditorText, addInline, addText, blocks, checked, _codeBlock, depth (+33 more)
 
 ### Community 56 - "cute_events.dart"
-Cohesion: 0.10
-Nodes (20): addOverlay, build, controller, createState, CuteContent, _CuteContentState, CuteEventOverlay, _CuteEventOverlayState (+12 more)
+Cohesion: 0.07
+Nodes (29): auto,
+  full,, addOverlay, build, controller, createState, CuteContent, _CuteContentState, CuteEventOverlay (+21 more)
 
 ### Community 57 - "package:fluffychat/widgets/layouts/max_width_body.dart"
 Cohesion: 0.05
-Nodes (39): emoteThumbnail, generateThumbnail, imageWithinPixelCap, maxDecodedPixels, package:golden_screenshot/golden_screenshot.dart, package:odango/l10n/l10n_en.dart, package:odango/pages/profile/profile_page.dart, package:odango/utils/client_manager.dart (+31 more)
+Nodes (36): Directory, FileSystemException, package:golden_screenshot/golden_screenshot.dart, package:odango/l10n/l10n_en.dart, package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_file_state.dart, package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine.dart, package:odango/widgets/database_unencrypted_warning.dart, PlatformException (+28 more)
 
 ### Community 58 - "dialog_text_field.dart"
-Cohesion: 0.06
-Nodes (32): AnimatedSize, api, blockedRows, h, main, open, setIgnored, shared (+24 more)
+Cohesion: 0.05
+Nodes (36): package:odango/pages/chat/input_bar.dart, api, blockedRows, h, main, open, setIgnored, shared (+28 more)
 
 ### Community 59 - "notification_background_handler.dart"
-Cohesion: 0.07
-Nodes (28): _ActionRow, anchor, build, client, count, createState, current, icon (+20 more)
+Cohesion: 0.04
+Nodes (51): build, ChatJumpButtons, count, icon, iconColor, _JumpButton, label, mentionCount (+43 more)
 
 ### Community 60 - "message_content.dart"
 Cohesion: 0.06
@@ -853,12 +834,12 @@ Cohesion: 0.06
 Nodes (33): answerMax, answers, answersMin, answersParseMax, answersSendMax, bodyMax, canVote, _clean (+25 more)
 
 ### Community 64 - "device_settings.dart"
-Cohesion: 0.07
-Nodes (29): _accountManagementUri, accountPageUrl, blockDeviceAction, build, chatBackupEnabled, _checkChatBackup, _client, createState (+21 more)
+Cohesion: 0.06
+Nodes (33): _accountManagementUri, accountPageUrl, blockDeviceAction, build, chatBackupEnabled, _checkChatBackup, _client, createState (+25 more)
 
 ### Community 65 - "Event?"
-Cohesion: 0.05
-Nodes (36): AppearanceScope, _AccentSwatch, appearance, build, checked, child, color, config (+28 more)
+Cohesion: 0.04
+Nodes (50): build, controller, ExportPageView, build, GlassModeRow, AppearanceScope, _AccentSwatch, appearance (+42 more)
 
 ### Community 66 - "package:flutter_test/flutter_test.dart"
 Cohesion: 0.04
@@ -870,31 +851,36 @@ Nodes (26): addAlias, build, ChatAccessSettings, ChatAccessSettingsController, _
 
 ### Community 68 - "package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart"
 Cohesion: 0.05
-Nodes (34): bodyHeight, _Bubble, build, _controller, createState, dispose, event, initState (+26 more)
+Nodes (38): Archive, ArchiveController, build, createState, forgetAllAction, forgetRoomAction, getArchive, ArchiveView (+30 more)
 
 ### Community 69 - "blur_hash.dart"
 Cohesion: 0.11
 Nodes (18): BoxFit?, BlurHash, BlurhashData, _BlurHashState, build, _computeBlurhashData, createState, _data (+10 more)
 
 ### Community 70 - "golden.dart"
-Cohesion: 0.25
-Nodes (7): archived, ChatMatch, ChatMatcher, defaultLimit, _matches, room, run
+Cohesion: 0.08
+Nodes (27): AnimatedScale, build, child, controller, count, createState, DetailsMembers, DetailsSwipe (+19 more)
 
 ### Community 71 - "chat_view.dart"
-Cohesion: 0.04
-Nodes (44): DocsPage, docsUrl, package:odango/config/setting_keys.dart, package:odango/pages/chat/events/reaction_bar.dart, package:odango/pages/chat/events/reaction_pills.dart, package:odango/utils/appearance/chat_appearance_scope.dart, api, harness (+36 more)
+Cohesion: 0.03
+Nodes (65): @kim, ColoredBox, package:flutter_test/flutter_test.dart, package:odango/pages/chat/chat_wallpaper.dart, package:odango/pages/chat/events/deleted_bubble_content.dart, package:odango/pages/chat/events/reaction_bar.dart, package:odango/pages/chat/events/reaction_pills.dart, package:odango/pages/chat/events/utd_bubble_content.dart (+57 more)
 
 ### Community 72 - "custom_image_resizer.dart"
-Cohesion: 0.10
-Nodes (19): @pragma, ../config/setting_keys.dart, dart:isolate, abortSync, client, FluffyChatNotificationActions, fromJsonString, init (+11 more)
+Cohesion: 0.08
+Nodes (23): base, canonicalSharedPath, deleteOldSharedCopies, deleteStaleSharedCopies, dir, dropped, file, files (+15 more)
 
 ### Community 73 - "settings_style.dart"
 Cohesion: 0.08
 Nodes (25): accentHue, BubbleCorners, byName, colors, copyWith, corners, defaultPreset, GlobalAppearance (+17 more)
 
 ### Community 74 - "config_viewer.dart"
-Cohesion: 0.06
-Nodes (34): FolderRef get, _, apply, builtInTabs, ChatListTabItem, folder, FolderContext, FolderFilter (+26 more)
+Cohesion: 0.04
+Nodes (47): @immutable, FolderRef get, _, ChatListTabData, apply, builtInTabs, ChatListTabItem, folder (+39 more)
+
+### Community 75 - "space_view.dart"
+Cohesion: 0.09
+Nodes (20): bool endReached,, Color? containerColor,
+  double, build, ChatSearchFilesTab, events, isLoading, room, searchedUntil (+12 more)
 
 ### Community 76 - "matrix_live_kit_call.dart"
 Cohesion: 0.08
@@ -906,23 +892,23 @@ Nodes (21): build, ChatListTabBar, _ChatListTabBarState, client, count, _CountBa
 
 ### Community 78 - "chat_members.dart"
 Cohesion: 0.02
-Nodes (122): DeviceKeysList?, AttachmentType, AttachmentTypeBar, attachmentTypes, build, _icon, _label, onSelected (+114 more)
+Nodes (88): AttachmentType, AttachmentTypeBar, attachmentTypes, build, _icon, _label, onSelected, _spoken (+80 more)
 
 ### Community 79 - "State"
-Cohesion: 0.09
-Nodes (22): all, archived, copyWith, folder, FolderKind, fromSetting, groups, hashCode (+14 more)
+Cohesion: 0.05
+Nodes (37): int get, all, archived, copyWith, folder, FolderKind, FolderRef, fromSetting (+29 more)
 
 ### Community 80 - "settings_homeserver_view.dart"
 Cohesion: 0.07
 Nodes (26): _cacheCleared, _document, documentKey, _enqueuePersist, forget, hiddenIn, HiddenTopicsStore, isHidden (+18 more)
 
 ### Community 81 - "adaptive_dialog_action.dart"
-Cohesion: 0.11
-Nodes (16): _capabilities, controller, createState, icon, _KeyRow, localized, SettingsSecurityView, title (+8 more)
+Cohesion: 0.05
+Nodes (41): BootstrapViewModelState, BootstrapViewModel, build, checked, label, NewPassphraseView, _PassphraseCheckListTile, viewModel (+33 more)
 
 ### Community 82 - "avatar.dart"
-Cohesion: 0.07
-Nodes (25): animated, avatarColorSeed, backgroundColor, borderRadius, build, _calcFallbackLetters, client, colorSeed (+17 more)
+Cohesion: 0.09
+Nodes (21): animated, avatarColorSeed, backgroundColor, borderRadius, build, _calcFallbackLetters, client, colorSeed (+13 more)
 
 ### Community 83 - "image_bubble.dart"
 Cohesion: 0.04
@@ -933,16 +919,16 @@ Cohesion: 0.13
 Nodes (14): declaredHeight, declaredWidth, height, htmlImageDefaultDimension, htmlImageMaxDimension, htmlImageMinDimension, HtmlImageSize, htmlMaxImagesPerMessage (+6 more)
 
 ### Community 85 - "bootstrap_state.dart"
-Cohesion: 0.06
-Nodes (33): KeyVerification, KeyVerificationEmoji, connectedDevices, isLoading, keyVerification, newPassphraseEqualsRepeatPassphrase, newPassphraseLongEnough, newPassphraseNumbers (+25 more)
+Cohesion: 0.11
+Nodes (17): connectedDevices, isLoading, keyVerification, newPassphraseEqualsRepeatPassphrase, newPassphraseLongEnough, newPassphraseNumbers, newPassphraseSpecialCharacters, newPassphraseUpperAndLowerCase (+9 more)
 
 ### Community 86 - "settings_security.dart"
-Cohesion: 0.22
-Nodes (9): ImagePackUsage, build, createState, room, searchFilter, StickerPickerDialog, StickerPickerDialogState, usage (+1 more)
+Cohesion: 0.14
+Nodes (13): ImagePackUsage, build, createState, room, searchFilter, StickerPickerDialog, StickerPickerDialogState, usage (+5 more)
 
 ### Community 87 - "theme_builder.dart"
-Cohesion: 0.05
-Nodes (38): @visibleForTesting, migrateLegacyAccent, dotCenters, highlighted, askSkipDuplicateEmote, CallJoinTarget, callKitJoinTarget, client (+30 more)
+Cohesion: 0.10
+Nodes (19): CallJoinTarget, callKitJoinTarget, client, clientName, context, _endCallKitCall, files, _isRouteSafeRoomId (+11 more)
 
 ### Community 88 - "win32_window.cpp"
 Cohesion: 0.17
@@ -953,24 +939,24 @@ Cohesion: 0.06
 Nodes (34): a, accentHueOf, alphaValue, b, bb, chroma, epsilon, _finiteOr0 (+26 more)
 
 ### Community 90 - "intro_page.dart"
-Cohesion: 0.04
-Nodes (44): build, height, name, NewDeviceBanner, onDismiss, onVerify, alignEnd, avatar (+36 more)
+Cohesion: 0.10
+Nodes (18): Brightness, build, clipped, content, QrCodeViewer, qrFileName, safe, _save (+10 more)
 
 ### Community 91 - "package:fluffychat/config/app_config.dart"
 Cohesion: 0.04
 Nodes (47): _api, canReschedule, _capabilities, _checkTime, client, countFor, delete, error (+39 more)
 
 ### Community 92 - "key_verification_dialog.dart"
-Cohesion: 0.05
-Nodes (38): build, caps, _client, createState, _fetchInfo, info, initState, loading (+30 more)
+Cohesion: 0.09
+Nodes (21): buildAdminReport, cleanName, domain, featureDescription, featureTitle, formatUploadLimit, h, homeserverFeatureOrder (+13 more)
 
 ### Community 93 - "restore_bootstrap_view.dart"
 Cohesion: 0.16
 Nodes (21): addToExternrefTable0(), debugString(), getDataViewMemory0(), getStringFromWasm0(), getUint8ArrayMemory0(), handleError(), initSync(), isLikeNone() (+13 more)
 
 ### Community 94 - "send_location_dialog.dart"
-Cohesion: 0.06
-Nodes (35): mentions, richMessageContent, sendRichMessage, build, _bytes, _eventId, isSilent, maxEventIdLength (+27 more)
+Cohesion: 0.10
+Nodes (19): mentions, richMessageContent, sendRichMessage, build, _bytes, _eventId, isSilent, maxEventIdLength (+11 more)
 
 ### Community 95 - "start_poll_bottom_sheet.dart"
 Cohesion: 0.05
@@ -985,12 +971,12 @@ Cohesion: 0.12
 Nodes (17): chat_members_view.dart, build, ChatMembersController, ChatMembersPage, createState, dispose, error, filterController (+9 more)
 
 ### Community 98 - "member_actions_popup_menu_button.dart"
-Cohesion: 0.06
-Nodes (30): build, CallsView, controller, ServerCapabilities, package:odango/pages/calls/calls_page.dart, package:odango/pages/settings_appearance/settings_appearance.dart, package:odango/pages/settings/settings.dart, package:odango/pages/settings/settings_view.dart (+22 more)
+Cohesion: 0.05
+Nodes (42): build, CallsView, controller, ServerCapabilities, package:odango/pages/calls/calls_page.dart, package:odango/pages/profile/profile_page.dart, package:odango/pages/settings_appearance/settings_appearance.dart, package:odango/pages/settings/settings.dart (+34 more)
 
 ### Community 99 - "package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart"
-Cohesion: 0.17
-Nodes (10): CallNotificationPlan, callsAvailable, planCallNotification, ring, package:odango/utils/server_capabilities/server_capabilities.dart, derive, main, _synapseVersions (+2 more)
+Cohesion: 0.05
+Nodes (42): L10n, build, caps, _client, createState, _fetchInfo, info, initState (+34 more)
 
 ### Community 100 - "map_bubble.dart"
 Cohesion: 0.06
@@ -1001,8 +987,8 @@ Cohesion: 0.08
 Nodes (25): audio_player.dart, cute_events.dart, html_message.dart, image_bubble.dart, bigEmojis, borderRadius, build, _ButtonContent (+17 more)
 
 ### Community 102 - "settings_3pid.dart"
-Cohesion: 0.04
-Nodes (53): DatabaseApi, EditableText, DraftStore, package:odango/utils/draft_migration.dart, package:odango/utils/draft_store.dart, package:odango/utils/hidden_topics_store.dart, _MemoryDatabase, _Database (+45 more)
+Cohesion: 0.09
+Nodes (24): DatabaseApi, DraftStore, _MemoryDatabase, _Database, _Db, cacheCustomObject, client, failingReads (+16 more)
 
 ### Community 103 - "fluffy_chat_tester.dart"
 Cohesion: 0.05
@@ -1021,12 +1007,12 @@ Cohesion: 0.13
 Nodes (13): unique_ptr, DartProject, HWND, LPARAM, LRESULT, UINT, WPARAM, FlutterWindow (+5 more)
 
 ### Community 107 - "call_tile.dart"
-Cohesion: 0.09
-Nodes (21): analyze, _blockOf, _checklist, EditorText, end, _heading, _inlineKinds, _inlines (+13 more)
+Cohesion: 0.10
+Nodes (20): analyze, _blockOf, _checklist, end, _heading, _inlineKinds, _inlines, isBlock (+12 more)
 
 ### Community 108 - "message_reactions.dart"
-Cohesion: 0.09
-Nodes (21): GetCallTiles, matrixId, TileData, _getFile, isAttachmentSmallEnough, isThumbnailSmallEnough, LocalizedBody, saveFile (+13 more)
+Cohesion: 0.11
+Nodes (17): _getFile, isAttachmentSmallEnough, isThumbnailSmallEnough, LocalizedBody, saveFile, shareFile, showThumbnail, sizeString (+9 more)
 
 ### Community 109 - "reply_content.dart"
 Cohesion: 0.09
@@ -1037,12 +1023,12 @@ Cohesion: 0.18
 Nodes (10): end, FormatRange, hashCode, kind, length, link, operator, RangeKind (+2 more)
 
 ### Community 111 - "fluffy_chat_app.dart"
-Cohesion: 0.04
-Nodes (42): Color?, build, ChatJumpButtons, count, icon, iconColor, _JumpButton, label (+34 more)
+Cohesion: 0.03
+Nodes (70): Color?, build, color, edited, MessageFooter, onEditedTap, tick, time (+62 more)
 
 ### Community 112 - "app_shell_test.dart"
-Cohesion: 0.17
-Nodes (12): attempt, build, controller, createState, dispose, errorText, ignoreUser, initialUserId (+4 more)
+Cohesion: 0.12
+Nodes (16): attempt, build, controller, createState, dispose, errorText, ignoreUser, initialUserId (+8 more)
 
 ### Community 113 - "flutter_linux.h"
 Cohesion: 0.12
@@ -1053,8 +1039,8 @@ Cohesion: 0.13
 Nodes (14): byteData, canvas, circularImage, ClientDownloadContentExtension, clipPath, codec, _convertToCircularImage, downloadMxcCached (+6 more)
 
 ### Community 115 - "oidc_login.dart"
-Cohesion: 0.10
-Nodes (20): avatarActions, build, ChatDetails, ChatDetailsController, createState, dispose, editAvatar, embeddedCloseButton (+12 more)
+Cohesion: 0.08
+Nodes (26): avatarActions, build, ChatDetails, ChatDetailsController, createState, dispose, editAvatar, embeddedCloseButton (+18 more)
 
 ### Community 116 - "pulsating_widget.dart"
 Cohesion: 0.08
@@ -1069,8 +1055,8 @@ Cohesion: 0.11
 Nodes (19): build, convert, createState, decoder, editPushRule, encoder, isLoading, maxPusherTextUnits (+11 more)
 
 ### Community 119 - "chat_access_settings_page.dart"
-Cohesion: 0.06
-Nodes (32): package:odango/pages/space_overview/space_overview.dart, api, create, createBody, harness, initialState, main, _newRoomId (+24 more)
+Cohesion: 0.10
+Nodes (21): SpaceOverview, SpaceOverviewController, addSpace, answers, api, controller, entry, gates (+13 more)
 
 ### Community 120 - "Route /rooms"
 Cohesion: 0.08
@@ -1081,16 +1067,16 @@ Cohesion: 0.04
 Nodes (48): asFailedDevice, byDelayId, _byTime, _commit, content, copyWith, createdAt, _delayId (+40 more)
 
 ### Community 122 - "chat_list_body.dart"
-Cohesion: 0.25
-Nodes (6): notifySilently, package:odango/utils/scheduling/scheduled_content.dart, package:odango/utils/scheduling/silent_notification.dart, event, main, room
+Cohesion: 0.11
+Nodes (17): complete, _databaseKey, isAccountSecretKey, keys, known, productionRepairStore, productionSecretStores, _purge (+9 more)
 
 ### Community 123 - "MainActivity"
 Cohesion: 0.29
 Nodes (7): Context, FlutterEngine, MainActivity, provideEngine(), provideRunningEngine(), FlutterFragment, FlutterFragmentActivity
 
 ### Community 124 - "login_and_chat_backup.dart"
-Cohesion: 0.10
-Nodes (21): _, RichTextTooLong, package:odango/utils/rich_text/html_parser.dart, package:odango/utils/rich_text/html_serializer.dart, package:odango/utils/rich_text/rich_document.dart, rich_text_injection_test.dart, build, main (+13 more)
+Cohesion: 0.14
+Nodes (16): _, RichTextTooLong, package:odango/utils/rich_text/html_parser.dart, package:odango/utils/rich_text/html_serializer.dart, package:odango/utils/rich_text/rich_document.dart, rich_text_injection_test.dart, build, main (+8 more)
 
 ### Community 125 - "qr_scanner_modal.dart"
 Cohesion: 0.18
@@ -1105,9 +1091,8 @@ Cohesion: 0.08
 Nodes (24): build, ChatHeader, _ChatHeaderState, child, collapsed, controller, createState, dispose (+16 more)
 
 ### Community 128 - "chat_search_message_tab.dart"
-Cohesion: 0.04
-Nodes (51): bool? public,
-  bool, dart:async, moveFullyRead, send, _sending, sendPublic, sendReadMarker, ThreadReadMarkerSender (+43 more)
+Cohesion: 0.12
+Nodes (17): package:odango/utils/rich_text/format_range.dart, package:odango/utils/rich_text/format_state.dart, package:odango/utils/rich_text/send_rich_message.dart, bold, main, state, event, main (+9 more)
 
 ### Community 129 - "intro_page_presenter.dart"
 Cohesion: 0.05
@@ -1119,7 +1104,7 @@ Nodes (37): _ActionPill, build, _clean, _closeIfRedacted, color, controller, cre
 
 ### Community 131 - "Widget?"
 Cohesion: 0.07
-Nodes (29): _applyPresenceChoice, build, choosePresence, clear, clearAfter, _client, createState, dispose (+21 more)
+Nodes (27): _applyPresenceChoice, build, choosePresence, clear, clearAfter, _client, createState, dispose (+19 more)
 
 ### Community 132 - "typing_animation.dart"
 Cohesion: 0.07
@@ -1130,64 +1115,64 @@ Cohesion: 0.07
 Nodes (29): canLoadMore, ChatExportTexts, _check, display, dispose, downloadMedia, encrypted, events (+21 more)
 
 ### Community 134 - "date_time_extension.dart"
-Cohesion: 0.03
-Nodes (62): goToRoomsPageAfterSuccess, _run, setActiveBundle, setActiveClient, initState, restoreBackupFlow, initState, LocalNotificationsExtension (+54 more)
+Cohesion: 0.06
+Nodes (34): goToRoomsPageAfterSuccess, _run, setActiveBundle, setActiveClient, initState, restoreBackupFlow, initState, package:odango/pages/chat_list/key_backup_banner.dart (+26 more)
 
 ### Community 135 - "show_modal_action_popup.dart"
-Cohesion: 0.09
-Nodes (21): build, controller, _coolDown, createState, deeplink, dispose, handleScan, initState (+13 more)
+Cohesion: 0.07
+Nodes (26): build, controller, _coolDown, createState, deeplink, dispose, handleScan, initState (+18 more)
 
 ### Community 136 - "chat_input_row.dart"
 Cohesion: 0.02
-Nodes (107): ChatPage, _AddRow, _AnswerRow, build, _Card, child, controller, _CreateButton (+99 more)
+Nodes (117): ChatPage, _AddRow, _AnswerRow, build, _Card, child, controller, _CreateButton (+109 more)
 
 ### Community 137 - "sign_in_view_model.dart"
 Cohesion: 0.08
-Nodes (24): accent, accentFill, BubbleBody, BubbleColors, BubbleKind, build, child, content (+16 more)
+Nodes (23): accent, accentFill, BubbleBody, BubbleColors, BubbleKind, build, child, content (+15 more)
 
 ### Community 138 - "account_bundles.dart"
 Cohesion: 0.11
 Nodes (18): _Database, ScheduledStore, cacheCustomObject, client, content, entry, failingReads, failingWrites (+10 more)
 
 ### Community 139 - "chat_settings_popup_menu.dart"
-Cohesion: 0.09
-Nodes (22): Exception, Iterable, DatabaseKeyUnavailableException, ScheduleDelayTooShort, ScheduledEncryptionUnavailable, ScheduleException, ScheduledRoomUnavailable, ScheduledCapReached (+14 more)
+Cohesion: 0.08
+Nodes (25): Exception, http.BaseClient, Iterable, ScheduleDelayTooShort, ScheduledEncryptionUnavailable, ScheduleException, ScheduledRoomUnavailable, ScheduledCapReached (+17 more)
 
 ### Community 140 - "manifest.json"
 Cohesion: 0.18
 Nodes (10): background_color, description, display, icons, name, orientation, prefer_related_applications, short_name (+2 more)
 
 ### Community 141 - "login_scaffold.dart"
-Cohesion: 0.12
-Nodes (16): build, child, _controller, createState, dispose, _onDragEnd, _onDragUpdate, rightToLeft (+8 more)
+Cohesion: 0.10
+Nodes (19): AnimationController, build, child, _controller, createState, dispose, _onDragEnd, _onDragUpdate (+11 more)
 
 ### Community 142 - "profile_page.dart"
-Cohesion: 0.06
-Nodes (31): homeserver_details.dart, build, _contactText, controller, _copy, HomeserverDetailsView, _JsonRow, _LinkRow (+23 more)
+Cohesion: 0.09
+Nodes (21): homeserver_details.dart, build, _contactText, controller, _copy, HomeserverDetailsView, _JsonRow, _LinkRow (+13 more)
 
 ### Community 143 - "FlutterMacOS"
 Cohesion: 0.07
-Nodes (29): package:flutter/rendering.dart, package:odango/pages/chat/events/reply_content.dart, RenderParagraph, depth, false, harness, _insideStripper, lre (+21 more)
+Nodes (26): package:flutter/rendering.dart, package:odango/pages/chat/events/reply_content.dart, package:odango/pages/chat/new_device_banner.dart, package:odango/utils/chat/new_device_banner_model.dart, RenderParagraph, harness, main, text (+18 more)
 
 ### Community 144 - "call_kit_params.dart"
-Cohesion: 0.17
-Nodes (11): TopicLoader, _annotate, dispose, _disposed, load, _loader, room, status (+3 more)
+Cohesion: 0.07
+Nodes (26): TopicLoader, _annotate, dispose, _disposed, load, _loader, room, status (+18 more)
 
 ### Community 145 - "show_text_input_dialog.dart"
 Cohesion: 0.01
 Nodes (273): actionButton, actionIcon, actionRow, actionRowHeight, actionTileMinHeight, actionTileRadius, animateUpTo, AppChat (+265 more)
 
 ### Community 146 - "List"
-Cohesion: 0.04
-Nodes (47): EditableTextState, FocusNode, active, availableHeight, build, _Cell, _cells, _columns (+39 more)
+Cohesion: 0.07
+Nodes (29): EditableTextState, active, availableHeight, build, _Cell, _cells, _columns, controller (+21 more)
 
 ### Community 147 - "chat_emoji_picker.dart"
-Cohesion: 0.04
-Nodes (47): BasicEvent?, golden.dart, NewPrivateChat, NewPrivateChatController, package:odango/pages/new_private_chat/new_private_chat.dart, package:odango/pages/new_private_chat/new_private_chat_view.dart, package:odango/pages/new_private_chat/scan_confirm_sheet.dart, package:odango/pages/space_overview/space_overview_view.dart (+39 more)
+Cohesion: 0.09
+Nodes (21): package:odango/pages/new_private_chat/new_private_chat.dart, package:odango/pages/new_private_chat/new_private_chat_view.dart, package:odango/pages/new_private_chat/scan_confirm_sheet.dart, package:odango/pages/space_overview/space_overview_view.dart, api, harness, main, smallScreen (+13 more)
 
 ### Community 148 - "chat_event_list.dart"
-Cohesion: 0.08
-Nodes (23): accountId, blocked, contains, deviceIds, DeviceInfo, dismiss, dismissKey, encryptToDevice (+15 more)
+Cohesion: 0.09
+Nodes (22): accountId, blocked, contains, deviceIds, DeviceInfo, dismiss, dismissKey, encryptToDevice (+14 more)
 
 ### Community 149 - "chat_list_header.dart"
 Cohesion: 0.07
@@ -1224,12 +1209,12 @@ Nodes (30): int? maxLength,
   int?, autocorrect, build, cancelLabel, _controller, createState, dispose (+22 more)
 
 ### Community 157 - "String? get"
-Cohesion: 0.10
-Nodes (19): ArchiveGuardException, package:archive/archive.dart, package:odango/utils/archive_guard.dart, archive, expectRejected, fromList, main, zipOf (+11 more)
+Cohesion: 0.08
+Nodes (23): dart:typed_data, reader, webToXFile, InvalidBackupException, package:cross_file/cross_file.dart, package:odango/utils/backup_dump_validator.dart, package:universal_html/universal_html.dart, encode (+15 more)
 
 ### Community 158 - "lock_screen.dart"
 Cohesion: 0.06
-Nodes (47): _Counter, Archive, ArchiveController, _CollapsibleText, _CollapsibleTextState, _AnimateIn, __AnimateInState, _Shimmer (+39 more)
+Nodes (49): _Counter, _CollapsibleText, _CollapsibleTextState, _AnimateIn, __AnimateInState, SwipeToReply, _SwipeToReplyState, _Shimmer (+41 more)
 
 ### Community 159 - "sign_in_state.dart"
 Cohesion: 0.08
@@ -1244,8 +1229,8 @@ Cohesion: 0.09
 Nodes (21): applyTextChange, assign, clear, clearLink, copy, _covered, FormatState, fromJson (+13 more)
 
 ### Community 162 - "ChatListController"
-Cohesion: 0.11
-Nodes (17): after, maxMessages, mergeMessages, ownsTypes, SearchSection, SearchSections, select, _typeSets (+9 more)
+Cohesion: 0.09
+Nodes (21): after, maxMessages, mergeMessages, ownsTypes, SearchSection, SearchSections, select, _typeSets (+13 more)
 
 ### Community 163 - "push_rule_extensions.dart"
 Cohesion: 0.22
@@ -1257,15 +1242,15 @@ Nodes (22): build, canCreate, createState, dispose, initState, model, newTopic, 
 
 ### Community 165 - "settings_switch_list_tile.dart"
 Cohesion: 0.06
-Nodes (30): _arm, build, createState, delete, dispose, initState, items, list (+22 more)
+Nodes (31): _arm, build, createState, delete, dispose, initState, items, list (+23 more)
 
 ### Community 166 - "database_unencrypted_warning.dart"
 Cohesion: 0.07
 Nodes (28): createRoom, delayedEventCount, _deviceId, deviceIds, deviceName, directRoomWith, getAccountData, getRoomAccountData (+20 more)
 
 ### Community 167 - "view_model_builder.dart"
-Cohesion: 0.08
-Nodes (25): cached, _callsShown, callSupportKeyPrefix, client, dispose, _disposed, _entries, _Entry (+17 more)
+Cohesion: 0.06
+Nodes (30): DateTime, DateTimeExtension, cached, _callsShown, callSupportKeyPrefix, client, dispose, _disposed (+22 more)
 
 ### Community 168 - "Android"
 Cohesion: 0.25
@@ -1280,8 +1265,8 @@ Cohesion: 0.09
 Nodes (20): appLockMustBlock, AppLockRead, readAppLockSettings, readStoredEvents, Locale, afterAssets, brightness, expectGoldenVariants (+12 more)
 
 ### Community 171 - "bool get"
-Cohesion: 0.08
-Nodes (23): bubbleRect, bubbleRectOf, chatOf, chipRect, controller, _counter, expectChipAttached, expectMoreAtSide (+15 more)
+Cohesion: 0.03
+Nodes (54): characters, cleaned, _firstStrongIsolate, isolatedDisplayText, _markRun, _popDirectionalIsolate, safeDisplayText, _unsafe (+46 more)
 
 ### Community 172 - "CLAUDE.md"
 Cohesion: 0.25
@@ -1292,8 +1277,8 @@ Cohesion: 0.25
 Nodes (7): Code Analyzis, Code Style, Contributing Guidelines, Contributing to Odango, Directory Structure:, Formatting, Separation of Controllers and Views
 
 ### Community 174 - "Client?"
-Cohesion: 0.33
-Nodes (7): _clientSelected, build, build, Route /rooms/archive, Route /rooms/newgroup, Route /rooms/newspace, Route /settings/addaccount
+Cohesion: 0.12
+Nodes (17): _callsHidden, _clientSelected, build, build, Route /calls, Route /profile, Route /rooms/abc, Route /rooms/archive (+9 more)
 
 ### Community 175 - "GeneratedPluginRegistrant"
 Cohesion: 0.07
@@ -1304,16 +1289,16 @@ Cohesion: 0.12
 Nodes (15): package:odango/pages/chat/scheduling/scheduled_messages_page.dart, addMany, addThree, bubble, client, f, fixture, main (+7 more)
 
 ### Community 177 - "archive_guard_test.dart"
-Cohesion: 0.05
-Nodes (36): CustomSemanticsAction, Opacity, package:odango/pages/chat/chat_header.dart, package:odango/pages/chat_list/active_call_indicator.dart, api, harness, headerPill, load (+28 more)
+Cohesion: 0.07
+Nodes (25): CustomSemanticsAction, package:odango/utils/hidden_topics_store.dart, cacheCustomObject, clearStorage, client, event, fresh, main (+17 more)
 
 ### Community 178 - "GeneratedPluginRegistrant"
 Cohesion: 0.38
 Nodes (5): GeneratedPluginRegistrant, FlutterEngine, String, FlutterLocalNotificationsPlugin, Keep
 
 ### Community 179 - "string_color.dart"
-Cohesion: 0.04
-Nodes (45): IconData, build, client, leadingIcon, MentionSuggestionTile, onTap, size, suggestion (+37 more)
+Cohesion: 0.05
+Nodes (38): IconData, build, client, leadingIcon, MentionSuggestionTile, onTap, size, suggestion (+30 more)
 
 ### Community 180 - "environment_constants.dart"
 Cohesion: 0.29
@@ -1356,8 +1341,8 @@ Cohesion: 0.33
 Nodes (6): Chore, Docs, Feature, Fixes, Refactor, v0.26.0 - 2021-01-25
 
 ### Community 190 - "AppDelegate"
-Cohesion: 0.04
-Nodes (54): ChatController, ChatPageWithRoom, build, controller, _displayPinnedEventsDialog, PinnedEvents, package:odango/pages/chat/chat_app_bar_list_tile.dart, package:odango/pages/chat/chat.dart (+46 more)
+Cohesion: 0.02
+Nodes (97): ChatController, ChatPageWithRoom, package:odango/pages/chat/chat.dart, package:odango/pages/chat/chat_header.dart, package:odango/pages/chat/chat_input_row.dart, package:odango/pages/chat/chat_jump_buttons.dart, package:odango/utils/chat/mention_jump.dart, badge (+89 more)
 
 ### Community 191 - "ShareViewController"
 Cohesion: 0.40
@@ -1376,8 +1361,8 @@ Cohesion: 0.09
 Nodes (23): BlockKind, blocks, checked, hashCode, Inline, InlineMark, inlines, isPlain (+15 more)
 
 ### Community 195 - "hover_builder.dart"
-Cohesion: 0.05
-Nodes (36): package:odango/pages/chat/chat_jump_buttons.dart, package:odango/utils/chat/mention_jump.dart, badge, controllerOf, harness, main, mention, buttons (+28 more)
+Cohesion: 0.11
+Nodes (18): @visibleForTesting, migrateLegacyAccent, dotCenters, ringColor, highlighted, askSkipDuplicateEmote, hasOtherActiveRtcMember, onCallKitEvent (+10 more)
 
 ### Community 196 - "v0.35.0 - 2021-07-24"
 Cohesion: 0.40
@@ -1420,8 +1405,8 @@ Cohesion: 0.40
 Nodes (4): Available Actions, Installation, iOS, ios rc
 
 ### Community 206 - "../widgets/matrix.dart"
-Cohesion: 0.14
-Nodes (12): dart:typed_data, body, declared, decode, maxBytes, readBoundedBody, readBoundedResponse, response (+4 more)
+Cohesion: 0.12
+Nodes (16): KeyVerification, KeyVerificationEmoji, build, checkInput, createState, dispose, _Emoji, getLocalizedName (+8 more)
 
 ### Community 207 - "link_scheme_policy.dart"
 Cohesion: 0.29
@@ -1498,16 +1483,16 @@ Cohesion: 0.67
 Nodes (3): Features, Fixes, v0.33.0 - 2021-06-26
 
 ### Community 225 - "trust_user_key_dialog.dart"
-Cohesion: 0.04
-Nodes (48): DecoratedBox, GlobalSearch, GlobalSearchController, build, cancelKey, controller, fieldKey, filtersKey (+40 more)
+Cohesion: 0.06
+Nodes (31): GlobalSearch, GlobalSearchController, build, cancelKey, controller, fieldKey, filtersKey, GlobalSearchView (+23 more)
 
 ### Community 226 - "file_selector.dart"
-Cohesion: 0.13
-Nodes (14): call_support_fakes.dart, test_client.dart, capabilities, client, clientName, finish, fixtureRoom, httpClient (+6 more)
+Cohesion: 0.12
+Nodes (15): canWrite, messageActionContext, readable, room, runMessageAction, sent, package:odango/pages/chat/edit_history_sheet.dart, package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart (+7 more)
 
 ### Community 227 - "database_unencrypted_warning.dart"
-Cohesion: 0.05
-Nodes (36): actions, activeChat, avatarSize, background, _Badges, body, build, ChatListItem (+28 more)
+Cohesion: 0.04
+Nodes (51): actions, activeChat, avatarSize, background, _Badges, body, build, ChatListItem (+43 more)
 
 ### Community 241 - "package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart"
 Cohesion: 0.10
@@ -1519,27 +1504,27 @@ Nodes (19): package:matrix/fake_matrix_api.dart, _accept, body, clear, _counter,
 
 ### Community 254 - "FcmPushService.kt"
 Cohesion: 0.08
-Nodes (22): build, client, entry, event, MessageReactions, _ReactorsDialog, timeline, alignEnd (+14 more)
+Nodes (24): build, client, entry, event, MessageReactions, _ReactorsDialog, timeline, alignEnd (+16 more)
 
 ### Community 270 - "dart:ui"
-Cohesion: 0.12
-Nodes (15): ../config/app_config.dart, build, height, latitude, longitude, MapBubble, onTap, radius (+7 more)
+Cohesion: 0.17
+Nodes (11): build, height, latitude, longitude, MapBubble, onTap, radius, width (+3 more)
 
 ### Community 271 - "fl_engine.h"
-Cohesion: 0.04
-Nodes (51): main, getIosNotificationAvatar, notificationAvatarDimension, NotificationAvatarExtension, tryDownloadNotificationAvatar, base, canonicalSharedPath, deleteOldSharedCopies (+43 more)
+Cohesion: 0.05
+Nodes (37): main, appTempDirectory, appTempDirectoryIfExists, appTempDirName, _defaultBase, deleteAppTempDirectory, dir, exists (+29 more)
 
 ### Community 272 - "dart:io"
-Cohesion: 0.11
-Nodes (18): calls, cancelled, cancelSubscriptions, client, fixture, gate, getTimeline, last (+10 more)
+Cohesion: 0.12
+Nodes (15): golden.dart, addGroup, addSpace, api, entry, _general, harness, _help (+7 more)
 
 ### Community 273 - "package:fluffychat/utils/localized_exception_extension.dart"
 Cohesion: 0.14
 Nodes (13): checkHeader, encodeSync, maxEdge, maxInputBytes, maxOutputBytes, maxPixels, process, _qualities (+5 more)
 
 ### Community 274 - "CustomPainter"
-Cohesion: 0.07
-Nodes (27): AppRoutes, _callsAvailable, defaultIsLoggedIn, defaultPageBuilder, globalRedirect, _legacySettingsPath, loggedInRedirect, loggedOutRedirect (+19 more)
+Cohesion: 0.03
+Nodes (58): AppRoutes, _callsAvailable, defaultIsLoggedIn, defaultPageBuilder, globalRedirect, _legacySettingsPath, loggedInRedirect, loggedOutRedirect (+50 more)
 
 ### Community 275 - "bootstrap_page.dart"
 Cohesion: 0.14
@@ -1547,11 +1532,11 @@ Nodes (14): app, build, _busy, _busyLabel, _confirmReset, _confirmSetAside, crea
 
 ### Community 276 - "_DrawSurface"
 Cohesion: 0.07
-Nodes (26): api, cacheCustomObject, cancel, cancelError, client, counter, database, dispose (+18 more)
+Nodes (27): ScheduledMessages, api, cacheCustomObject, cancel, cancelError, client, counter, database (+19 more)
 
 ### Community 277 - "sign_in_page.dart"
 Cohesion: 0.02
-Nodes (139): AnimatedAlign, AnimatedScale, AnimatedSwitcher, FadeTransition, Icon, loginAndChatBackup, Key, build (+131 more)
+Nodes (130): Key, commandExample, commandHint, build, ChatEncryptionSettingsView, controller, build, ChatMembersView (+122 more)
 
 ### Community 278 - "SendFileDialog"
 Cohesion: 0.07
@@ -1563,7 +1548,7 @@ Nodes (19): BackdropFilter, ClipPath, ClipRRect, RenderBackdropFilter, blur, bri
 
 ### Community 280 - "client_chooser_button.dart"
 Cohesion: 0.07
-Nodes (28): autocorrect, autofocus, _border, build, controller, counterText, DialogTextField, errorText (+20 more)
+Nodes (27): autocorrect, autofocus, _border, build, controller, counterText, DialogTextField, errorText (+19 more)
 
 ### Community 281 - "chat_access_settings_page.dart"
 Cohesion: 0.09
@@ -1588,11 +1573,11 @@ Nodes (20): a, _absorbSpaces, add, added, b, DiffKind, DiffSegment, flush (+12 m
 
 ### Community 286 - "@visibleForTesting"
 Cohesion: 0.09
-Nodes (22): InheritedWidget, appearance, build, ChatAppearanceHost, _ChatAppearanceHostState, ChatAppearanceScope, child, cornersOf (+14 more)
+Nodes (23): InheritedWidget, ResolvedAppearance, appearance, build, ChatAppearanceHost, _ChatAppearanceHostState, ChatAppearanceScope, child (+15 more)
 
 ### Community 287 - "Uri"
-Cohesion: 0.11
-Nodes (19): library, package:plugin_platform_interface/plugin_platform_interface.dart, PlatformInterface, src/receive_sharing_intent_mobile.dart, static final Object, static ReceiveSharingIntent, static ReceiveSharingIntent get, getInitialMedia (+11 more)
+Cohesion: 0.07
+Nodes (27): library, package:plugin_platform_interface/plugin_platform_interface.dart, PlatformInterface, ../receive_sharing_intent.dart, src/receive_sharing_intent_mobile.dart, static final Object, static ReceiveSharingIntent, static ReceiveSharingIntent get (+19 more)
 
 ### Community 288 - "dart:async"
 Cohesion: 0.24
@@ -1607,25 +1592,25 @@ Cohesion: 0.08
 Nodes (25): _addChat, applyKey, build, _controller, createState, dispose, draft, initial (+17 more)
 
 ### Community 291 - "permission_slider_dialog.dart"
-Cohesion: 0.06
-Nodes (27): BaseClient? httpClient,
-  bool, package:odango/pages/chat_list/key_backup_banner.dart, package:odango/utils/crypto_identity.dart, set_up_vodozemac.dart, build, calls, createState, dispose (+19 more)
+Cohesion: 0.15
+Nodes (12): BaseClient? httpClient,
+  bool, set_up_vodozemac.dart, client, id, init, loggedIn, noCryptoIdentity, pickledOlmAccount (+4 more)
 
 ### Community 292 - "web_auth_test.dart"
-Cohesion: 0.08
-Nodes (25): chat_emoji_picker.dart, chat_input_row.dart, availableHeight, _Banner, build, ChatView, child, children (+17 more)
+Cohesion: 0.06
+Nodes (34): chat_emoji_picker.dart, chat_input_row.dart, availableHeight, _Banner, build, ChatView, child, children (+26 more)
 
 ### Community 294 - "shell_navigation.dart"
-Cohesion: 0.10
-Nodes (20): appearance, build, ChatWallpaper, _ChatWallpaperState, client, color, config, createState (+12 more)
+Cohesion: 0.08
+Nodes (25): appearance, build, ChatWallpaper, _ChatWallpaperState, client, color, config, createState (+17 more)
 
 ### Community 295 - "sticker_picker_dialog.dart"
-Cohesion: 0.10
-Nodes (18): InkWell, api, body, composer, createEnabled, fill, harness, main (+10 more)
+Cohesion: 0.12
+Nodes (14): package:odango/pages/chat/events/message_hover_actions.dart, package:odango/utils/chat/message_actions.dart, main, controllerOf, counter, harness, hoverButton, longPress (+6 more)
 
 ### Community 296 - "package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart"
-Cohesion: 0.05
-Nodes (34): build, colors, first, icon, iconColor, label, last, MemberRow (+26 more)
+Cohesion: 0.03
+Nodes (67): DeviceKeysList?, build, createState, _duration, event, events, feed, FeedFooter (+59 more)
 
 ### Community 297 - "return"
 Cohesion: 0.11
@@ -1640,12 +1625,12 @@ Cohesion: 0.08
 Nodes (24): ScheduledQueue, package:odango/utils/scheduling/scheduled_queue.dart, base, cacheCustomObject, database, document, entry, failSend (+16 more)
 
 ### Community 300 - "multi_account.dart"
-Cohesion: 0.17
-Nodes (11): _access, chatDetailsFlow, _details, _invite, inviteSelectionFlow, _leaveDetails, _openDetails, _permissions (+3 more)
+Cohesion: 0.15
+Nodes (14): build, createState, initState, _loadData, of, setAccentHue, setThemeMode, _sharedPreferences (+6 more)
 
 ### Community 301 - "_CollapsibleText"
-Cohesion: 0.04
-Nodes (43): FormatException, package:odango/utils/search/chat_matcher.dart, package:odango/utils/search/public_directory.dart, package:odango/utils/search/search_query.dart, package:odango/utils/search/server_search.dart, api, auth, body (+35 more)
+Cohesion: 0.05
+Nodes (38): FormatException, package:odango/utils/search/chat_matcher.dart, package:odango/utils/search/public_directory.dart, package:odango/utils/search/search_query.dart, package:odango/utils/search/server_search.dart, api, auth, body (+30 more)
 
 ### Community 302 - "chat_flows.dart"
 Cohesion: 0.12
@@ -1657,19 +1642,19 @@ Nodes (15): biased, check, ids, keys, kind, length, main, pool (+7 more)
 
 ### Community 304 - "poll.dart"
 Cohesion: 0.02
-Nodes (83): AnimatedContainer, FileSendingStatus, build, child, controller, count, createState, DetailsMembers (+75 more)
+Nodes (83): BorderRadius, EdgeInsets?, IndexedWidgetBuilder?, build, FileBubbleView, filename, leading, meta (+75 more)
 
 ### Community 305 - "chat_search_images_tab.dart"
-Cohesion: 0.08
-Nodes (23): dialog_goldens_test.dart, Material, package:odango/widgets/database_quarantine_banner.dart, package:odango/widgets/shell_banner.dart, build, _Counter, createState, _Host (+15 more)
+Cohesion: 0.03
+Nodes (61): dialog_goldens_test.dart, package:odango/pages/chat/events/html_message.dart, package:odango/pages/support/support_dialog.dart, package:odango/utils/branding/support_links.dart, package:odango/utils/chat/edit_history.dart, package:odango/widgets/database_quarantine_banner.dart, package:odango/widgets/shell_banner.dart, RichText (+53 more)
 
 ### Community 306 - "mobile_test.dart"
-Cohesion: 0.07
-Nodes (24): EmojiPicker, SettingsToggleRow, package:odango/pages/chat_access_settings/chat_access_settings_page.dart, package:odango/pages/new_group/new_group.dart, aliases, api, counter, h (+16 more)
+Cohesion: 0.04
+Nodes (46): EmojiPicker, Image, SettingsToggleRow, package:odango/pages/chat_access_settings/chat_access_settings_controller.dart, package:odango/pages/chat_access_settings/chat_access_settings_page.dart, package:odango/pages/new_group/new_group.dart, package:odango/pages/settings_emotes/import_archive_dialog.dart, package:odango/pages/settings_emotes/settings_emotes.dart (+38 more)
 
 ### Community 307 - "settings_switch_list_tile.dart"
 Cohesion: 0.14
-Nodes (13): chatListDraft, chatListFolders, chatListPeek, chatListSwipeArchive, chatListTabs, _draftText, _folderName, _groupRow (+5 more)
+Nodes (13): Completer, cacheCustomObject, eventReads, events, failReads, failWrites, getEventList, noSuchMethod (+5 more)
 
 ### Community 308 - "shell_banner.dart"
 Cohesion: 0.36
@@ -1680,32 +1665,32 @@ Cohesion: 0.14
 Nodes (14): Level, logoutAction, build, barColor, build, createState, fontSize, logLevel (+6 more)
 
 ### Community 310 - "user_dialog.dart"
-Cohesion: 0.07
-Nodes (26): action, _ActionRow, AdaptiveModalAction, build, icon, isDefaultAction, isDestructive, label (+18 more)
+Cohesion: 0.17
+Nodes (11): action, _ActionRow, AdaptiveModalAction, build, icon, isDefaultAction, isDestructive, label (+3 more)
 
 ### Community 311 - "matrix_file_extension.dart"
-Cohesion: 0.07
-Nodes (24): Directory, FileSystemException, LocalWallpaperStore, package:odango/utils/app_temp_directory.dart, package:odango/utils/appearance/wallpaper_store.dart, package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/database_quarantine.dart, Slider, base (+16 more)
+Cohesion: 0.10
+Nodes (18): clients, end, ensureLoggedIn, finalLogout, initCryptoIdentity, leftover, login, logout (+10 more)
 
 ### Community 312 - "max_width_body.dart"
-Cohesion: 0.14
-Nodes (13): BackupRestoreFailedException, decoded, dump, importDump, InvalidBackupException, maxBackupDumpBytes, maxBytes, requiredBackupBoxes (+5 more)
+Cohesion: 0.15
+Nodes (12): BackupRestoreFailedException, decoded, dump, importDump, maxBackupDumpBytes, maxBytes, requiredBackupBoxes, text (+4 more)
 
 ### Community 313 - "file_selector.dart"
-Cohesion: 0.12
-Nodes (15): _ensureVisible, enterText, goBack, isVisible, longPressOn, _print, _printCounter, scrollUntilVisible (+7 more)
+Cohesion: 0.10
+Nodes (19): AuthFlows, ChatFlows, ShellFlows, _ensureVisible, enterText, FluffyChatTester, goBack, isVisible (+11 more)
 
 ### Community 314 - "ValueNotifier"
-Cohesion: 0.11
-Nodes (15): CaseIterable, Codable, Flutter, GeneratedPluginRegistrant, +registerWithRegistry, NSObject, MobileCoreServices, Photos (+7 more)
+Cohesion: 0.08
+Nodes (21): CaseIterable, Codable, Flutter, FlutterImplicitEngineBridge, FlutterImplicitEngineDelegate, AppDelegate, Any, Bool (+13 more)
 
 ### Community 315 - "return"
 Cohesion: 0.05
-Nodes (43): BaseClient?, dart:convert, base, boundedMatrixJson, json, request, text, token (+35 more)
+Nodes (38): BaseClient?, call_support_fakes.dart, body, declared, decode, maxBytes, readBoundedBody, readBoundedResponse (+30 more)
 
 ### Community 316 - "search_title.dart"
-Cohesion: 0.07
-Nodes (24): build, ChatAppBarTitle, controller, _DisappearLine, lifetime, onTap, avatar, build (+16 more)
+Cohesion: 0.15
+Nodes (12): avatar, build, ChatListTopBar, onProfile, onSearch, overflow, spaceChip, syncStatus (+4 more)
 
 ### Community 317 - "restore_backup_flow.dart"
 Cohesion: 0.12
@@ -1736,57 +1721,56 @@ Cohesion: 0.12
 Nodes (16): _eveningCutoffHour, fromWheel, groups, initial, _inOneHour, maxDays, minLead, minuteStep (+8 more)
 
 ### Community 324 - "AppShell"
-Cohesion: 0.09
-Nodes (20): FakeMatrixApi, package:odango/utils/chat_list/peek_controller.dart, package:odango/utils/privacy/presence_policy.dart, _Hostile, api, client, main, _failed (+12 more)
+Cohesion: 0.06
+Nodes (32): FakeMatrixApi, package:odango/pages/settings_folders/folder_chat_picker.dart, package:odango/utils/chat_list/peek_controller.dart, package:odango/utils/privacy/presence_policy.dart, _Hostile, api, client, main (+24 more)
 
 ### Community 325 - "_LeftColumns"
 Cohesion: 0.08
 Nodes (27): AnyHashable, FlutterEventSink, FlutterMethodCall, FlutterPluginRegistrar, FlutterResult, FlutterSceneLifeCycleDelegate, FlutterStreamHandler, NSObject (+19 more)
 
 ### Community 326 - "Route /backup"
-Cohesion: 0.08
-Nodes (21): Color? containerColor,
-  double, EdgeInsets?, isDismissible, isScrollControlled, maxHeight, useRootNavigator, maxHeight, maxWidth (+13 more)
+Cohesion: 0.05
+Nodes (32): package:material_ui/material_ui.dart, package:odango/pages/chat/events/swipe_to_reply.dart, package:odango/utils/crypto_identity.dart, package:odango/widgets/clamped_height.dart, profile_goldens_test.dart, host, main, column (+24 more)
 
 ### Community 327 - "Route /settings/chat/folders"
-Cohesion: 0.09
-Nodes (21): FutureBuilder, package:flutter_callkit_incoming/entities/entities.dart, package:odango/utils/app_start_hooks.dart, package:odango/widgets/layouts/app_shell.dart, Route /logs, accountTest, first, firstApi (+13 more)
+Cohesion: 0.04
+Nodes (44): FutureBuilder, GoRouter, AppBottomBar, package:flutter_callkit_incoming/entities/entities.dart, package:odango/utils/app_start_hooks.dart, package:odango/widgets/layouts/app_bottom_bar.dart, package:odango/widgets/layouts/app_shell.dart, package:odango/widgets/layouts/chats_badge.dart (+36 more)
 
 ### Community 328 - "folder_chat_picker.dart"
-Cohesion: 0.05
-Nodes (40): @immutable, ChatListTabData, FolderRef, FolderDocument, build, ContactEntry, ContactList, ContactSource (+32 more)
+Cohesion: 0.12
+Nodes (15): adminLevel, AnnouncementsRoom, ChildPowerLevels, CommunityModel, encrypted, find, isSpace, joined (+7 more)
 
 ### Community 329 - "app_tab.dart"
-Cohesion: 0.14
-Nodes (13): _bubblesRoom, _closeOverflow, conversationBubbles, conversationDirectionRoomMention, conversationJumpButtons, conversationShell, _directionRoom, _inBubble (+5 more)
+Cohesion: 0.15
+Nodes (12): ChangeNotifier, build, candidate, _Chip, onRemove, selection, SelectionChips, SharedMediaFeed (+4 more)
 
 ### Community 330 - "DatabaseKeyError"
-Cohesion: 0.06
-Nodes (30): count, entries, hiddenKeys, key, map, maxKeyLength, maxKeys, maxReactors (+22 more)
+Cohesion: 0.07
+Nodes (25): count, entries, hiddenKeys, key, map, maxKeyLength, maxKeys, maxReactors (+17 more)
 
 ### Community 331 - "ChatListController"
-Cohesion: 0.10
-Nodes (20): badge, _BarItem, _bottomInset, build, chatsBadge, _fadeHeight, focusNode, _gap (+12 more)
+Cohesion: 0.04
+Nodes (52): FocusNode, active, build, controller, focusNode, icon, label, onTap (+44 more)
 
 ### Community 332 - "Object?"
-Cohesion: 0.14
-Nodes (13): BorderRadius, AdaptiveDialogAction, autofocus, bigButtons, borderRadius, build, child, icon (+5 more)
+Cohesion: 0.15
+Nodes (12): build, ContactEntry, ContactList, ContactSource, lastActivity, lastSeen, maxContacts, maxStatusChars (+4 more)
 
 ### Community 333 - "package:matrix/encryption.dart"
-Cohesion: 0.17
-Nodes (11): _announced, appearOffline, apply, away, backgroundFetchPresence, fromSettings, PresenceApplier, PresencePolicy (+3 more)
+Cohesion: 0.05
+Nodes (35): bool get, _, filterByVisibleInGui, isCollapsedState, isKnownHiddenStates, isState, IsStateExtension, isUndecryptable (+27 more)
 
 ### Community 334 - "waveform.dart"
 Cohesion: 0.10
 Nodes (20): base, canLoadMore, client, display, dispose, disposed, edits, event (+12 more)
 
 ### Community 335 - "peek_menu.dart"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (11): AnyObject, NSCoder, Configuration, RSIComposeView, RSIComposeViewDelegate, Bool, String, UIImage (+3 more)
 
 ### Community 336 - "return"
-Cohesion: 0.10
-Nodes (19): build, createState, dispose, initState, StartTime, _StartTimeState, _timer, animationDuration (+11 more)
+Cohesion: 0.18
+Nodes (11): animationDuration, build, createState, didChangeDependencies, dispose, size, _tick, _timer (+3 more)
 
 ### Community 337 - "chats_badge.dart"
 Cohesion: 0.14
@@ -1798,39 +1782,39 @@ Nodes (35): answersVisible, avatar, build, canEnd, canVote, client, colors, ende
 
 ### Community 339 - "error_reporter.dart"
 Cohesion: 0.04
-Nodes (43): legacyDraftKeyPrefix, _legacyKeys, logged, _maxScannedKeys, _migrate, migrateLegacyDrafts, moved, _movePass (+35 more)
+Nodes (48): client, context, controller, hasUnverified, l10n, _processHooksDone, processPushHelperCrashReport, report (+40 more)
 
 ### Community 340 - "permission_slider_dialog.dart"
-Cohesion: 0.05
-Nodes (37): complete, _databaseKey, isAccountSecretKey, keys, known, productionRepairStore, productionSecretStores, _purge (+29 more)
+Cohesion: 0.09
+Nodes (21): clientName, error, getDatabaseCipher, iosOptions, isStored, legacy, MarkDatabaseEncryption, markEncryption (+13 more)
 
 ### Community 342 - "reaction_summary_test.dart"
-Cohesion: 0.10
-Nodes (19): eventId, hasLink, IndexedMessage, key, kind, mentionsMe, roomId, senderId (+11 more)
+Cohesion: 0.07
+Nodes (26): formatRetention, name, policy, retentionHours, retentionServerNote, retentionServiceText, eventId, hasLink (+18 more)
 
 ### Community 343 - "calls_view.dart"
-Cohesion: 0.04
-Nodes (42): Image, package:odango/pages/chat_access_settings/chat_access_settings_controller.dart, package:odango/pages/settings_emotes/import_archive_dialog.dart, package:odango/pages/settings_emotes/settings_emotes.dart, package:odango/widgets/config_viewer.dart, package:odango/widgets/fluffy_chat_app.dart, package:odango/widgets/log_view.dart, recording_api.dart (+34 more)
+Cohesion: 0.12
+Nodes (15): recording_api.dart, api, defineSettingsAGoldens, harness, height, name, path, setEmotePack (+7 more)
 
 ### Community 344 - "localized_exception_extension.dart"
-Cohesion: 0.11
-Nodes (16): package:odango/utils/retention/default_retention.dart, package:odango/utils/server_capabilities/call_support.dart, package:odango/utils/server_capabilities/server_capabilities_service.dart, answer, caps, client, FeatureSupportAnswer, fetch (+8 more)
+Cohesion: 0.17
+Nodes (11): build, ChatSearchMessageTab, displayname, event, events, isLoading, _MessageSearchResultListTile, room (+3 more)
 
 ### Community 345 - "../config/app_config.dart"
-Cohesion: 0.11
-Nodes (16): BoxDecoration, Container, package:odango/pages/chat/chat_view.dart, package:odango/pages/chat/mention_suggestion_tile.dart, _allowlist, _callAt, depth, displayName (+8 more)
+Cohesion: 0.05
+Nodes (35): BoxDecoration, Container, package:odango/pages/chat/chat_view.dart, package:odango/pages/chat/mention_suggestion_tile.dart, package:odango/utils/chat_list/chat_row_model.dart, _allowlist, _callAt, depth (+27 more)
 
 ### Community 346 - "participant_list_item.dart"
-Cohesion: 0.11
-Nodes (16): SettingsNotice, Linkify, package:odango/pages/settings_notifications/settings_notifications.dart, SelectableText, api, clipboard, harness, launched (+8 more)
+Cohesion: 0.18
+Nodes (10): build, _CandidateList, candidates, controller, _found, InvitationSelectionView, members, selection (+2 more)
 
 ### Community 347 - "reaction_summary_test.dart"
 Cohesion: 0.03
-Nodes (71): package:odango/pages/chat_encryption_settings/user_devices_section.dart, package:odango/pages/chat_members/chat_members.dart, package:odango/pages/chat_members/member_row.dart, package:odango/pages/chat_permissions_settings/permission_row.dart, package:odango/pages/invitation_selection/invitation_selection.dart, SelectableLinkify, h, main (+63 more)
+Nodes (67): package:odango/pages/chat_encryption_settings/user_devices_section.dart, package:odango/pages/chat_members/chat_members.dart, package:odango/pages/chat_members/member_row.dart, SelectableLinkify, h, main, api, counter (+59 more)
 
 ### Community 348 - "package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart"
-Cohesion: 0.17
-Nodes (10): package:odango/pages/support/support_dialog.dart, package:odango/utils/branding/support_links.dart, bothLinks, main, _bothLinks, _isFilledButton, launch, launched (+2 more)
+Cohesion: 0.18
+Nodes (10): legacyDraftKeyPrefix, _legacyKeys, logged, _maxScannedKeys, _migrate, migrateLegacyDrafts, moved, _movePass (+2 more)
 
 ### Community 349 - "AppDelegate"
 Cohesion: 0.14
@@ -1841,32 +1825,32 @@ Cohesion: 0.17
 Nodes (10): fl_plugin_registrar, FlPluginRegistrar, GTypeInterface, G_DECLARE_INTERFACE(), FL, G_BEGIN_DECLS, GObject, _FlPluginRegistryInterface (+2 more)
 
 ### Community 351 - "Route /settings/chat/folders"
-Cohesion: 0.18
-Nodes (10): AppBar?, appBar, body, bottomNavigationBar, build, LoginScaffold, mainAxisAlignment, _PrivacyButtons (+2 more)
+Cohesion: 0.07
+Nodes (26): AppBar?, _isLoopback, _maxServiceUrlLength, safeLiveKitServiceUri, trimmed, uri, _authenticate, authenticateInBrowser (+18 more)
 
 ### Community 352 - "chat_row_model.dart"
 Cohesion: 0.11
 Nodes (18): buffer, capHtmlInput, changes, elements, _headings, isMathsElement, length, limitHtmlElements (+10 more)
 
 ### Community 353 - "database_open_error.dart"
-Cohesion: 0.05
-Nodes (42): FilledButton, clients, didChangeAppLifecycleState, firstClient, guiStarted, isIntegrationTest, lock, main (+34 more)
+Cohesion: 0.06
+Nodes (32): FilledButton, clients, didChangeAppLifecycleState, firstClient, guiStarted, isIntegrationTest, lock, main (+24 more)
 
 ### Community 354 - "matrix_file_extension.dart"
-Cohesion: 0.12
-Nodes (14): build, ChatsBadge, child, count, semanticsLabel, package:odango/widgets/layouts/app_bottom_bar.dart, package:odango/widgets/layouts/app_tab.dart, package:odango/widgets/layouts/chats_badge.dart (+6 more)
+Cohesion: 0.18
+Nodes (10): package:odango/utils/search/unencrypted_scan.dart, api, client, file, files, main, now, reads (+2 more)
 
 ### Community 355 - "_OutsideRRectClipper"
 Cohesion: 0.09
 Nodes (21): at, diff, l10n, _language, scheduleDateLabel, scheduleDayLabel, scheduleErrorMessage, scheduleFailureMessage (+13 more)
 
 ### Community 356 - "bubble_shape_test.dart"
-Cohesion: 0.03
-Nodes (63): dart:io, DatabaseFileState, _plaintextHeader, package:flutter_test/flutter_test.dart, package:odango/pages/chat/chat_wallpaper.dart, package:odango/pages/chat/events/swipe_to_reply.dart, package:odango/utils/account_config.dart, package:odango/utils/branding/docs_links.dart (+55 more)
+Cohesion: 0.04
+Nodes (43): dart:io, DatabaseFileState, _plaintextHeader, package:http/testing.dart, package:odango/pages/sign_in/view_model/sign_in_view_model.dart, package:odango/utils/error_reporter.dart, package:vodozemac/vodozemac.dart, _blurFiles (+35 more)
 
 ### Community 357 - "themes_test.dart"
-Cohesion: 0.10
-Nodes (19): AlertDialog, Brightness, BuildContext, PositionFromBuildContext, package:flutter/cupertino.dart, package:pretty_qr_code/pretty_qr_code.dart, PrettyQrView, brightness (+11 more)
+Cohesion: 0.04
+Nodes (42): AlertDialog, AnimatedContainer, FadeTransition, package:flutter/cupertino.dart, package:odango/pages/database_key_error/database_key_error_page.dart, package:odango/widgets/settings/settings_check_row.dart, package:odango/widgets/settings/settings_pill_button.dart, package:odango/widgets/typing_animation.dart (+34 more)
 
 ### Community 358 - "ValueNotifier"
 Cohesion: 0.10
@@ -1877,16 +1861,16 @@ Cohesion: 0.09
 Nodes (23): ../key_verification/key_verification_dialog.dart, build, ChatEncryptionSettings, ChatEncryptionSettingsController, createState, _debounce, didChangeDependencies, dispose (+15 more)
 
 ### Community 360 - "app_tokens_test.dart"
-Cohesion: 0.14
-Nodes (13): clientUri, code, oidcClientData, oidcLogin, oidcLoginFlow, queryParameters, redirectUrl, returnUrl (+5 more)
+Cohesion: 0.06
+Nodes (29): clientUri, code, oidcClientData, oidcLogin, oidcLoginFlow, queryParameters, redirectUrl, returnUrl (+21 more)
 
 ### Community 361 - "string_color.dart"
-Cohesion: 0.13
-Nodes (13): package:odango/pages/chat/events/html_message.dart, RichText, htmlWidget, main, room, found, htmlWidget, main (+5 more)
+Cohesion: 0.18
+Nodes (10): api, counter, h, invited, key, main, open, profile (+2 more)
 
 ### Community 362 - "event_extension.dart"
-Cohesion: 0.17
-Nodes (9): _entry, showSendOptionsMenu, availableSendOptions, _command, presenceKnownOffline, SendOption, package:odango/utils/glass_policy.dart, package:odango/utils/scheduling/send_options.dart (+1 more)
+Cohesion: 0.11
+Nodes (15): _entry, showSendOptionsMenu, availableSendOptions, _command, presenceKnownOffline, SendOption, package:odango/pages/chat/scheduling/send_options_flow.dart, package:odango/utils/glass_policy.dart (+7 more)
 
 ### Community 363 - "chat_contrast_test.dart"
 Cohesion: 0.13
@@ -1898,16 +1882,16 @@ Cohesion: 0.10
 Nodes (24): build, closeKey, ContentShareItem, createState, displayname, dispose, FileShareItem, _filterController (+16 more)
 
 ### Community 365 - "hover_builder.dart"
-Cohesion: 0.09
-Nodes (20): hidden, shown, splitHidden, package:odango/pages/topics/topic_chip_bar.dart, package:odango/utils/topics/hidden_split.dart, package:odango/utils/topics/topic.dart, all, ids (+12 more)
+Cohesion: 0.10
+Nodes (18): AnimatedSize, package:odango/pages/topics/topic_chip_bar.dart, api, harness, main, open, setPack, state (+10 more)
 
 ### Community 366 - "database_quarantine_test.dart"
-Cohesion: 0.09
-Nodes (25): auth_flows.dart, chat_flows.dart, ../data/environment_constants.dart, basicMessaging, _profileQr, profileQrFlow, _userSheet, userSheetFlow (+17 more)
+Cohesion: 0.02
+Nodes (128): auth_flows.dart, chat_flows.dart, ChatController get, ../data/environment_constants.dart, Finder get, basicMessaging, archiveChats, ensureGroupChatCreated (+120 more)
 
 ### Community 367 - "sticker_picker_dialog.dart"
-Cohesion: 0.17
-Nodes (11): _appearOffline, appearOfflineFlow, _bubbleWith, _disappearing, disappearingFlow, _poll, pollFlow, _setSwitch (+3 more)
+Cohesion: 0.20
+Nodes (9): BasicEvent?, api, direct, harness, l10n, location, main, presence (+1 more)
 
 ### Community 368 - "G_DECLARE_DERIVABLE_TYPE"
 Cohesion: 0.29
@@ -1922,20 +1906,20 @@ Cohesion: 0.33
 Nodes (3): GtkApplicationClass, _FlApplicationClass, parent_class
 
 ### Community 371 - "event_checkbox_extension.dart"
-Cohesion: 0.06
-Nodes (29): clients, end, ensureLoggedIn, finalLogout, initCryptoIdentity, leftover, login, logout (+21 more)
+Cohesion: 0.07
+Nodes (26): createHTTPClient, CustomHttpClient, accessToken, deleteSessionBackup, deviceId, deviceName, fromJson, fromJsonString (+18 more)
 
 ### Community 372 - "store_recovery_key_view.dart"
-Cohesion: 0.11
-Nodes (17): arm, clearAtMs, clearIfDue, disarm, hashCode, key, maxRecords, maxUserIdLength (+9 more)
+Cohesion: 0.12
+Nodes (15): arm, clearAtMs, clearIfDue, disarm, hashCode, key, maxRecords, maxUserIdLength (+7 more)
 
 ### Community 373 - "chat_row_model.dart"
 Cohesion: 0.09
 Nodes (21): ExportEvent, ExportTooLarge, package:odango/utils/export/export_html.dart, package:odango/utils/export/export_json.dart, package:odango/utils/export/export_media.dart, package:odango/utils/export/export_model.dart, _allowed, _event (+13 more)
 
 ### Community 374 - "send_options.dart"
-Cohesion: 0.12
-Nodes (15): anna, cacheCustomObject, client, draftStore, labelStarting, main, muteRoom, noSuchMethod (+7 more)
+Cohesion: 0.20
+Nodes (9): cancelIsAction, _dialogConstraints, isDestructive, OkCancelResult, showOkAlertDialog, showOkCancelAlertDialog, useRootNavigator, package:odango/widgets/adaptive_dialogs/dialog_message.dart (+1 more)
 
 ### Community 375 - "_FlMessageCodecClass"
 Cohesion: 0.40
@@ -1954,8 +1938,8 @@ Cohesion: 0.11
 Nodes (19): build, client, _clientSubscription, create, createState, dispose, echoTimeout, edit (+11 more)
 
 ### Community 379 - "dart"
-Cohesion: 0.03
-Nodes (60): ChatOverflowAction, chatOverflowActions, _entry, showChatOverflowMenu, UtdBubbleContent, canWrite, messageActionContext, readable (+52 more)
+Cohesion: 0.09
+Nodes (21): UtdBubbleContent, package:odango/pages/chat/events/map_bubble.dart, package:odango/pages/chat/events/message.dart, package:odango/pages/chat/events/message_footer.dart, package:odango/pages/chat/message_action_runner.dart, package:odango/pages/chat/utd_why_sheet.dart, controllerOf, counter (+13 more)
 
 ### Community 380 - "BuildContext"
 Cohesion: 0.25
@@ -1966,16 +1950,17 @@ Cohesion: 0.67
 Nodes (3): _FlMethodCodecClass, parent_class, GObjectClass
 
 ### Community 382 - "ScheduleSheet"
-Cohesion: 0.09
-Nodes (22): AnimationController, DecorationTween, build, child, color, _controller, createState, decorationTween (+14 more)
+Cohesion: 0.18
+Nodes (11): DecorationTween, build, child, color, _controller, createState, decorationTween, dispose (+3 more)
 
 ### Community 383 - "notification_avatar_extension.dart"
-Cohesion: 0.18
-Nodes (11): Future, _activeClientSubscription, build, CallsController, CallsPage, capabilities, createState, dispose (+3 more)
+Cohesion: 0.20
+Nodes (9): event, extra, main, _me, _mentions, pending, redacted, room (+1 more)
 
 ### Community 384 - "message_ticks_test.dart"
 Cohesion: 0.03
-Nodes (72): Client, flutter_matrix_dart_sdk_database/database_open_error.dart, clear, _initClearPending, SafeInitClient, settleInitFailure, package:odango/pages/chat/input_bar.dart, package:odango/pages/image_viewer/viewer_chrome.dart (+64 more)
+Nodes (51): bool? public,
+  bool, FileSendingStatus, flutter_matrix_dart_sdk_database/database_open_error.dart, build, fileSendingStatus, FileSendStatusIndicator, loggedInDatabase, _eventId (+43 more)
 
 ### Community 385 - "restore_backup_flow.dart"
 Cohesion: 0.17
@@ -1986,12 +1971,12 @@ Cohesion: 0.24
 Nodes (9): InputStream, OutputStream, FileDirectory, Boolean, Context, File, Long, String (+1 more)
 
 ### Community 387 - "bool get"
-Cohesion: 0.13
-Nodes (15): leaveChat, ChatContextAction, showUtdWhySheet, _finishOidcLogin, build, firstRunBootstrapAction, showUnverifiedDeviceNoticeAfterFirstSync, connectToHomeserverFlow (+7 more)
+Cohesion: 0.29
+Nodes (7): leaveChat, ChatContextAction, build, showUnverifiedDeviceNoticeAfterFirstSync, build, Route /settings/devices, Route /settings/security/ignorelist
 
 ### Community 388 - "DateTime"
-Cohesion: 0.03
-Nodes (78): chat_list.dart, build, _getSecureStorageLocalizedName, StoreRecoveryKeyView, viewModel, build, _bundleMenuItems, ClientChooserButton (+70 more)
+Cohesion: 0.02
+Nodes (89): chat_list.dart, build, ChatAppBarTitle, controller, _DisappearLine, lifetime, onTap, build (+81 more)
 
 ### Community 389 - "archive_view.dart"
 Cohesion: 0.11
@@ -2002,8 +1987,8 @@ Cohesion: 0.14
 Nodes (13): ScheduledMode, confirm, confirmLabel, encrypted, main, mode, pump, ready (+5 more)
 
 ### Community 391 - "return"
-Cohesion: 0.16
-Nodes (10): FlutterAppDelegate, FlutterImplicitEngineBridge, FlutterImplicitEngineDelegate, AppDelegate, Any, Bool, UIApplication, AppDelegate (+2 more)
+Cohesion: 0.25
+Nodes (8): Event?, build, event, EventInfoDialog, EventInfoDialogExtension, l10n, prettyJson, showInfoDialog
 
 ### Community 392 - "package:fluffychat/utils/secure_storage.dart"
 Cohesion: 0.11
@@ -2015,51 +2000,51 @@ Nodes (12): buildEditHistory, byId, _cut, EditHistory, edits, EditVersion, event
 
 ### Community 394 - "AppLock"
 Cohesion: 0.07
-Nodes (27): _ArchivedHeader, build, ChatListViewBody, client, controller, mode, onBack, spaces (+19 more)
+Nodes (28): _ArchivedHeader, build, ChatListViewBody, client, controller, mode, onBack, spaces (+20 more)
 
 ### Community 395 - "Stream"
-Cohesion: 0.06
-Nodes (28): ../l10n/l10n.dart, clear, current, _file, fileName, folderName, save, supported (+20 more)
+Cohesion: 0.07
+Nodes (25): ../l10n/l10n.dart, clear, current, _file, fileName, folderName, save, supported (+17 more)
 
 ### Community 397 - "AppLock"
 Cohesion: 0.12
 Nodes (16): buildHtml, cleaned, _clip, _controls, esc, formatExportTime, maxLength, mediaPaths (+8 more)
 
 ### Community 398 - "bubble_shape_test.dart"
-Cohesion: 0.12
-Nodes (15): blurhash, customImageResizer, fit, height, imageBytes, init, mimeType, originalHeight (+7 more)
+Cohesion: 0.15
+Nodes (12): blurhash, customImageResizer, fit, height, imageBytes, init, mimeType, originalHeight (+4 more)
 
 ### Community 399 - "peek_forbidden_api_test.dart"
-Cohesion: 0.10
-Nodes (20): AnimatedOpacity, ExcludeFocus, ExcludeSemantics, IgnorePointer, InteractiveViewer, ImageViewer, ImageViewerController, package:matrix/src/models/timeline_chunk.dart (+12 more)
+Cohesion: 0.05
+Nodes (36): AnimatedOpacity, ExcludeFocus, ExcludeSemantics, IgnorePointer, InteractiveViewer, package:matrix/src/models/timeline_chunk.dart, package:odango/pages/image_viewer/image_viewer.dart, package:odango/pages/image_viewer/image_viewer_view.dart (+28 more)
 
 ### Community 400 - "w04_source_guard_test.dart"
-Cohesion: 0.15
-Nodes (12): client, context, controller, hasUnverified, l10n, _processHooksDone, processPushHelperCrashReport, report (+4 more)
+Cohesion: 0.22
+Nodes (8): _bidiOverrides, firstStrongDirection, _isRtlBlock, _letter, maxDirectionRunes, null, seen, stripBidiOverrides
 
 ### Community 401 - "_SwipeActionRowState"
-Cohesion: 0.08
-Nodes (24): accountCount, AppNavRail, AppTabStrip, build, chatsBadge, child, focusNode, label (+16 more)
+Cohesion: 0.22
+Nodes (8): activeIcon, AppTab, forPath, icon, isRoot, label, path, visible
 
 ### Community 402 - "ScheduleSheet"
-Cohesion: 0.08
-Nodes (24): package:odango/utils/search/unencrypted_scan.dart, addRoom, api, emptySearch, harness, hits, indexed, l10n (+16 more)
+Cohesion: 0.06
+Nodes (38): DecoratedBox, package:odango/pages/global_search/global_search_view.dart, package:odango/pages/global_search/search_filter_sheet.dart, package:odango/pages/global_search/search_result_widgets.dart, package:odango/utils/search/indexed_message.dart, package:odango/utils/search/search_kind.dart, package:odango/utils/search/search_sections.dart, api (+30 more)
 
 ### Community 403 - "wallpaper_ingest_test.dart"
 Cohesion: 0.11
 Nodes (17): package:odango/utils/appearance/wallpaper_ingest.dart, _animatedGif, builder, chunk, _contains, encodeJpg, false, ihdr (+9 more)
 
 ### Community 404 - "wallpaper_ingest.dart"
-Cohesion: 0.07
-Nodes (24): PeekMenuItem, peekStillShown, room, runSwipeAction, SwipeAction, unreadChatCount, package:odango/utils/chat_list/space_tabs_model.dart, package:odango/utils/chat_list/unread_counts.dart (+16 more)
+Cohesion: 0.09
+Nodes (20): PeekMenuItem, peekStillShown, unreadChatCount, package:odango/utils/chat_list/space_tabs_model.dart, package:odango/utils/chat_list/unread_counts.dart, package:odango/utils/matrix_sdk_extensions/chat_list_room_extension.dart, client, ids (+12 more)
 
 ### Community 405 - "package:flutter/widgets.dart"
-Cohesion: 0.07
-Nodes (24): L10n, characters, cleaned, _firstStrongIsolate, isolatedDisplayText, _markRun, _popDirectionalIsolate, safeDisplayText (+16 more)
+Cohesion: 0.22
+Nodes (8): _alphabet, doc, _inlines, _links, randomDocument, _tex, _text, value
 
 ### Community 406 - "devices_page_test.dart"
-Cohesion: 0.15
-Nodes (13): homeserver_details_view.dart, build, _clientSubscription, createState, dispose, HomeserverDetails, HomeserverDetailsController, initState (+5 more)
+Cohesion: 0.09
+Nodes (24): Future, homeserver_details_view.dart, _activeClientSubscription, build, CallsController, CallsPage, capabilities, createState (+16 more)
 
 ### Community 407 - "presence_sync_network_test.dart"
 Cohesion: 0.17
@@ -2074,8 +2059,8 @@ Cohesion: 0.15
 Nodes (12): _claimedSize, content, exportEventFrom, exportMediaKind, info, isExportable, kind, rawName (+4 more)
 
 ### Community 410 - "send_options_flow.dart"
-Cohesion: 0.20
-Nodes (10): build, _clear, _clients, createState, initState, _load, rowKey, SearchIndexGroup (+2 more)
+Cohesion: 0.29
+Nodes (7): build, createState, dispose, initState, StartTime, _StartTimeState, _timer
 
 ### Community 411 - "chat_send_options_test.dart"
 Cohesion: 0.11
@@ -2086,32 +2071,32 @@ Cohesion: 0.19
 Nodes (12): Curve, AccelerateDecelerateCurve, DecelerateCurve, dialogAnimationStyle, factor, motionDuration, OvershootCurve, PolyOutCurve (+4 more)
 
 ### Community 413 - "conversation_flows.dart"
-Cohesion: 0.04
-Nodes (53): bool isLoading,, BootstrapPage, build, reset, BootstrapViewModelState, BootstrapViewModel, build, checked (+45 more)
+Cohesion: 0.07
+Nodes (25): bool isLoading,, BootstrapPage, build, reset, build, hasPresetHomeserver, IntroPage, login (+17 more)
 
 ### Community 414 - "settings_flows.dart"
-Cohesion: 0.11
-Nodes (17): _appearance, _blockedUsers, _chatSettings, _devices, _doubleTap, _export, _homeserver, _notifications (+9 more)
+Cohesion: 0.25
+Nodes (7): MatrixLocals, MatrixLocalizations, package:odango/utils/rich_text/edit_prefill.dart, event, locals, main, room
 
 ### Community 415 - "typing_notifier.dart"
 Cohesion: 0.09
 Nodes (23): AudioRecorder?, events/audio_player.dart, amplitudeTimeline, _audioRecorder, build, cancel, createState, dispose (+15 more)
 
 ### Community 416 - "TextEditingController"
-Cohesion: 0.11
-Nodes (18): addGroup, addRemote, addSpace, announcementsLevelsFor, answerLevelsFor, api, clipboard, entry (+10 more)
+Cohesion: 0.04
+Nodes (42): build, createState, pickDoubleTapReaction, package:odango/pages/space_overview/space_overview.dart, package:odango/widgets/app_sheet.dart, settings_chat_view.dart, api, create (+34 more)
 
 ### Community 417 - "Timer"
 Cohesion: 0.15
 Nodes (12): buildJson, encoder, _encryptedFileKeys, first, head, maxLength, nodes, out (+4 more)
 
 ### Community 418 - "message_focus.dart"
-Cohesion: 0.04
-Nodes (47): build, createState, forgetAllAction, forgetRoomAction, getArchive, ArchiveView, build, controller (+39 more)
+Cohesion: 0.07
+Nodes (28): DetailsTabStripDelegate, badgeOpacity, build, _buttonSize, child, _CircleButton, _CircleChild, controller (+20 more)
 
 ### Community 419 - "localized_exception_extension.dart"
-Cohesion: 0.11
-Nodes (17): IndexedWidgetBuilder?, actions, backKey, bottom, build, builder, children, itemBuilder (+9 more)
+Cohesion: 0.25
+Nodes (7): package:odango/utils/chat/message_ticks.dart, _bob, client, event, main, _me, roomWith
 
 ### Community 420 - "resize_video.dart"
 Cohesion: 0.12
@@ -2123,23 +2108,23 @@ Nodes (13): AvailableUpdate, checkForUpdate, contains, currentParts, downloadUrl
 
 ### Community 422 - "static const String"
 Cohesion: 0.11
-Nodes (19): animate, applyPaintTransform, build, _controller, createRenderObject, createState, direction, dispose (+11 more)
+Nodes (17): animate, applyPaintTransform, build, _controller, createRenderObject, createState, direction, dispose (+9 more)
 
 ### Community 423 - "status_policy.dart"
 Cohesion: 0.15
 Nodes (12): dispose, fetchPublicHomeservers, _filterHomeservers, filterTextController, json, matrixService, refreshPublicHomeservers, response (+4 more)
 
 ### Community 424 - "homeserver_report_test.dart"
-Cohesion: 0.15
-Nodes (11): _attempt, prefs, run, standard, status, package:flutter_local_notifications/flutter_local_notifications.dart, package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart, package:odango/utils/spaces/legacy_cache_purge.dart (+3 more)
+Cohesion: 0.25
+Nodes (7): black, deleteFill, expectAll, main, pair, themes, white
 
 ### Community 425 - "chat_row_model.dart"
-Cohesion: 0.05
-Nodes (38): build, DetailsActionTiles, icon, label, onTap, room, _Tile, build (+30 more)
+Cohesion: 0.25
+Nodes (7): _code, _directories, _forbidden, isLegacyPurge, isScannerModal, main, _sources
 
 ### Community 426 - "Uri"
-Cohesion: 0.09
-Nodes (21): ChangeNotifier, SharedMediaFeed, client, handle, roomsToUnarchive, _seen, UnarchiveOnMention, atCap (+13 more)
+Cohesion: 0.18
+Nodes (10): atCap, avatarUrl, contains, displayName, id, length, remove, removeAll (+2 more)
 
 ### Community 427 - "static const double"
 Cohesion: 0.20
@@ -2152,24 +2137,24 @@ Cohesion: 0.20
 Nodes (9): bandHeight, bottom, eventId, ids, minFraction, top, VisibleBox, visibleIds (+1 more)
 
 ### Community 429 - "privacy_source_scan_test.dart"
-Cohesion: 0.18
-Nodes (10): TopicsLoadFailed, package:odango/utils/topics/topic_loader.dart, package:odango/utils/topics/topics_model.dart, bundle, client, loader, main, now (+2 more)
+Cohesion: 0.09
+Nodes (19): hidden, shown, splitHidden, TopicsLoadFailed, package:odango/utils/topics/hidden_split.dart, package:odango/utils/topics/topic.dart, package:odango/utils/topics/topic_loader.dart, package:odango/utils/topics/topics_model.dart (+11 more)
 
 ### Community 430 - "dart"
 Cohesion: 0.10
-Nodes (19): flows/auth_flows.dart, flows/basic_messaging.dart, flows/chat_flows.dart, flows/chat_list_flows.dart, flows/composer_flows.dart, flows/conversation_flows.dart, flows/dialog_flows.dart, flows/direct_chat_flows.dart (+11 more)
+Nodes (20): flows/auth_flows.dart, flows/basic_messaging.dart, flows/chat_flows.dart, flows/chat_list_flows.dart, flows/composer_flows.dart, flows/conversation_flows.dart, flows/dialog_flows.dart, flows/direct_chat_flows.dart (+12 more)
 
 ### Community 431 - "BuildContext"
-Cohesion: 0.12
-Nodes (14): ChatController get, _bubbleWith, _chat, composerRichText, _composerRoom, editHistory, _historyRoom, _select (+6 more)
+Cohesion: 0.29
+Nodes (6): bars, generate, input, _maxInput, resampleWaveform, scale
 
 ### Community 432 - "AppShell"
-Cohesion: 0.18
-Nodes (10): login, provider, redirectUrl, result, ssoLoginFlow, ssoProviders, token, url (+2 more)
+Cohesion: 0.33
+Nodes (5): confirmed, deleteFolder, l10n, result, package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart
 
 ### Community 433 - "_LeftColumns"
-Cohesion: 0.11
-Nodes (17): GoRouter, AppBottomBar, StreamController, accountChanges, bar, calls, clientChanges, left (+9 more)
+Cohesion: 0.33
+Nodes (5): package:flutter/painting.dart, package:odango/utils/row_list_diff.dart, package:odango/utils/tab_metrics.dart, package:odango/utils/tab_swipe.dart, main
 
 ### Community 434 - "chat_members_view.dart"
 Cohesion: 0.29
@@ -2180,28 +2165,28 @@ Cohesion: 0.25
 Nodes (8): build, child, createState, dispose, initState, _viewModel, ViewModelBuilder, _ViewModelBuilderState
 
 ### Community 436 - "GeneratedPluginRegistrant"
-Cohesion: 0.06
-Nodes (29): Completer, Every, IndexFeeder, MessageIndex, client, db, edit, encrypted (+21 more)
+Cohesion: 0.08
+Nodes (25): Every, build, _clear, _clients, createState, initState, _load, rowKey (+17 more)
 
 ### Community 437 - "device_model_test.dart"
-Cohesion: 0.14
-Nodes (11): package:html/dom.dart, package:html/parser.dart, package:odango/utils/chat/message_paragraphs.dart, package:odango/utils/html_image_size.dart, package:odango/utils/html_limits.dart, main, body, main (+3 more)
+Cohesion: 0.22
+Nodes (7): package:html/parser.dart, package:odango/utils/chat/message_paragraphs.dart, package:odango/utils/html_image_size.dart, main, main, split, texts
 
 ### Community 438 - "return"
-Cohesion: 0.09
-Nodes (21): build, clipped, content, QrCodeViewer, qrFileName, safe, _save, showQrCodeViewer (+13 more)
+Cohesion: 0.17
+Nodes (11): NativeImplementations, package:image/image.dart, package:odango/utils/image_pixel_cap.dart, bytes, crc, _crc32, main, _NeverCalled (+3 more)
 
 ### Community 439 - "focus_order_test.dart"
-Cohesion: 0.18
-Nodes (10): _filled, first, flush, index, main, _msg, second, _secret (+2 more)
+Cohesion: 0.04
+Nodes (40): registerFontLicenses, cause, classifyDatabaseOpenError, clientName, code, DatabaseOpenFailure, error, keepsDataAfterInitFailure (+32 more)
 
 ### Community 440 - "new_device_banner_model_test.dart"
-Cohesion: 0.18
-Nodes (10): alice, api, event, harness, main, open, roomId, rootId (+2 more)
+Cohesion: 0.33
+Nodes (5): package:provider/provider.dart, ProviderNotFoundException, launched, main, pumpHost
 
 ### Community 441 - "set_up_vodozemac.dart"
 Cohesion: 0.03
-Nodes (64): ClientInitException, FlutterLocalNotificationsPlatform, cause, classifyDatabaseOpenError, clientName, code, DatabaseOpenFailedException, DatabaseOpenFailure (+56 more)
+Nodes (69): Client, ClientInitException, FlutterLocalNotificationsPlatform, emoteThumbnail, generateThumbnail, imageWithinPixelCap, maxDecodedPixels, DatabaseKeyUnavailableException (+61 more)
 
 ### Community 442 - "dart"
 Cohesion: 0.29
@@ -2212,32 +2197,32 @@ Cohesion: 0.18
 Nodes (11): build, ChatPopupMenuActions, ChatSettingsPopupMenu, ChatSettingsPopupMenuState, createState, displayChatDetails, dispose, notificationChangeSub (+3 more)
 
 ### Community 444 - "status_policy.dart"
-Cohesion: 0.20
-Nodes (9): AsyncSnapshot, PublicHomeserverData, filteredPublicHomeservers, loginLoading, publicHomeservers, selectedHomeserver, SignInState, SignInViewModel (+1 more)
+Cohesion: 0.40
+Nodes (4): package:html/dom.dart, package:odango/utils/html_limits.dart, body, main
 
 ### Community 445 - "matrix_file_extension.dart"
-Cohesion: 0.07
-Nodes (24): IconButton, package:odango/pages/chat/chat_overflow_menu.dart, package:odango/pages/chat/new_device_banner.dart, package:odango/pages/chat/retention_sheet.dart, harness, main, actions, main (+16 more)
+Cohesion: 0.05
+Nodes (37): IconButton, InkWell, package:odango/pages/chat/chat_overflow_menu.dart, package:odango/pages/chat/retention_sheet.dart, actions, main, api, body (+29 more)
 
 ### Community 446 - "bounded_body.dart"
-Cohesion: 0.07
-Nodes (26): http.BaseClient, ServerCapabilityInputs, package:odango/pages/chat/scheduling/send_options_flow.dart, StreamedResponse, _Server, _HangingPresence, inner, main (+18 more)
+Cohesion: 0.09
+Nodes (21): client, handle, roomsToUnarchive, _seen, UnarchiveOnMention, ServerCapabilityInputs, Map, calls (+13 more)
 
 ### Community 447 - "chat_row_model.dart"
 Cohesion: 0.12
 Nodes (15): cryptoIdentityConnected, cryptoIdentityRevision, defaultLoadCryptoIdentityConnected, state, package:matrix/encryption.dart, package:odango/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/account_secret_purge.dart, SecretStore get, data (+7 more)
 
 ### Community 448 - "ValueNotifier"
-Cohesion: 0.05
-Nodes (32): package:odango/pages/chat_list/swipe_action_row.dart, package:odango/utils/chat_details/shared_media_feed.dart, package:odango/utils/chat_list/archive_policy.dart, package:odango/utils/chat_list/peek_menu.dart, package:odango/utils/chat_list/swipe_actions.dart, api, _archived, client (+24 more)
+Cohesion: 0.04
+Nodes (47): package:odango/pages/chat_list/swipe_action_row.dart, package:odango/utils/chat_details/shared_media_feed.dart, package:odango/utils/chat_list/archive_policy.dart, package:odango/utils/chat_list/peek_menu.dart, package:odango/utils/chat_list/swipe_actions.dart, api, _archived, client (+39 more)
 
 ### Community 449 - "retention_hide_test.dart"
-Cohesion: 0.07
-Nodes (27): package:odango/utils/show_scaffold_dialog.dart, package:odango/widgets/adaptive_dialogs/public_room_dialog.dart, package:odango/widgets/adaptive_dialogs/user_dialog.dart, package:odango/widgets/share_scaffold_dialog.dart, api, compare, defineProfileGoldens, harness (+19 more)
+Cohesion: 0.03
+Nodes (67): AnimatedAlign, dart:async, Icon, AdaptiveDialogInkWell, AdaptiveIconTextButton, Avatar, Material, MaterialPageRoute (+59 more)
 
 ### Community 450 - "search_flows.dart"
-Cohesion: 0.17
-Nodes (11): _leaveSearch, _openSearch, _searchEncrypted, searchEncryptedFlow, _searchServer, searchServerFlow, _searchWipe, searchWipeFlow (+3 more)
+Cohesion: 0.67
+Nodes (4): AppStarter, AppLock, AppLockWidget, WidgetsBindingObserver
 
 ### Community 451 - "string_color.dart"
 Cohesion: 0.17
@@ -2248,36 +2233,28 @@ Cohesion: 0.14
 Nodes (13): part of, duration, fromValue, message, mimeType, path, receive_sharing_intent, SharedMediaFile (+5 more)
 
 ### Community 453 - "DevicesSettingsController"
-Cohesion: 0.22
-Nodes (7): Cocoa, FlutterMacOS, FlutterPluginRegistry, FlutterViewController, RegisterGeneratedPlugins(), MainFlutterWindow, NSWindow
+Cohesion: 0.15
+Nodes (11): Cocoa, FlutterAppDelegate, FlutterMacOS, FlutterPluginRegistry, FlutterViewController, RegisterGeneratedPlugins(), AppDelegate, Bool (+3 more)
 
 ### Community 454 - "int get"
-Cohesion: 0.20
-Nodes (9): Device, DeviceKeys, IconData get, DeviceExtension, DeviceKeysExtension, displayname, _getIconFromName, icon (+1 more)
-
-### Community 456 - "shell_navigation.dart"
-Cohesion: 0.12
-Nodes (16): Finder get, _bobChatName, _bobMessagesAlice, _callsHidden, callsHiddenFlow, _chatsBadge, _expectNoCallsTab, openTab (+8 more)
-
-### Community 457 - "scan_confirm_sheet.dart"
-Cohesion: 0.20
-Nodes (9): _authenticate, authenticateInBrowser, callbackUrlScheme, options, toString, url, WebAuthenticate, package:flutter_web_auth_2/flutter_web_auth_2.dart (+1 more)
+Cohesion: 0.50
+Nodes (3): package:odango/widgets/layouts/two_column_layout.dart, _column, main
 
 ### Community 458 - "package:html/dom.dart"
 Cohesion: 0.25
 Nodes (7): fromJson, homeserverStoreKey, OidcSessionJsonExtension, storeKey, toJson, OidcLoginSession, static const String
 
 ### Community 459 - "typing_animation_test.dart"
-Cohesion: 0.12
-Nodes (16): animated, backgroundColor, borderRadius, build, event, fit, height, ImageBubble (+8 more)
+Cohesion: 0.11
+Nodes (18): animated, backgroundColor, borderRadius, build, event, fit, height, ImageBubble (+10 more)
 
 ### Community 460 - "show_ok_cancel_alert_dialog.dart"
 Cohesion: 0.22
 Nodes (8): TypingNotifier, package:odango/pages/chat/typing_notifier.dart, enabled, idle, main, notifier, sent, wait
 
 ### Community 462 - "../utils/fluffy_chat_tester.dart"
-Cohesion: 0.18
-Nodes (11): build, createState, initState, IntroPagePresenter, _IntroPagePresenterState, isLoading, loggingInToHomeserver, _login (+3 more)
+Cohesion: 0.10
+Nodes (20): showUtdWhySheet, build, createState, _finishOidcLogin, initState, IntroPagePresenter, _IntroPagePresenterState, isLoading (+12 more)
 
 ### Community 463 - "build"
 Cohesion: 0.29
@@ -2288,8 +2265,8 @@ Cohesion: 0.07
 Nodes (27): adaptive_dialogs/show_ok_cancel_alert_dialog.dart, adaptive_dialogs/show_text_input_dialog.dart, adaptive_dialogs/user_dialog.dart, avatar.dart, future_loading_dialog.dart, build, ChatPermissionsSettings, ChatPermissionsSettingsController (+19 more)
 
 ### Community 465 - "default_retention_sheet.dart"
-Cohesion: 0.10
-Nodes (16): _overrides, safeLocalizedDisplayname, SafeRoomName, OtherPartyCanNotReceiveMessages, OtherPartyCanReceiveExtension, VerifiedRoomExtension, Room, event (+8 more)
+Cohesion: 0.11
+Nodes (15): ChatListRoomExtension, _overrides, safeLocalizedDisplayname, SafeRoomName, OtherPartyCanNotReceiveMessages, OtherPartyCanReceiveExtension, archived, ChatMatch (+7 more)
 
 ### Community 467 - "package:matrix/encryption.dart"
 Cohesion: 0.12
@@ -2306,57 +2283,40 @@ Cohesion: 0.18
 Nodes (10): _, buyMeACoffee, from, fromSettings, hasAny, isAcceptableSupportUrl, koFi, _parse (+2 more)
 
 ### Community 470 - "database_quarantine_test.dart"
-Cohesion: 0.03
-Nodes (67): @kim, ColoredBox, build, ChatEventList, controller, topPadding, loggedInDatabase, _eventId (+59 more)
+Cohesion: 0.08
+Nodes (22): build, ChatEventList, controller, topPadding, build, chunk, createState, didChangeDependencies (+14 more)
 
 ### Community 471 - "send_options.dart"
-Cohesion: 0.15
-Nodes (11): reader, webToXFile, getVideoInfo, getVideoThumbnail, ResizeImage, package:cross_file/cross_file.dart, package:light_compressor_v2/light_compressor_v2.dart, package:mime/mime.dart (+3 more)
+Cohesion: 0.25
+Nodes (7): getVideoInfo, getVideoThumbnail, ResizeImage, package:light_compressor_v2/light_compressor_v2.dart, package:mime/mime.dart, _FakeFile, XFile
 
 ### Community 472 - "chat_row_semantics_test.dart"
-Cohesion: 0.17
-Nodes (11): SpaceOverview, SpaceOverviewController, build, controller, listKey, loadMoreKey, _otherRoomsLabel, retryKey (+3 more)
+Cohesion: 0.12
+Nodes (15): build, controller, listKey, loadMoreKey, _otherRoomsLabel, retryKey, SpaceOverviewView, _tapOf (+7 more)
 
 ### Community 473 - "call_kit_params.dart"
 Cohesion: 0.15
 Nodes (12): _childConstraints, ClampedHeight, computeDryLayout, createRenderObject, maxHeight, paint, performLayout, _RenderClampedHeight (+4 more)
 
-### Community 474 - "database_key_error_page_test.dart"
-Cohesion: 0.22
-Nodes (8): ../receive_sharing_intent.dart, static Stream, eChannelMedia, getInitialMedia, getMediaStream, mChannel, reset, _streamMedia
-
 ### Community 475 - "matrix_room_id.dart"
-Cohesion: 0.12
-Nodes (14): bool get, archivedTag, canSwipe, ChatListRoomExtension, isArchivedChat, isJoinedSpace, order, pinOrderForNew (+6 more)
-
-### Community 476 - "device_extension.dart"
 Cohesion: 0.22
-Nodes (8): _activeExtension, couldFit, MediaBudget, name, safeMediaName, take, _total, used
+Nodes (8): archivedTag, canSwipe, isArchivedChat, isJoinedSpace, order, pinOrderForNew, setArchivedChat, valid
 
 ### Community 477 - "word_diff_test.dart"
 Cohesion: 0.09
 Nodes (21): countFor, _exhausted, _extraScan, forRoom, _lastServerCount, _loadedRounds, maxSeen, MentionJump (+13 more)
 
-### Community 478 - "archive.dart"
-Cohesion: 0.22
-Nodes (8): package:odango/pages/settings_folders/settings_folders.dart, ScaffoldMessengerState, api, drag, drain, harness, main, open
-
 ### Community 479 - "folder_chat_picker.dart"
 Cohesion: 0.14
 Nodes (14): build, createState, didUpdateWidget, dispose, indicatorKey, labels, onSelect, _reveal (+6 more)
 
-### Community 480 - "folder_store_test.dart"
-Cohesion: 0.22
-Nodes (8): package:odango/utils/chat/edit_history.dart, found, main, mockup, styleOf, version, view, walk
-
 ### Community 482 - "file_selector.dart"
-Cohesion: 0.07
-Nodes (24): _, build, cancelKey, confirmScannedTarget, openKey, result, ScanConfirmSheet, target (+16 more)
+Cohesion: 0.09
+Nodes (19): ArchivedChatsRow, build, count, maxNames, names, onTap, build, cancelKey (+11 more)
 
 ### Community 483 - "package:odango/utils/oklch.dart"
 Cohesion: 0.06
-Nodes (31): auto,
-  full,, appTempDirectory, appTempDirectoryIfExists, appTempDirName, _defaultBase, deleteAppTempDirectory, dir, exists (+23 more)
+Nodes (32): CustomScrollBehavior, dragDevices, appLockSettings, build, clients, gotInitialLink, locale, router (+24 more)
 
 ### Community 484 - "contact_list_test.dart"
 Cohesion: 0.20
@@ -2375,12 +2335,12 @@ Cohesion: 0.47
 Nodes (4): Activity, Bundle, Override, SendActivity
 
 ### Community 488 - "space_flows.dart"
-Cohesion: 0.13
-Nodes (12): confirmed, deleteFolder, l10n, result, FolderOrder, move, package:odango/utils/chat_list/folder_order.dart, package:odango/utils/chat_list/folder_store.dart (+4 more)
+Cohesion: 0.12
+Nodes (13): FolderOrder, move, FolderTooLargeException, package:odango/utils/chat_list/folder_order.dart, package:odango/utils/chat_list/folder_store.dart, folder, four, ids (+5 more)
 
 ### Community 489 - "homeserver_report_test.dart"
-Cohesion: 0.03
-Nodes (69): bool endReached,, ../../image_viewer/image_viewer.dart, build, ChatAppBarListTile, fixedHeight, leading, title, trailing (+61 more)
+Cohesion: 0.07
+Nodes (28): ../../image_viewer/image_viewer.dart, build, ChatAppBarListTile, fixedHeight, leading, title, trailing, build (+20 more)
 
 ### Community 490 - "visible_id.dart"
 Cohesion: 0.50
@@ -2391,20 +2351,12 @@ Cohesion: 0.33
 Nodes (5): package:odango/utils/spaces/community_model.dart, child, find, main, _me
 
 ### Community 507 - "device_model_test.dart"
-Cohesion: 0.12
-Nodes (14): Duration, dispose, idle, _idleTimer, isTyping, onTextChanged, stop, timeout (+6 more)
-
-### Community 508 - "package:odango/utils/spaces/space_trail.dart"
-Cohesion: 0.22
-Nodes (7): harness, _labelExclusions, main, _tapTargetExclusions, harness, main, utils/a11y_screens.dart
+Cohesion: 0.09
+Nodes (20): Duration, dispose, idle, _idleTimer, isTyping, onTextChanged, stop, timeout (+12 more)
 
 ### Community 509 - "ScheduleSheet"
-Cohesion: 0.40
-Nodes (4): package:odango/utils/chat/word_diff.dart, keptAndAdded, keptAndRemoved, main
-
-### Community 510 - "build"
-Cohesion: 0.29
-Nodes (7): CallViewModel, CallViewModelState, close, ComposerPanel, ComposerPanelModel, toggle, ValueNotifier
+Cohesion: 0.10
+Nodes (17): dart:math, ChatOverflowAction, chatOverflowActions, _entry, showChatOverflowMenu, showTopicHideMenu, isDismissible, isScrollControlled (+9 more)
 
 ### Community 511 - "search_source_scan_test.dart"
 Cohesion: 0.25
@@ -2416,8 +2368,8 @@ Cohesion: 0.18
 Nodes (9): LaunchMode, isLaunchableWebUrl, launchUrl, launchWebUrl, mode, uri, package:odango/utils/link_scheme_policy.dart, package:url_launcher/url_launcher.dart (+1 more)
 
 ### Community 513 - "app_temp_directory.dart"
-Cohesion: 0.15
-Nodes (12): offlinePartnerOf, onSendLongPress, openScheduled, _options, partner, _schedule, _sendButtonRect, sendOptionsAvailable (+4 more)
+Cohesion: 0.08
+Nodes (22): offlinePartnerOf, onSendLongPress, openScheduled, _options, partner, _schedule, _sendButtonRect, sendOptionsAvailable (+14 more)
 
 ### Community 514 - "web_auth_test.dart"
 Cohesion: 0.29
@@ -2428,24 +2380,24 @@ Cohesion: 0.50
 Nodes (3): ensureThreadRootLoaded, isLoaded, maxRounds
 
 ### Community 516 - "folder_store_test.dart"
-Cohesion: 0.08
-Nodes (23): DateTime, DateTime? get, build, ChatSearchImagesTab, events, isLoading, room, searchedUntil (+15 more)
+Cohesion: 0.17
+Nodes (11): DateTime? get, dateOnly, localizedDate, localizedDetailedTime, localizedTime, localizedTimeOfDay, localizedTimeShort, sameDay (+3 more)
 
 ### Community 517 - "package:odango/utils/glass_policy.dart"
 Cohesion: 0.50
 Nodes (3): package:odango/utils/chat/visible_mentions.dart, main, _seen
 
 ### Community 518 - "sliver_animated_row_list.dart"
-Cohesion: 0.12
-Nodes (15): RowListMotion, build, createState, didUpdateWidget, _displayed, items, _listKey, motion (+7 more)
+Cohesion: 0.18
+Nodes (11): RowListMotion, build, createState, didUpdateWidget, _displayed, items, _listKey, motion (+3 more)
 
 ### Community 519 - "database_quarantine_banner_test.dart"
-Cohesion: 0.07
-Nodes (27): LogoutCleanup, ScheduledStorageUnavailable, StatusClearStore, package:odango/utils/logout_cleanup.dart, package:odango/utils/status/status_clear_store.dart, cleanup, deletedQuarantine, main (+19 more)
+Cohesion: 0.03
+Nodes (60): EditableText, _attempt, LogoutCleanup, prefs, run, standard, status, ScheduledStorageUnavailable (+52 more)
 
 ### Community 520 - "swipe_actions.dart"
 Cohesion: 0.06
-Nodes (29): _List, AccountBundle, AccountBundles, AccountBundlesExtension, accountBundlesType, bundles, name, prefix (+21 more)
+Nodes (28): AsyncSnapshot, filteredPublicHomeservers, loginLoading, publicHomeservers, selectedHomeserver, _List, AccountBundle, AccountBundles (+20 more)
 
 ### Community 521 - "viewer_chrome_test.dart"
 Cohesion: 0.40
@@ -2464,32 +2416,21 @@ Cohesion: 0.50
 Nodes (3): cappedText, end, last
 
 ### Community 526 - "EditHistorySheet"
-Cohesion: 0.13
-Nodes (12): bubbleMaxWidth, bubbleRadius, corners, only, round, tailCorner, package:odango/utils/appearance/chat_appearance.dart, package:odango/utils/chat/bubble_shape.dart (+4 more)
-
-### Community 527 - "ScheduleSheet"
-Cohesion: 0.29
-Nodes (6): int get, checkCheckbox, checkedCheckboxId, EventCheckboxExtension, EventCheckboxRoomExtension, relationshipType
+Cohesion: 0.25
+Nodes (7): bubbleMaxWidth, bubbleRadius, corners, only, round, tailCorner, required bool tail,
+  BubbleCorners
 
 ### Community 528 - "chat_permissions_page_test.dart"
 Cohesion: 0.11
-Nodes (15): ownMessageTicks, seenFromHere, Tick, ticks, _isLoopback, _maxServiceUrlLength, safeLiveKitServiceUri, trimmed (+7 more)
+Nodes (14): ownMessageTicks, seenFromHere, Tick, ticks, raw, resolvePushGateway, uri, result (+6 more)
 
 ### Community 529 - "message_focus_test.dart"
-Cohesion: 0.18
-Nodes (10): context, ErrorReporter, findExistingIssue, httpClient, ingoredTypes, message, onErrorCallback, onFlutterError (+2 more)
-
-### Community 530 - "MatrixLocals"
-Cohesion: 0.29
-Nodes (6): action, folder, FolderTabAction, l10n, showUserFolderTabMenu, package:odango/pages/settings_folders/folder_actions.dart
-
-### Community 531 - "message_download_content.dart"
-Cohesion: 0.22
-Nodes (8): AuthFlows, archiveChats, ChatFlows, ensureGroupChatCreated, groupChatName, ShellFlows, FluffyChatTester, package:odango/pages/chat_list/chat_list.dart
+Cohesion: 0.08
+Nodes (23): context, ErrorReporter, findExistingIssue, httpClient, ingoredTypes, message, onErrorCallback, onFlutterError (+15 more)
 
 ### Community 532 - "menu_placement_test.dart"
-Cohesion: 0.07
-Nodes (25): dart:math, bars, generate, input, _maxInput, resampleWaveform, scale, package:odango/utils/chat/menu_placement.dart (+17 more)
+Cohesion: 0.08
+Nodes (23): actions, anchor, build, canReact, controller, _entry, event, _MessageMenu (+15 more)
 
 ### Community 533 - "Route /backup"
 Cohesion: 0.12
@@ -2500,88 +2441,52 @@ Cohesion: 0.22
 Nodes (8): Focus, package:odango/pages/chat/events/message_focus.dart, build, buttonBubble, _Counter, createState, main, pump
 
 ### Community 535 - "build"
-Cohesion: 0.29
-Nodes (6): ExceptionContext, _formatFileSize, LocalizedExceptionExtension, toLocalizedString, package:odango/utils/other_party_can_receive.dart, uia_request_manager.dart
-
-### Community 536 - "web_auth_test.dart"
-Cohesion: 0.29
-Nodes (6): UnsafeAuthUrlException, package:odango/utils/sign_in_flows/web_auth.dart, calls, fakeAuthenticate, main, run
+Cohesion: 0.12
+Nodes (14): ArchiveGuardException, ExceptionContext, _formatFileSize, LocalizedExceptionExtension, toLocalizedString, package:archive/archive.dart, package:odango/utils/archive_guard.dart, package:odango/utils/other_party_can_receive.dart (+6 more)
 
 ### Community 537 - "Duration"
-Cohesion: 0.20
-Nodes (10): accepts, eventType, msgtype, polls, SearchKind, SearchKindEventType, searchKindOf, SearchType (+2 more)
-
-### Community 538 - "bubble_shape.dart"
-Cohesion: 0.29
-Nodes (6): enterText, expectMultilineReasonField, field, pump, tap, widget
+Cohesion: 0.10
+Nodes (20): Device, DeviceKeys, IconData get, DeviceExtension, DeviceKeysExtension, displayname, _getIconFromName, icon (+12 more)
 
 ### Community 539 - "room_trust.dart"
 Cohesion: 0.25
 Nodes (7): complete, counted, keys, members, peer, RoomTrust, roomTrustOf
 
-### Community 540 - "chat_row_model.dart"
-Cohesion: 0.33
-Nodes (5): clip, of, ViewerCaption, ViewerStrip, window
-
-### Community 541 - "package:matrix/encryption.dart"
-Cohesion: 0.33
-Nodes (5): package:odango/utils/new_message/contact_list.dart, main, me, presence, source
-
-### Community 542 - "device_model_test.dart"
-Cohesion: 0.40
-Nodes (4): package:odango/utils/devices/device_model.dart, _device, main, now
-
 ### Community 543 - "typing_animation_test.dart"
-Cohesion: 0.06
-Nodes (37): package:odango/pages/settings_data/search_index_group.dart, package:odango/utils/search/indexed_message.dart, package:odango/utils/search/message_index.dart, package:odango/utils/search/search_kind.dart, Route /settings/data, api, client, main (+29 more)
+Cohesion: 0.07
+Nodes (27): dart:convert, package:odango/utils/search/message_index.dart, client, main, _msg, _roomId, _secret, _alice (+19 more)
 
 ### Community 544 - "dart:ui"
-Cohesion: 0.11
-Nodes (16): dart:ui, imageEditorLocalToImagePx, imageEditorRotationForQuarterTurns, scale, _bidiOverrides, firstStrongDirection, _isRtlBlock, _letter (+8 more)
+Cohesion: 0.20
+Nodes (8): dart:ui, imageEditorLocalToImagePx, imageEditorRotationForQuarterTurns, scale, package:crop_image/crop_image.dart, package:odango/utils/profile_header_geometry.dart, geo, main
 
 ### Community 545 - "homeserver_report_test.dart"
 Cohesion: 0.20
 Nodes (9): package:odango/pages/topics/sending_to_bar.dart, package:odango/pages/topics/topic_create_sheet.dart, package:odango/pages/topics/topic_row.dart, main, now, pump, sample, _today1240 (+1 more)
-
-### Community 546 - "tab_swipe_test.dart"
-Cohesion: 0.40
-Nodes (4): package:odango/utils/chat_list/chat_row_model.dart, english, label, main
-
-### Community 547 - "settings_chat.dart"
-Cohesion: 0.14
-Nodes (13): build, createState, pickDoubleTapReaction, SettingsChat, SettingsChatController, package:odango/widgets/app_sheet.dart, settings_chat_view.dart, context (+5 more)
-
-### Community 548 - "clamped_height_test.dart"
-Cohesion: 0.50
-Nodes (3): package:odango/widgets/clamped_height.dart, host, main
-
-### Community 549 - "chat_row_model.dart"
-Cohesion: 0.40
-Nodes (4): package:odango/utils/chat/new_device_banner_model.dart, _device, _eval, main
 
 ### Community 550 - "matrix_file_extension.dart"
 Cohesion: 0.15
 Nodes (11): _clearPickerStaging, ExportSaver, saveExport, allowMultiple, result, selectFiles, type, package:file_picker/file_picker.dart (+3 more)
 
 ### Community 551 - "chat_list_top_bar_test.dart"
-Cohesion: 0.22
-Nodes (8): build, CallPage, roomId, package:livekit_client/livekit_client.dart, package:odango/pages/call/call_tile.dart, package:odango/pages/call/call_view_model.dart, package:odango/pages/call/start_time.dart, package:odango/pages/call/utils/get_call_tiles.dart
+Cohesion: 0.14
+Nodes (13): build, CallPage, roomId, GetCallTiles, matrixId, TileData, lk, package:collection/collection.dart (+5 more)
 
 ### Community 552 - "settings_b_goldens_rtl_test.dart"
 Cohesion: 0.40
 Nodes (3): main, main, utils/settings_b_goldens.dart
 
 ### Community 553 - "retention_ticker_test.dart"
-Cohesion: 0.50
-Nodes (3): rateLimit, StreamExtension, Stream
+Cohesion: 0.11
+Nodes (16): base, boundedMatrixJson, json, request, text, token, rateLimit, StreamExtension (+8 more)
 
 ### Community 556 - "folder_tab_actions.dart"
 Cohesion: 0.07
-Nodes (28): reason, toString, UiaException, uiaRequestHandler, UiaRequestManager, package:odango/utils/sign_in_flows/oidc_login.dart, package:odango/utils/sign_in_flows/sso_login.dart, package:odango/widgets/adaptive_dialogs/show_modal_action_popup.dart (+20 more)
+Nodes (29): BuildContext, action, folder, FolderTabAction, l10n, showUserFolderTabMenu, PositionFromBuildContext, package:odango/pages/settings_folders/folder_actions.dart (+21 more)
 
 ### Community 557 - "retention_labels.dart"
-Cohesion: 0.05
-Nodes (37): close, _closed, events, limit, open, PeekController, room, _timeline (+29 more)
+Cohesion: 0.11
+Nodes (18): CallViewModel, CallViewModelState, close, ComposerPanel, ComposerPanelModel, toggle, SignInState, SignInViewModel (+10 more)
 
 ### Community 559 - "chats_badge.dart"
 Cohesion: 0.25
@@ -2589,37 +2494,29 @@ Nodes (7): L10n? l10n,
   MatrixRtcCallIntent, avatarUrl, buildFluffyChatCallKitParams, intent, timeout, package:odango/utils/notification_avatar_extension.dart, package:uuid/uuid.dart
 
 ### Community 560 - "reaction_summary_test.dart"
-Cohesion: 0.09
-Nodes (18): AssertionError, package:odango/utils/oklch.dart, expectColor, expected, expectGradient, main, reason, black (+10 more)
-
-### Community 561 - "space_hierarchy_test.dart"
-Cohesion: 0.29
-Nodes (6): package:odango/utils/spaces/space_hierarchy.dart, main, page, parse, room, _root
-
-### Community 565 - "CustomPainter"
-Cohesion: 0.50
-Nodes (4): CustomPainter, WallpaperDots, _CroppedImagePainter, _StrokePainter
+Cohesion: 0.18
+Nodes (9): AssertionError, package:odango/utils/oklch.dart, expectColor, expected, expectGradient, main, reason, expectAll (+1 more)
 
 ### Community 566 - "package:odango/utils/chat/bubble_shape.dart"
 Cohesion: 0.29
 Nodes (6): displayStatus, maxStatusLength, sanitizeStatus, StatusClearAfter, statusClearAt, text
 
 ## Knowledge Gaps
-- **8905 isolated node(s):** `homeserver`, `user1Name`, `user1Pw`, `user2Name`, `user2Pw` (+8900 more)
+- **8906 isolated node(s):** `homeserver`, `user1Name`, `user1Pw`, `user2Name`, `user2Pw` (+8901 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **53 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **54 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `_List` connect `swipe_actions.dart` to `chat.dart`, `folder_store_test.dart`, `send_file_dialog.dart`, `push_helper.dart`, `sliver_animated_row_list.dart`, `matrix.dart`, `image_viewer.dart`, `import_archive_dialog.dart`, `background_push.dart`, `database_quarantine_banner_test.dart`, `html_message.dart`, `package:matrix/matrix.dart`, `input_bar.dart`, `chat_search_page.dart`, `public_homeserver_data.dart`, `init_with_restore.dart`, `retention_labels.dart`, `audio_player.dart`, `matrix_live_kit_call_member.dart`, `video_player.dart`, `routes.dart`, `cute_events.dart`, `notification_background_handler.dart`, `message_content.dart`, `backup_dump_validator.dart`, `device_settings.dart`, `settings_style.dart`, `config_viewer.dart`, `account_config.dart`, `chat_members.dart`, `bootstrap_state.dart`, `intro_page.dart`, `package:fluffychat/config/app_config.dart`, `invitation_selection.dart`, `settings_notifications.dart`, `map_bubble.dart`, `fluffy_chat_tester.dart`, `call_tile.dart`, `intro_page_presenter.dart`, `sso_login.dart`, `Win32Window`, `chat_input_row.dart`, `chat_event_list.dart`, `chat_search_images_tab.dart`, `start_time.dart`, `settings_switch_list_tile.dart`, `string_color.dart`, `chat_search_images_tab.dart`, `matrix_file_extension.dart`, `file_selector.dart`, `package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart`, `dart:io`, `sign_in_page.dart`, `glass_surface_test.dart`, `client_chooser_button.dart`, `_FlMethodCodecClass`, `Uri`, `event_checkbox_extension.dart`, `web_auth_test.dart`, `poll.dart`, `settings_homeserver.dart`, `hover_builder.dart`, `AppLock`, `DatabaseKeyError`, `ChatListController`, `waveform.dart`, `poll.dart`, `reaction_summary_test.dart`, `database_open_error.dart`, `dart:ui`, `hover_builder.dart`, `w04_source_guard_test.dart`, `dart`, `DateTime`, `shared_file_filter_test.dart`, `AppLock`, `_SwipeActionRowState`, `presence_sync_network_test.dart`, `chat_emoji_picker.dart`, `send_options_flow.dart`, `typing_notifier.dart`, `message_focus.dart`, `localized_exception_extension.dart`, `Uri`, `status_policy.dart`, `bounded_body.dart`, `show_ok_cancel_alert_dialog.dart`, `package:matrix/encryption.dart`, `folder_chat_picker.dart`, `file_selector.dart`, `package:odango/utils/oklch.dart`, `homeserver_report_test.dart`?**
-  _High betweenness centrality (0.040) - this node is a cross-community bridge._
-- **Why does `UIKit` connect `ValueNotifier` to `GeneratedPluginRegistrant.swift`, `peek_menu.dart`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Why does `Foundation` connect `NotificationService.swift` to `GeneratedPluginRegistrant.swift`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `_List` connect `swipe_actions.dart` to `chat.dart`, `send_file_dialog.dart`, `push_helper.dart`, `sliver_animated_row_list.dart`, `database_quarantine_banner_test.dart`, `matrix.dart`, `image_viewer.dart`, `import_archive_dialog.dart`, `background_push.dart`, `html_message.dart`, `menu_placement_test.dart`, `package:matrix/matrix.dart`, `input_bar.dart`, `chat_search_page.dart`, `public_homeserver_data.dart`, `init_with_restore.dart`, `audio_player.dart`, `matrix_live_kit_call_member.dart`, `video_player.dart`, `routes.dart`, `cute_events.dart`, `notification_background_handler.dart`, `message_content.dart`, `backup_dump_validator.dart`, `device_settings.dart`, `package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart`, `golden.dart`, `settings_style.dart`, `config_viewer.dart`, `space_view.dart`, `account_config.dart`, `chat_members.dart`, `bootstrap_state.dart`, `package:fluffychat/config/app_config.dart`, `invitation_selection.dart`, `settings_notifications.dart`, `map_bubble.dart`, `fluffy_chat_tester.dart`, `call_tile.dart`, `fluffy_chat_app.dart`, `intro_page_presenter.dart`, `sso_login.dart`, `Win32Window`, `chat_input_row.dart`, `chat_event_list.dart`, `chat_search_images_tab.dart`, `start_time.dart`, `ChatListController`, `settings_switch_list_tile.dart`, `string_color.dart`, `chat_search_images_tab.dart`, `matrix_file_extension.dart`, `../widgets/matrix.dart`, `file_selector.dart`, `package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart`, `database_unencrypted_warning.dart`, `sign_in_page.dart`, `glass_surface_test.dart`, `client_chooser_button.dart`, `_FlMethodCodecClass`, `Uri`, `event_checkbox_extension.dart`, `web_auth_test.dart`, `package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart`, `poll.dart`, `settings_homeserver.dart`, `hover_builder.dart`, `AppLock`, `DatabaseKeyError`, `ChatListController`, `package:matrix/encryption.dart`, `waveform.dart`, `poll.dart`, `reaction_summary_test.dart`, `localized_exception_extension.dart`, `participant_list_item.dart`, `database_open_error.dart`, `dart:ui`, `hover_builder.dart`, `w04_source_guard_test.dart`, `DateTime`, `shared_file_filter_test.dart`, `AppLock`, `peek_forbidden_api_test.dart`, `presence_sync_network_test.dart`, `chat_emoji_picker.dart`, `typing_notifier.dart`, `Uri`, `GeneratedPluginRegistrant`, `bounded_body.dart`, `show_ok_cancel_alert_dialog.dart`, `package:matrix/encryption.dart`, `database_quarantine_test.dart`, `folder_chat_picker.dart`, `file_selector.dart`, `package:odango/utils/oklch.dart`?**
+  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `ReceiveSharingIntentPlugin` connect `_LeftColumns` to `sign_in_state.dart`, `ValueNotifier`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `SharedMediaFile` connect `_LeftColumns` to `AppDelegate`, `ValueNotifier`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **What connects `homeserver`, `user1Name`, `user1Pw` to the rest of the system?**
-  _8905 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _8906 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `chat.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.011049723756906077 - nodes in this community are weakly interconnected._
 - **Should `CHANGELOG.md` be split into smaller, more focused modules?**
