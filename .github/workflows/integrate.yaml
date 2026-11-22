@@ -234,6 +234,8 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: google_apis
           arch: x86_64
+          # ponytail: emulator 37.3.10 (latest) drops offline mid-run in about half the runs; pinned to the Jul 2025 build, unpin once the latest is stable
+          emulator-build: 13823996
           cores: 4
           ndk: 28.2.13676358
           force-avd-creation: false
@@ -277,6 +279,8 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: google_apis
           arch: x86_64
+          # ponytail: emulator 37.3.10 (latest) drops offline mid-run in about half the runs; pinned to the Jul 2025 build, unpin once the latest is stable
+          emulator-build: 13823996
           cores: 4
           ndk: 28.2.13676358
           force-avd-creation: false
