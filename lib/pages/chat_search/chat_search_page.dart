@@ -5,7 +5,10 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/pages/chat_search/chat_search_view.dart';
+import 'package:odango/utils/chat/message_search_feed.dart';
+import 'package:odango/utils/chat_details/shared_media_feed.dart';
 import 'package:odango/widgets/matrix.dart';
 
 class ChatSearchPage extends StatefulWidget {
@@ -16,125 +19,60 @@ class ChatSearchPage extends StatefulWidget {
   ChatSearchController createState() => ChatSearchController();
 }
 
-class ChatSearchController extends State<ChatSearchPage>
-    with SingleTickerProviderStateMixin {
+class ChatSearchController extends State<ChatSearchPage> {
   Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
 
   final TextEditingController searchController = TextEditingController();
-  late final TabController tabController;
+  late final MessageSearchFeed messages = MessageSearchFeed(_searchMessages);
+  final Map<SharedKind, SharedMediaFeed> _feeds = {};
 
-  final List<Event> messages = [];
-  final List<Event> images = [];
-  final List<Event> files = [];
-  String? messagesNextBatch, imagesNextBatch, filesNextBatch;
-  bool messagesEndReached = false;
-  bool imagesEndReached = false;
-  bool filesEndReached = false;
-  bool isLoading = false;
-  DateTime? searchedUntil;
+  int tabIndex = 0;
+  int tabDirection = 1;
+  Duration tabDuration = AppMotion.tabTap;
+  bool tabChanged = false;
 
-  void restartSearch() {
+  SharedMediaFeed feedOf(SharedKind kind) =>
+      _feeds[kind] ??= SharedMediaFeed(kind, _searchPage);
+
+  Future<({List<Event> events, String? nextBatch, DateTime? searchedUntil})>
+  _searchMessages({required String term, String? nextBatch}) {
+    final room = this.room;
+    if (room == null) throw StateError('room is gone');
+    return room.searchEvents(searchTerm: term, nextBatch: nextBatch);
+  }
+
+  Future<({List<Event> events, String? nextBatch, DateTime? searchedUntil})>
+  _searchPage({String? nextBatch, required bool Function(Event) match}) {
+    final room = this.room;
+    if (room == null) throw StateError('room is gone');
+    return room.searchEvents(
+      searchFunc: match,
+      nextBatch: nextBatch,
+      limit: AppProfile.feedPage,
+    );
+  }
+
+  void submit(String text) => messages.search(text);
+
+  void clearQuery() => messages.clear();
+
+  void selectTab(int index, {Duration? duration}) {
+    if (index == tabIndex) return;
     setState(() {
-      messages.clear();
-      images.clear();
-      files.clear();
-      messagesNextBatch = imagesNextBatch = filesNextBatch = searchedUntil =
-          null;
-      messagesEndReached = imagesEndReached = filesEndReached = false;
+      tabDirection = index > tabIndex ? 1 : -1;
+      tabDuration = duration ?? AppMotion.tabTap;
+      tabIndex = index;
+      tabChanged = true;
     });
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      startSearch();
-    });
-  }
-
-  Future<void> startSearch() async {
-    switch (tabController.index) {
-      case 0:
-        final searchQuery = searchController.text.trim();
-        if (searchQuery.isEmpty) return;
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchTerm: searchController.text.trim(),
-          nextBatch: messagesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          messages.addAll(result.events);
-          messagesNextBatch = result.nextBatch;
-          messagesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
-      case 1:
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchFunc: (event) => {
-            MessageTypes.Image,
-            MessageTypes.Video,
-          }.contains(event.messageType),
-          nextBatch: imagesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          images.addAll(result.events);
-          imagesNextBatch = result.nextBatch;
-          imagesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
-      case 2:
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchFunc: (event) =>
-              event.messageType == MessageTypes.File ||
-              (event.messageType == MessageTypes.Audio &&
-                  !event.content.containsKey('org.matrix.msc3245.voice')),
-          nextBatch: filesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          files.addAll(result.events);
-          filesNextBatch = result.nextBatch;
-          filesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
-      default:
-        return;
-    }
-  }
-
-  void _onTabChanged() {
-    switch (tabController.index) {
-      case 1:
-      case 2:
-        startSearch();
-        break;
-      case 0:
-      default:
-        restartSearch();
-        break;
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    tabController = TabController(initialIndex: 0, length: 3, vsync: this);
-    tabController.addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
-    tabController.removeListener(_onTabChanged);
     searchController.dispose();
-    tabController.dispose();
+    messages.dispose();
+    for (final feed in _feeds.values) {
+      feed.dispose();
+    }
     super.dispose();
   }
 

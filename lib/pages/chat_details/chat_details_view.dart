@@ -18,6 +18,8 @@ import 'package:odango/utils/chat_details/room_trust.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:odango/widgets/settings/settings_notice.dart';
 import 'package:odango/widgets/settings/settings_scaffold.dart';
+import 'package:odango/widgets/tab_strip_delegate.dart';
+import 'package:odango/widgets/tab_swipe_area.dart';
 
 class ChatDetailsView extends StatelessWidget {
   final ChatDetailsController controller;
@@ -52,9 +54,11 @@ class ChatDetailsView extends StatelessWidget {
         final trust = roomTrustOf(room);
         return Scaffold(
           backgroundColor: tokens.bg,
-          body: DetailsSwipe(
-            controller: controller,
+          body: TabSwipeArea(
+            index: controller.tabIndex,
             count: labels.length,
+            onSelect: (target, duration) =>
+                controller.selectTab(target, duration: duration),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
@@ -91,9 +95,10 @@ class ChatDetailsView extends StatelessWidget {
                     ),
                     SliverPersistentHeader(
                       pinned: true,
-                      delegate: DetailsTabStripDelegate(
+                      delegate: TabStripDelegate(
                         labels: labels,
-                        controller: controller,
+                        selected: controller.tabIndex,
+                        onSelect: controller.selectTab,
                       ),
                     ),
                     DetailsTabContent(room: room, controller: controller),

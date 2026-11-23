@@ -15,6 +15,7 @@ const a11yScreens = <String>[
   '/rooms/{room}/topics',
   '/rooms/{room}/appearance',
   '/rooms/{room}/scheduled',
+  '/rooms/{room}/search',
   '/rooms/{room}/details',
   '/rooms/{room}/details/access',
   '/rooms/{room}/details/members',

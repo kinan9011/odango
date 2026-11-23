@@ -63,20 +63,35 @@ bool matchesSharedKind(SharedKind kind, Event event) {
   };
 }
 
-class SharedMediaFeed extends ChangeNotifier {
+abstract class FeedState implements Listenable {
+  List<Event> get events;
+  bool get loading;
+  bool get endReached;
+  DateTime? get searchedUntil;
+  Object? get error;
+  Future<void> loadMore();
+}
+
+class SharedMediaFeed extends ChangeNotifier implements FeedState {
   final SharedKind kind;
   final SearchPage _search;
+  @override
   final List<Event> events = [];
   String? _nextBatch;
+  @override
   bool loading = false;
+  @override
   bool endReached = false;
   bool started = false;
+  @override
   DateTime? searchedUntil;
+  @override
   Object? error;
   bool _disposed = false;
 
   SharedMediaFeed(this.kind, this._search);
 
+  @override
   Future<void> loadMore() async {
     if (loading || endReached) return;
     started = true;

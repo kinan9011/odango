@@ -474,6 +474,11 @@
         "type": "String",
         "placeholders": {}
     },
+    "archiveEmpty": "No archived chats",
+    "@archiveEmpty": {
+        "type": "String",
+        "placeholders": {}
+    },
     "clearArchive": "Clear archive",
     "close": "Close",
     "@close": {
@@ -1304,6 +1309,108 @@
         "type": "String",
         "placeholders": {}
     },
+    "pinnedMessages": "Pinned messages",
+    "@pinnedMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pinnedMessage": "Pinned message",
+    "@pinnedMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pinnedMessageOf": "Pinned message {position} of {count}",
+    "@pinnedMessageOf": {
+        "type": "String",
+        "placeholders": {
+            "position": {
+                "type": "int"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "pinnedUnavailable": "Message not available",
+    "@pinnedUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "check": "Check",
+    "@check": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "compressHint": "Smaller files, less detail.",
+    "@compressHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "captionOneFileOnly": "You can add a caption when you send one file.",
+    "@captionOneFileOnly": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageStatusSending": "Sending…",
+    "@messageStatusSending": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageStatusSent": "Sent",
+    "@messageStatusSent": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageStatusError": "Not sent",
+    "@messageStatusError": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageEncryptedEndToEnd": "End-to-end encrypted",
+    "@messageEncryptedEndToEnd": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageNotEncrypted": "Not end-to-end encrypted",
+    "@messageNotEncrypted": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "senderDevice": "Sent from",
+    "@senderDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "verifiedDevice": "Verified device",
+    "@verifiedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unverifiedDevice": "Device not verified",
+    "@unverifiedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "blockedDevice": "Blocked device",
+    "@blockedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unknownDeviceSender": "A device we have no keys for",
+    "@unknownDeviceSender": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "deviceInfoUnavailable": "Device information unavailable",
+    "@deviceInfoUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unverifiedDeviceHint": "Only trust this message if you know this device is theirs.",
+    "@unverifiedDeviceHint": {
+        "type": "String",
+        "placeholders": {}
+    },
     "pin": "Pin",
     "@pin": {
         "type": "String",
@@ -1487,7 +1594,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "sendImages": "Send {count} image",
+    "sendImages": "Send {count} images",
     "@sendImages": {
         "type": "String",
         "placeholders": {
@@ -1704,15 +1811,6 @@
     "@unknownEncryptionAlgorithm": {
         "type": "String",
         "placeholders": {}
-    },
-    "unknownEvent": "Unknown event '{type}'",
-    "@unknownEvent": {
-        "type": "String",
-        "placeholders": {
-            "type": {
-                "type": "String"
-            }
-        }
     },
     "unmuteChat": "Unmute chat",
     "@unmuteChat": {
@@ -2110,7 +2208,6 @@
             }
         }
     },
-    "searchMore": "Search more...",
     "gallery": "Gallery",
     "files": "Files",
     "sessionLostBody": "Your session is lost. Please report this error to the developers at {url}. The error message is: {error}",
@@ -2539,7 +2636,6 @@
     "attribution": "Attribution",
     "skipChatBackup": "Skip chat backup",
     "skipChatBackupWarning": "Are you sure? Without enabling the chat backup you may lose access to your messages if you switch your device.",
-    "noMoreResultsFound": "No more results found",
     "chatSearchedUntil": "Chat searched until {time}",
     "@chatSearchedUntil": {
         "type": "String",

@@ -11,6 +11,7 @@ import 'package:odango/pages/chat/chat_jump_buttons.dart';
 import 'package:odango/pages/chat/events/message_bubble.dart';
 import 'package:odango/pages/chat/events/message_footer.dart';
 import 'package:odango/pages/chat/events/reaction_bar.dart';
+import 'package:odango/pages/chat/pinned_events.dart';
 import 'package:odango/pages/chat_list/chat_list.dart';
 import 'package:odango/pages/chat_list/chat_list_item.dart';
 
@@ -32,6 +33,10 @@ Future<void> conversationBubbles(WidgetTester widgetTester) => widgetTester
 Future<void> conversationJumpButtons(WidgetTester widgetTester) => widgetTester
     .startFluffyChatTest()
     .then((tester) => tester._conversationJumpButtons());
+
+Future<void> pinnedMessagesFlow(WidgetTester widgetTester) => widgetTester
+    .startFluffyChatTest()
+    .then((tester) => tester._pinnedMessages());
 
 Future<void> conversationDirectionRoomMention(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then(
@@ -324,5 +329,31 @@ extension on FluffyChatTester {
     await goBack();
     await bob.logout();
     await alice.logout();
+  }
+
+  Future<void> _pinnedMessages() async {
+    await ensureLoggedIn();
+    await ensureGroupChatCreated();
+    await openTab('Chats');
+    await tapOn(ChatFlows.groupChatName);
+    final text = 'pin me ${DateTime.now().millisecondsSinceEpoch}';
+    await _sendMessage(text);
+    await longPressOn(_inBubble(text));
+    await tapOn('Pin to room');
+    await waitFor(find.byKey(PinnedEvents.barKey));
+    await waitFor('Pinned message');
+    await tapOn(find.byKey(PinnedEvents.barKey));
+    expect(find.byKey(PinnedEvents.barKey), findsOneWidget);
+    await tapOn(find.byKey(PinnedEvents.unpinKey));
+    await tapOn(
+      find
+          .descendant(
+            of: find.byType(AlertDialog),
+            matching: find.text('Unpin'),
+          )
+          .last,
+    );
+    await waitForGone(find.byKey(PinnedEvents.barKey));
+    await goBack();
   }
 }

@@ -10,6 +10,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/app_temp_directory.dart';
@@ -20,6 +21,11 @@ import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'events/audio_player.dart';
+
+void pushAmplitude(List<double> timeline, double value) {
+  timeline.add(value);
+  if (timeline.length > AppInChat.maxAmplitudes) timeline.removeAt(0);
+}
 
 class RecordingViewModel extends StatefulWidget {
   final Widget Function(BuildContext, RecordingViewModelState) builder;
@@ -130,7 +136,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
       final amplitude = await _audioRecorder!.getAmplitude();
       var value = 100 + amplitude.current * 2;
       value = value < 1 ? 1 : value;
-      amplitudeTimeline.add(value);
+      pushAmplitude(amplitudeTimeline, value);
       setState(() {
         duration += const Duration(milliseconds: 100);
       });

@@ -45,6 +45,8 @@ class RecordingApi extends FakeMatrixApi {
   /// The next write to `/send/` is refused with a server error.
   bool failNextSend = false;
 
+  String? limitNextWrite;
+
   /// GET paths (by their end) that the server does not know: 404.
   final notFound = <String>{};
 
@@ -66,7 +68,7 @@ class RecordingApi extends FakeMatrixApi {
   Object? Function(Uri url)? getResponder;
 
   static final _accept = RegExp(
-    r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads|/account_data/|/invite',
+    r'/receipt/|/read_markers|/typing/|/presence/[^/]+/status|/state/|/send/|/threads|/account_data/|/invite|/forget|/media/v3/upload',
   );
 
   void clear() => log.clear();
@@ -181,12 +183,33 @@ class RecordingApi extends FakeMatrixApi {
         headers: {'content-type': 'application/json'},
       );
     }
+    final limited = limitNextWrite;
+    if (limited != null &&
+        request.method != 'GET' &&
+        request.url.path.contains(limited)) {
+      limitNextWrite = null;
+      return StreamedResponse(
+        Stream.value(
+          utf8.encode(
+            '{"errcode":"M_LIMIT_EXCEEDED","error":"slow","retry_after_ms":0}',
+          ),
+        ),
+        429,
+        headers: {'content-type': 'application/json'},
+      );
+    }
     final unstubbed =
         request.method != 'GET' && _accept.hasMatch(request.url.path);
     if (!unstubbed) return super.send(copy);
-    final response = request.url.path.contains('/send/')
-        ? {'event_id': '\$recorded${_counter++}:fakeserver.notexisting'}
-        : <String, Object?>{};
+    final response = switch (request.url.path) {
+      final path when path.contains('/send/') => {
+        'event_id': '\$recorded${_counter++}:fakeserver.notexisting',
+      },
+      final path when path.contains('/upload') => {
+        'content_uri': 'mxc://example.org/uploaded${_counter++}',
+      },
+      _ => <String, Object?>{},
+    };
     return StreamedResponse(
       Stream.value(utf8.encode(jsonEncode(response))),
       200,

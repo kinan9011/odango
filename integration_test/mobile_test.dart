@@ -70,6 +70,8 @@ void main() {
     flow('Search encrypted chats', searchEncryptedFlow);
     flow('Search unencrypted chats', searchServerFlow);
     flow('Search index wiped on logout', searchWipeFlow);
+    flow('Chat search', chatSearchFlow);
+    flow('Pinned messages', pinnedMessagesFlow);
     flow('Chat details', chatDetailsFlow);
     flow('Room access', roomAccessFlow);
     flow('Room permissions', roomPermissionsFlow);

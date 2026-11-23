@@ -7,17 +7,20 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/app_config.dart';
+import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/mention_suggestion_tile.dart';
+import 'package:odango/pages/chat/suggestion_list.dart';
 import 'package:odango/pages/chat/trust_user_key_dialog.dart';
+import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/chat/room_mention.dart';
 import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/markdown_context_builder.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/mxc_image.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:slugify/slugify.dart';
@@ -234,89 +237,76 @@ class InputBar extends StatelessWidget {
     BuildContext context,
     Map<String, String?> suggestion,
     void Function(Map<String, String?>) onSelected,
-    Client? client,
-  ) {
-    final theme = Theme.of(context);
-    const size = 30.0;
-    if (suggestion['type'] == 'command') {
+    Client? client, {
+    bool highlighted = false,
+  }) {
+    final tokens = AppTokens.of(context);
+    final type = suggestion['type'];
+    void select() => onSelected(suggestion);
+    if (type == 'command') {
       final command = suggestion['name']!;
-      final hint = commandHint(L10n.of(context), command);
-      return Tooltip(
-        message: hint,
-        waitDuration: const Duration(days: 1), // don't show on hover
-        child: ListTile(
-          onTap: () => onSelected(suggestion),
-          title: Text(commandExample(command), style: AppTypography.mono),
-          subtitle: Text(
-            hint,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall,
-          ),
-        ),
+      return SuggestionRow(
+        key: ValueKey('suggestion_command_$command'),
+        highlighted: highlighted,
+        onTap: select,
+        monoTitle: true,
+        leading: Icon(Icons.terminal_rounded, size: 22, color: tokens.acc),
+        title: visibleId(cappedText(commandExample(command), maxUnits: 80)),
+        subtitle: commandHint(L10n.of(context), command),
       );
     }
-    if (suggestion['type'] == 'emoji') {
+    if (type == 'emoji') {
       final label = suggestion['label']!;
-      return Tooltip(
-        message: label,
-        waitDuration: const Duration(days: 1), // don't show on hover
-        child: ListTile(
-          onTap: () => onSelected(suggestion),
-          leading: SizedBox.square(
-            dimension: size,
-            child: Text(
-              suggestion['emoji']!,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-          title: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      return SuggestionRow(
+        key: ValueKey('suggestion_emoji_${suggestion['emoji']}'),
+        highlighted: highlighted,
+        onTap: select,
+        leading: Text(
+          suggestion['emoji']!,
+          style: const TextStyle(fontSize: 22),
         ),
+        title: visibleId(cappedText(label, maxUnits: 80)),
       );
     }
-    if (suggestion['type'] == 'emote') {
-      return ListTile(
-        onTap: () => onSelected(suggestion),
+    if (type == 'emote') {
+      final packAvatar = suggestion['pack_avatar_url'];
+      return SuggestionRow(
+        key: ValueKey('suggestion_emote_${suggestion['name']}'),
+        highlighted: highlighted,
+        onTap: select,
         leading: MxcImage(
-          // ensure proper ordering ...
           key: ValueKey(suggestion['name']),
           uri: suggestion['mxc'] is String
               ? Uri.tryParse(suggestion['mxc'] ?? '')
               : null,
           client: client,
-          width: size,
-          height: size,
+          width: AppInChat.suggestionAvatar,
+          height: AppInChat.suggestionAvatar,
         ),
-        title: Row(
-          crossAxisAlignment: .center,
-          children: <Widget>[
-            Text(suggestion['name']!),
-            Expanded(
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: Opacity(
-                  opacity: suggestion['pack_avatar_url'] != null ? 0.8 : 0.5,
-                  child: suggestion['pack_avatar_url'] != null
-                      ? Avatar(
-                          mxContent: Uri.tryParse(
-                            suggestion.tryGet<String>('pack_avatar_url') ?? '',
-                          ),
-                          name: suggestion.tryGet<String>('pack_display_name'),
-                          colorSeed: suggestion.tryGet<String>(
-                            'pack_avatar_url',
-                          ),
-                          size: size * 0.9,
-                          client: client,
-                        )
-                      : Text(suggestion['pack_display_name']!),
+        title: visibleId(cappedText(suggestion['name']!, maxUnits: 80)),
+        trailing: Opacity(
+          opacity: packAvatar != null ? 0.8 : 0.5,
+          child: packAvatar != null
+              ? Avatar(
+                  mxContent: Uri.tryParse(packAvatar),
+                  name: suggestion.tryGet<String>('pack_display_name'),
+                  colorSeed: packAvatar,
+                  size: AppInChat.suggestionAvatar * 0.8,
+                  client: client,
+                )
+              : Text(
+                  visibleId(
+                    cappedText(
+                      suggestion['pack_display_name'] ?? '',
+                      maxUnits: 40,
+                    ),
+                  ),
+                  style: TextStyle(color: tokens.mut, fontSize: 12.5),
                 ),
-              ),
-            ),
-          ],
         ),
       );
     }
-    if (suggestion['type'] == 'room_mention') {
+    if (type == 'room_mention') {
       return MentionSuggestionTile(
         suggestion: {
           ...suggestion,
@@ -324,17 +314,19 @@ class InputBar extends StatelessWidget {
           'subtitle': L10n.of(context).mentionEveryoneSubtitle,
         },
         client: client,
-        size: size,
+        size: AppInChat.suggestionAvatar,
         leadingIcon: Icons.groups_rounded,
-        onTap: () => onSelected(suggestion),
+        highlighted: highlighted,
+        onTap: select,
       );
     }
-    if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
+    if (type == 'user' || type == 'room') {
       return MentionSuggestionTile(
         suggestion: suggestion,
         client: client,
-        size: size,
-        onTap: () => onSelected(suggestion),
+        size: AppInChat.suggestionAvatar,
+        highlighted: highlighted,
+        onTap: select,
       );
     }
     return const SizedBox.shrink();
@@ -416,12 +408,12 @@ class InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Autocomplete<Map<String, String?>>(
       key: Key('chat_input_field'),
       focusNode: focusNode,
       textEditingController: controller,
-      optionsBuilder: getSuggestions,
+      optionsBuilder: (value) =>
+          getSuggestions(value).take(AppInChat.maxSuggestions),
       fieldViewBuilder: (context, controller, focusNode, _) => MediaQuery(
         data: MediaQuery.of(context).copyWith(
           textScaler: TextScaler.linear(AppSettings.fontSizeFactor.value),
@@ -496,21 +488,16 @@ class InputBar extends StatelessWidget {
       ),
       optionsViewBuilder: (c, onSelected, s) {
         final suggestions = s.toList();
-        return Material(
-          elevation: theme.appBarTheme.scrolledUnderElevation ?? 4,
-          shadowColor: theme.appBarTheme.shadowColor,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          clipBehavior: Clip.hardEdge,
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemCount: suggestions.length,
-            itemBuilder: (context, i) => buildSuggestion(
-              c,
-              suggestions[i],
-              onSelected,
-              Matrix.of(context).client,
-            ),
+        final highlighted = AutocompleteHighlightedOption.of(c);
+        return SuggestionList(
+          count: suggestions.length,
+          highlighted: highlighted,
+          itemBuilder: (context, i) => buildSuggestion(
+            context,
+            suggestions[i],
+            onSelected,
+            Matrix.of(context).client,
+            highlighted: i == highlighted,
           ),
         );
       },

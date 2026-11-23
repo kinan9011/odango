@@ -319,7 +319,7 @@ class _FeedRow extends StatelessWidget {
 }
 
 class FeedFooter extends StatelessWidget {
-  final SharedMediaFeed feed;
+  final FeedState feed;
 
   const FeedFooter({required this.feed, super.key});
 

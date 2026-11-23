@@ -8,9 +8,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:odango/pages/chat/events/message_bubble.dart';
 import 'package:odango/pages/chat/events/message_footer.dart';
 import 'package:odango/pages/chat_list/chat_list_item.dart';
+import 'package:odango/pages/chat_search/chat_search_view.dart';
+import 'package:odango/pages/chat_search/message_result_row.dart';
 import 'package:odango/pages/global_search/global_search_view.dart';
 import 'package:odango/pages/global_search/search_filter_sheet.dart';
 import 'package:odango/pages/global_search/search_result_widgets.dart';
+import 'package:odango/widgets/underline_tab_strip.dart';
 
 import '../data/environment_constants.dart';
 import '../utils/fluffy_chat_tester.dart';
@@ -25,6 +28,9 @@ Future<void> searchEncryptedFlow(WidgetTester widgetTester) => widgetTester
 
 Future<void> searchServerFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._searchServer());
+
+Future<void> chatSearchFlow(WidgetTester widgetTester) =>
+    widgetTester.startFluffyChatTest().then((tester) => tester._chatSearch());
 
 Future<void> searchWipeFlow(WidgetTester widgetTester) =>
     widgetTester.startFluffyChatTest().then((tester) => tester._searchWipe());
@@ -191,5 +197,34 @@ extension on FluffyChatTester {
     await enterText(GlobalSearchView.fieldKey, fresh);
     await waitFor(find.byType(MessageHitTile));
     await _leaveSearch();
+  }
+
+  Future<void> _chatSearch() async {
+    await ensureLoggedIn();
+    await ensureGroupChatCreated();
+    await openTab('Chats');
+    final word = 'inchat${DateTime.now().millisecondsSinceEpoch}';
+    await tapOn(ChatFlows.groupChatName);
+    await _sendInGroup('look for $word');
+    await tapOn(const Key('chat_overflow_button'));
+    await tapOn('Search');
+    await waitFor(ChatSearchView.fieldKey);
+    await tester.enterText(find.byKey(ChatSearchView.fieldKey), word);
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await waitFor(find.byType(MessageResultRow));
+    await tapOn(UnderlineTabStrip.tabKey(1));
+    await waitFor('Nothing found...');
+    await tapOn(UnderlineTabStrip.tabKey(0));
+    await waitFor(find.byType(MessageResultRow));
+    await tapOn(find.byType(MessageResultRow).first);
+    await waitFor(const Key('chat_input_field'));
+    await waitFor(
+      find.descendant(
+        of: find.byType(MessageBubble),
+        matching: find.textContaining(word, findRichText: true),
+      ),
+    );
+    await goBack();
+    await openTab('Chats');
   }
 }

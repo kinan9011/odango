@@ -229,7 +229,6 @@ void main() {
       'lib/pages/chat/events/message_download_content.dart':
           'file name through safeDisplayText',
       'lib/pages/chat_list/chat_list_item.dart': 'RowPreview strips',
-      'lib/pages/chat_search/chat_search_files_tab.dart': 'stripped',
       'lib/pages/chat/sticker_picker_dialog.dart': 'tooltip stripped',
       'lib/pages/image_viewer/video_player.dart': 'a temp file name',
       'lib/pages/image_viewer/viewer_chrome.dart': 'ViewerCaption strips',
