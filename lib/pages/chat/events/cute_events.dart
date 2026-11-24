@@ -75,7 +75,7 @@ class _CuteContentState extends State<CuteContent> {
   }
 
   String? generateLabel(User? user) {
-    final name = stripBidiOverrides(
+    final name = inlineName(
       user?.displayName ??
           widget.event.senderFromMemoryOrFallback.displayName ??
           '',

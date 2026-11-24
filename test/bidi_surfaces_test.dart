@@ -135,15 +135,23 @@ void main() {
       'img alt': RegExp(r"attributes\['alt'\]"),
       'room name': RegExp(r'\.getLocalizedDisplayname\('),
       'maths attribute': RegExp(r"attributes\['data-mx-maths'\]"),
-      'display name': RegExp(r'\.calcDisplayname\('),
+      'display name': RegExp(r'\.calcDisplayname\b'),
       'reaction key text': RegExp(r'Text\(\s*entry\.key\b'),
-      'room name field': RegExp(r'\broom\.name\b(?!\.(isEmpty|isNotEmpty))'),
+      'room name field': RegExp(
+        r'\b_?room[!?]?\.name\b(?!\.(isEmpty|isNotEmpty))',
+      ),
+      'displayname field': RegExp(r"tryGet<String>\('displayname'\)"),
+    };
+    // A name has to be stripped, a visible marker is not enough for it.
+    const nameSources = {
+      'display name',
+      'room name field',
+      'displayname field',
     };
     // Files that may hold a raw source, and why.
     const exempt = <String, String>{
       'lib/utils/rich_text/edit_prefill.dart':
           "the composer text of the user's own message being edited",
-      'lib/utils/matrix_sdk_extensions/matrix_locals.dart': 'the SDK glue',
       'lib/utils/matrix_sdk_extensions/safe_room_name.dart':
           'the one place that wraps getLocalizedDisplayname',
       'lib/utils/export/export_events.dart': 'written to a file, not shown',
@@ -168,7 +176,8 @@ void main() {
         final matches = entry.value.allMatches(source).toList();
         if (single.contains(file.path) && matches.length <= 1) continue;
         for (final match in matches) {
-          if (_insideStripper(source, match.start)) continue;
+          final names = nameSources.contains(entry.key);
+          if (_insideStripper(source, match.start, names: names)) continue;
           final line = '\n'.allMatches(source.substring(0, match.start)).length;
           offenders.add('${file.path}:${line + 1} (${entry.key})');
         }
@@ -219,33 +228,193 @@ void main() {
     expect(preview!.text, 'preview');
   });
 
+  test('every name parameter of MatrixLocals is cleaned', () {
+    final source = File(
+      'lib/utils/matrix_sdk_extensions/matrix_locals.dart',
+    ).readAsStringSync();
+    final name = RegExp(
+      r'\b(senderName|targetName|displayname|newDisplayname|oldDisplayName|reactionKey|typeKey)\b',
+    );
+    final offenders = <String>[];
+    for (final match in name.allMatches(source)) {
+      final before = source.substring(0, match.start);
+      if (before.endsWith('String ') || before.endsWith('String? ')) continue;
+      final only = match.group(0) == 'typeKey' ? 'visibleId' : 'inlineName';
+      if (_insideStripper(source, match.start, only: {only})) continue;
+      final line = '\n'.allMatches(before).length;
+      offenders.add('matrix_locals.dart:${line + 1} (${match.group(0)})');
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('the sender prefix is composed by the app, not by the SDK', () {
+    final prefixed = RegExp(
+      r'\.calcLocalizedBody(?:Fallback)?\((?:(?!;)[\s\S])*?'
+      r'withSenderNamePrefix:(?!\s*false\b)',
+    );
+    final offenders = <String>[];
+    for (final file in Directory('lib').listSync(recursive: true)) {
+      if (file is! File || !file.path.endsWith('.dart')) continue;
+      final source = file.readAsStringSync();
+      for (final match in prefixed.allMatches(source)) {
+        final line = '\n'.allMatches(source.substring(0, match.start)).length;
+        offenders.add('${file.path}:${line + 1}');
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('names that go into a sentence are made inline at their source', () {
+    // Sentences built in the app from a name that has no widget test.
+    final sites = <String, RegExp>{
+      'lib/pages/chat/scheduling/send_options_flow.dart': RegExp(
+        r'partnerName = partner == null\s*\? null\s*: inlineName\(',
+      ),
+      'lib/pages/invitation_selection/invitation_selection_view.dart': RegExp(
+        r'cleanRoomName = inlineName\(',
+      ),
+      'lib/pages/chat/chat_event_list.dart': RegExp(
+        r'cleanRoomName = inlineName\(',
+      ),
+    };
+    final lost = <String>[
+      for (final entry in sites.entries)
+        if (!entry.value.hasMatch(File(entry.key).readAsStringSync()))
+          entry.key,
+    ];
+    expect(lost, isEmpty, reason: lost.join('\n'));
+  });
+
+  test('a name that can show nothing has a visible fallback', () {
+    const files = [
+      'lib/pages/chat_members/member_row.dart',
+      'lib/pages/chat_encryption_settings/user_devices_section.dart',
+      'lib/pages/invitation_selection/invite_row.dart',
+      'lib/pages/chat_details/profile_header.dart',
+      'lib/pages/chat_details/shared_media_pages.dart',
+    ];
+    final lost = <String>[
+      for (final file in files)
+        if (!File(file).readAsStringSync().contains('nameOr(')) file,
+    ];
+    expect(lost, isEmpty, reason: lost.join('\n'));
+  });
+
+  test('nothing is capped after it was balanced', () {
+    final capped = RegExp(r'cappedText\(\s*stripBidiOverrides\(');
+    final offenders = <String>[
+      for (final file in Directory('lib').listSync(recursive: true))
+        if (file is File &&
+            file.path.endsWith('.dart') &&
+            capped.hasMatch(file.readAsStringSync()))
+          file.path,
+    ];
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('the stripper scan only accepts the first argument', () {
+    expect(
+      _insideStripper(
+        'stripBidiOverrides(cappedText(u.calcDisplayname(), maxUnits: 3))',
+        'stripBidiOverrides(cappedText('.length,
+      ),
+      isTrue,
+    );
+    expect(
+      _insideStripper(
+        'safeDisplayText(x, maxGraphemes: [Text(u.calcDisplayname())].length)',
+        'safeDisplayText(x, maxGraphemes: [Text('.length,
+      ),
+      isFalse,
+    );
+    expect(
+      _insideStripper(
+        'stripBidiOverrides(x, y: u.calcDisplayname())',
+        'stripBidiOverrides(x, y: '.length,
+      ),
+      isFalse,
+    );
+    expect(
+      _insideStripper('visibleId(u.calcDisplayname())', 'visibleId('.length),
+      isTrue,
+    );
+    expect(
+      _insideStripper(
+        'visibleId(u.calcDisplayname())',
+        'visibleId('.length,
+        names: true,
+      ),
+      isFalse,
+    );
+  });
+
+  test('a name composed into a sentence is not clean behind a whole strip', () {
+    int at(String source, String marker) => source.indexOf(marker);
+    const typing = 'stripBidiOverrides(l10n.userIsTyping(u.calcDisplayname()))';
+    expect(_insideStripper(typing, at(typing, 'u.calc')), isFalse);
+    const prefix =
+        r"stripBidiOverrides('${e.senderFromMemoryOrFallback.calcDisplayname()}: $body')";
+    expect(_insideStripper(prefix, at(prefix, 'e.sender')), isFalse);
+    const kicked = 'stripBidiOverrides(l10n.kicked(senderName, targetName))';
+    expect(_insideStripper(kicked, at(kicked, 'targetName')), isFalse);
+    const wrapped =
+        'stripBidiOverrides(L10n.of(context).peekNotice(a, u.calcDisplayname()))';
+    expect(_insideStripper(wrapped, at(wrapped, 'u.calc')), isFalse);
+    const inner = 'l10n.userIsTyping(inlineName(u.calcDisplayname()))';
+    expect(_insideStripper(inner, at(inner, 'u.calc')), isTrue);
+    const capped =
+        'stripBidiOverrides(cappedText(u.calcDisplayname() ?? x, maxUnits: 3))';
+    expect(_insideStripper(capped, at(capped, 'u.calc')), isTrue);
+  });
+
+  test('a raw name read behind a whole-sentence strip is found', () {
+    const source = '''
+final a = l10n.hello(stripBidiOverrides(p.displayName ?? ''));
+final b = stripBidiOverrides(l10n.hello(p.displayName ?? ''));
+''';
+    expect(_rawNameReads(source), [2]);
+  });
+
+  test('a raw name read inside a file that also strips is found', () {
+    const source = '''
+final a = stripBidiOverrides(user.displayName ?? '');
+final b = Text(user.displayName!);
+final c = visibleId(user.displayName!);
+''';
+    expect(_rawNameReads(source), [2, 3]);
+  });
+
   test('a new place that reads a display name has to be looked at', () {
     // Every file that reads a profile or member display name field, with what
     // it does with it. A new file in this list fails the test until someone
-    // has checked it.
-    const checked = <String, String>{
-      'lib/utils/fluffy_share.dart': 'our own name, share text',
+    // has checked it. `shown` files must strip every read; `handed` files are
+    // checked as a whole, and the reason says why.
+    const shown = <String, String>{
       'lib/utils/devices/device_model.dart':
           'device name through safeDisplayText',
-      'lib/utils/members/member_filter.dart': 'search match only, not shown',
-      'lib/widgets/member_actions_popup_menu_button.dart':
-          'handed to UserDialog, which strips',
-      'lib/widgets/own_avatar.dart': 'our own name',
       'lib/widgets/adaptive_dialogs/user_dialog.dart': 'header name, stripped',
-      'lib/pages/chat/chat_input_row.dart': 'our own accounts',
-      'lib/pages/settings/settings.dart': 'our own name, edit prefill',
-      'lib/pages/settings/settings_view.dart': 'our own name',
       'lib/pages/chat/events/cute_events.dart': 'label name, stripped',
       'lib/pages/new_private_chat/new_private_chat_view.dart':
           'contact name through safeDisplayText',
       'lib/pages/global_search/search_result_widgets.dart':
           'profile name through safeDisplayText',
-      'lib/pages/chat/sticker_picker_dialog.dart':
-          'pack name, tooltip stripped',
+    };
+    const handed = <String, String>{
+      'lib/pages/chat/mention_suggestion_tile.dart':
+          'the raw name goes into a variable, then through safeDisplayText',
+      'lib/pages/invitation_selection/invite_row.dart':
+          'stripped, and the raw name is handed to UserDialog, which strips',
+      'lib/utils/fluffy_share.dart': 'our own name, share text',
+      'lib/utils/members/member_filter.dart': 'search match only, not shown',
+      'lib/widgets/member_actions_popup_menu_button.dart':
+          'handed to UserDialog, which strips',
+      'lib/widgets/own_avatar.dart': 'our own name',
+      'lib/pages/chat/chat_input_row.dart': 'our own accounts',
+      'lib/pages/settings/settings.dart': 'our own name, edit prefill',
+      'lib/pages/settings/settings_view.dart': 'our own name',
+      'lib/pages/chat/sticker_picker_dialog.dart': 'pack name, label stripped',
       'lib/pages/chat/input_bar.dart':
           'suggestion map, the tile shows it through safeDisplayText',
-      'lib/pages/chat/mention_suggestion_tile.dart': 'through safeDisplayText',
-      'lib/pages/invitation_selection/invite_row.dart': 'through visibleId',
       'lib/pages/invitation_selection/selection_chips.dart':
           'avatar initials, the label comes from candidateName in invite_row',
       'lib/pages/invitation_selection/invitation_selection_view.dart':
@@ -254,22 +423,28 @@ void main() {
       'lib/pages/profile/profile_view.dart': 'our own name',
       'lib/pages/chat_list/client_chooser_button.dart': 'our own accounts',
     };
-    final read = RegExp(r"(?<!this)\.displayName\b|\['displayname'\]");
+    final checked = {...shown, ...handed};
     final unseen = <String>[
       for (final file in Directory('lib').listSync(recursive: true))
         if (file is File &&
             file.path.endsWith('.dart') &&
             !file.path.startsWith('lib/l10n/') &&
             !checked.containsKey(file.path) &&
-            read.hasMatch(file.readAsStringSync()))
+            _rawNameReads(file.readAsStringSync(), any: true).isNotEmpty)
           file.path,
     ];
     expect(unseen, isEmpty, reason: unseen.join('\n'));
+    final raw = <String>[
+      for (final path in shown.keys)
+        for (final line in _rawNameReads(File(path).readAsStringSync()))
+          '$path:$line',
+    ];
+    expect(raw, isEmpty, reason: raw.join('\n'));
     final stripper = RegExp(
-      r'stripBidiOverrides\(|safeDisplayText\(|visibleId\(',
+      r'stripBidiOverrides\(|safeDisplayText\(|visibleId\(|inlineName\(',
     );
     final lost = <String>[
-      for (final entry in checked.entries)
+      for (final entry in handed.entries)
         if (RegExp(
               r'strip|safeDisplayText|visibleId|through',
             ).hasMatch(entry.value) &&
@@ -334,7 +509,7 @@ void main() {
     expect(unseen, isEmpty, reason: unseen.join('\n'));
     // The files that say they strip must still call a stripper.
     final stripper = RegExp(
-      r'stripBidiOverrides\(|safeDisplayText\(|visibleId\(',
+      r'stripBidiOverrides\(|safeDisplayText\(|visibleId\(|inlineName\(',
     );
     final lost = <String>[
       for (final entry in checked.entries)
@@ -354,23 +529,64 @@ void main() {
   });
 }
 
-bool _insideStripper(String source, int position) {
+const _strippers = [
+  'stripBidiOverrides',
+  'stripBidiControls',
+  'inlineName',
+  'safeDisplayText',
+  'visibleId',
+];
+
+final _nameRead = RegExp(r"(?<!this)\.displayName\b|\['displayname'\]");
+
+/// The lines (1-based) of the display name reads that are not the first
+/// argument of a stripper; with [any] every read counts.
+List<int> _rawNameReads(String source, {bool any = false}) => [
+  for (final match in _nameRead.allMatches(source))
+    if (any || !_insideStripper(source, match.start, names: true))
+      '\n'.allMatches(source.substring(0, match.start)).length + 1,
+];
+
+/// A call on the l10n object: a sentence with the name as one of its words.
+final _sentenceCall = RegExp(
+  r'(?:\b(?:l10n|i18n|locals|matrixLocals)|L10n\.of\([^)]*\)|'
+  r'\bMatrixLocals\([^)]*\))\s*\.\s*\w+$',
+);
+
+/// Whether [position] sits in the FIRST positional argument of a stripper
+/// call, with nothing that composes a sentence in between: a name that is
+/// put into a sentence or a `${}` string and balanced afterwards is not
+/// clean. A name must not be accepted behind a visible marker ([names]).
+/// With [only] just those strippers count.
+bool _insideStripper(
+  String source,
+  int position, {
+  bool names = false,
+  Set<String>? only,
+}) {
   var depth = 0;
+  var afterComma = false;
   for (var i = position - 1; i >= 0; i--) {
     final char = source[i];
-    if (char == ')') depth++;
-    if (char == '(') {
-      if (depth == 0) {
-        final before = source.substring(0, i).trimRight();
-        if (before.endsWith('stripBidiOverrides') ||
-            before.endsWith('stripBidiControls') ||
-            before.endsWith('visibleId') ||
-            before.endsWith('safeDisplayText')) {
-          return true;
-        }
-      } else {
+    if (char == ')' || char == ']' || char == '}') depth++;
+    if (char == ',' && depth == 0) afterComma = true;
+    if (char == '(' || char == '[' || char == '{') {
+      if (depth > 0) {
         depth--;
+        continue;
       }
+      if (char == '{' && i > 0 && source[i - 1] == r'$') return false;
+      if (char == '(') {
+        final before = source.substring(0, i).trimRight();
+        if (_sentenceCall.hasMatch(before)) return false;
+        if (!afterComma) {
+          for (final stripper in only ?? _strippers) {
+            if (only == null && names && stripper == 'visibleId') continue;
+            if (before.endsWith(stripper)) return true;
+          }
+        }
+      }
+      afterComma = false;
     }
     if (char == ';' && depth == 0) return false;
   }

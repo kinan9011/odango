@@ -9,6 +9,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/fluffy_share.dart';
@@ -93,7 +94,7 @@ class UserDialog extends StatelessWidget {
     final isSelf = client.userID == profile.userId;
     final directChatRoomId = client.getDirectChatFromUserId(profile.userId);
     final cleanName = stripBidiOverrides(profile.displayName ?? '');
-    final displayname = cleanName.isNotEmpty
+    final displayname = safeDisplayText(cleanName).isNotEmpty
         ? cleanName
         : profile.userId.localpart ?? l10n.user;
     final avatar = profile.avatarUrl;

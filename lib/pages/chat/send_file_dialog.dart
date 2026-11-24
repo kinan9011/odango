@@ -102,6 +102,14 @@ class SendFileDialogState extends State<SendFileDialog> {
   Future<void> _send(String? uniqueFileType) async {
     if (_sending) return;
     _sending = true;
+    try {
+      await _upload();
+    } finally {
+      _sending = false;
+    }
+  }
+
+  Future<void> _upload() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
 
@@ -109,10 +117,7 @@ class SendFileDialogState extends State<SendFileDialog> {
       widget.outerContext,
       widget.room,
     );
-    if (!context.mounted || !proceed) {
-      _sending = false;
-      return;
-    }
+    if (!context.mounted || !proceed) return;
 
     if (ForegroundServices.platformSupported) {
       await ForegroundServices.startService('send_files');
@@ -207,7 +212,6 @@ class SendFileDialogState extends State<SendFileDialog> {
         }
       }
     } finally {
-      if (mounted) _sending = false;
       if (ForegroundServices.platformSupported) {
         await ForegroundServices.stopService('send_files');
       } else {

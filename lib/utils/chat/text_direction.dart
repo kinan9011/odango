@@ -62,3 +62,13 @@ String stripBidiOverrides(String text) {
   }
   return out.toString() + '\u2069' * open;
 }
+
+final _lineBreaks = RegExp(
+  r'[\n\r\u000B\u000C\u001C-\u001E\u0085\u2028\u2029]',
+);
+
+/// A name that goes inside a sentence: every line or paragraph break becomes
+/// a space (a break ends an isolate early and splits the sentence), then
+/// [stripBidiOverrides].
+String inlineName(String text) =>
+    stripBidiOverrides(text.replaceAll(_lineBreaks, ' '));

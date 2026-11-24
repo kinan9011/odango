@@ -162,9 +162,11 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                     itemBuilder: (context, i) {
                       final entry = pack.images[i];
                       final image = entry.value;
-                      final label = cappedText(
-                        stripBidiOverrides(image.body ?? entry.key),
-                        maxUnits: AppInChat.stickerLabelCap,
+                      final label = stripBidiOverrides(
+                        cappedText(
+                          image.body ?? entry.key,
+                          maxUnits: AppInChat.stickerLabelCap,
+                        ),
                       );
                       return Semantics(
                         button: true,

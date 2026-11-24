@@ -26,16 +26,16 @@ extension RoomStatusExtension on Room {
       if (typingUsers.first.id != directChatMatrixID) {
         typingText = L10n.of(
           context,
-        ).userIsTyping(stripBidiOverrides(typingUsers.first.calcDisplayname()));
+        ).userIsTyping(inlineName(typingUsers.first.calcDisplayname()));
       }
     } else if (typingUsers.length == 2) {
       typingText = L10n.of(context).userAndUserAreTyping(
-        stripBidiOverrides(typingUsers.first.calcDisplayname()),
-        stripBidiOverrides(typingUsers[1].calcDisplayname()),
+        inlineName(typingUsers.first.calcDisplayname()),
+        inlineName(typingUsers[1].calcDisplayname()),
       );
     } else if (typingUsers.length > 2) {
       typingText = L10n.of(context).userAndOthersAreTyping(
-        stripBidiOverrides(typingUsers.first.calcDisplayname()),
+        inlineName(typingUsers.first.calcDisplayname()),
         (typingUsers.length - 1),
       );
     }

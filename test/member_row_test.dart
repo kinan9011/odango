@@ -152,12 +152,28 @@ void main() {
     await h.finish(tester);
   });
 
-  testWidgets('bidi controls in a name and an id are shown as U+FFFD', (
+  testWidgets('a name with nothing visible shows the id as its title', (
     tester,
   ) async {
-    await show(tester, [user('@ev${rlo}il:example.org', name: 'Mal${rlo}ory')]);
+    await show(tester, [user('@ev:example.org', name: '\u200F\u2067\u2069')]);
+    expect(find.textContaining('@ev:example.org'), findsNWidgets(2));
+    await h.finish(tester);
+  });
+
+  testWidgets('a break in a name becomes a space', (tester) async {
+    await show(tester, [user('@ev:example.org', name: 'Mal\u2028ory')]);
+    expect(find.textContaining('Mal ory'), findsOneWidget);
+    await h.finish(tester);
+  });
+
+  testWidgets('an override leaves a name, a mark stays, an id is marked', (
+    tester,
+  ) async {
+    await show(tester, [
+      user('@ev${rlo}il:example.org', name: 'Mal${rlo}ory\u200F'),
+    ]);
     expect(find.textContaining(rlo), findsNothing);
-    expect(find.textContaining('Mal\u{FFFD}ory'), findsOneWidget);
+    expect(find.textContaining('Malory\u200F'), findsOneWidget);
     expect(find.textContaining('@ev\u{FFFD}il:example.org'), findsOneWidget);
     await h.finish(tester);
   });

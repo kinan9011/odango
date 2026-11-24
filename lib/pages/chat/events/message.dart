@@ -24,6 +24,7 @@ import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/file_description.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_localized_body.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/string_color.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -736,7 +737,7 @@ class _ThreadChip extends StatelessWidget {
           onPressed: onTap,
           icon: const Icon(Icons.message),
           label: Text(
-            '${L10n.of(context).countReplies(children.length)} | ${stripBidiOverrides(children.first.calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true))}',
+            '${L10n.of(context).countReplies(children.length)} | ${children.first.safeLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

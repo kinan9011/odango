@@ -9,11 +9,12 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_localized_body.dart';
 
 String pinnedBarText(Event event, L10n l10n) => stripBidiOverrides(
   cappedText(
     event
-        .calcLocalizedBodyFallback(
+        .safeLocalizedBodyFallback(
           MatrixLocals(l10n),
           withSenderNamePrefix: true,
           hideReply: true,

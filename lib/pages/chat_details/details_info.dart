@@ -75,9 +75,11 @@ class DetailsInfo extends StatelessWidget {
                         key: const ValueKey('details_topic'),
                         text: room.topic.isEmpty
                             ? l10n.noChatDescriptionYet
-                            : cappedText(
-                                stripBidiOverrides(room.topic),
-                                maxUnits: AppProfile.topicCap,
+                            : stripBidiOverrides(
+                                cappedText(
+                                  room.topic,
+                                  maxUnits: AppProfile.topicCap,
+                                ),
                               ),
                         textScaleFactor: MediaQuery.textScalerOf(
                           context,

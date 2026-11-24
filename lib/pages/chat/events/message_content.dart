@@ -229,7 +229,7 @@ class MessageContent extends StatelessWidget {
           builder: (context, snapshot) {
             return _ButtonContent(
               label: L10n.of(context).startedACall(
-                stripBidiOverrides(
+                inlineName(
                   snapshot.data?.calcDisplayname() ??
                       event.senderFromMemoryOrFallback.calcDisplayname(),
                 ),
@@ -247,7 +247,7 @@ class MessageContent extends StatelessWidget {
           builder: (context, snapshot) {
             return _ButtonContent(
               label: L10n.of(context).userSentUnknownEvent(
-                stripBidiOverrides(
+                inlineName(
                   snapshot.data?.calcDisplayname() ??
                       event.senderFromMemoryOrFallback.calcDisplayname(),
                 ),
@@ -284,7 +284,7 @@ class RedactionWidget extends StatelessWidget {
       future: event.redactedBecause?.fetchSenderUser(),
       builder: (context, snapshot) {
         final reason = event.redactedBecause?.content.tryGet<String>('reason');
-        final redactedBy = stripBidiOverrides(
+        final redactedBy = inlineName(
           snapshot.data?.calcDisplayname() ??
               event.redactedBecause?.senderId.localpart ??
               L10n.of(context).user,
@@ -294,7 +294,7 @@ class RedactionWidget extends StatelessWidget {
               ? L10n.of(context).redactedBy(redactedBy)
               : L10n.of(
                   context,
-                ).redactedByBecause(redactedBy, stripBidiOverrides(reason)),
+                ).redactedByBecause(redactedBy, inlineName(reason)),
           icon: '🗑️',
           textColor: buttonTextColor.withAlpha(128),
           onPressed: () => onInfoTab!(event),

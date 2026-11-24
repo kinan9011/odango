@@ -367,6 +367,32 @@ void main() {
     await h.finish(tester);
   });
 
+  testWidgets('W10 a failure before the upload does not kill the Send button', (
+    tester,
+  ) async {
+    final controller = await drop(tester, [
+      _Item.fromData(Uint8List(300), name: 'file.mp3', mime: 'audio/mpeg'),
+    ], encrypted: true);
+    controller.room.summary.mJoinedMemberCount = 50;
+    api.forbidden.add('/members');
+    final send = tester.widget<SettingsPillButton>(
+      find.descendant(
+        of: find.byKey(SendFileDialog.sendKey),
+        matching: find.byType(SettingsPillButton),
+      ),
+    );
+    for (var attempt = 1; attempt <= 2; attempt++) {
+      await tester.runAsync(() async {
+        final failed = Function.apply(send.onPressed!, []) as Future<void>;
+        await expectLater(failed, throwsA(isA<Object>()));
+      });
+      expect(api.requests('/members'), hasLength(attempt));
+    }
+    expect(find.byType(AppSheet), findsOneWidget);
+    expect(api.requests('/upload', method: 'POST'), isEmpty);
+    await h.finish(tester);
+  });
+
   testWidgets('a rate limited upload is tried again in the same thread', (
     tester,
   ) async {

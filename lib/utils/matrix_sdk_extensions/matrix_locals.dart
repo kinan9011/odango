@@ -5,6 +5,8 @@
 
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
+import 'package:odango/utils/visible_id.dart';
 
 /// This is a temporary helper class until there is a proper solution to this with the new system
 class MatrixLocals extends MatrixLocalizations {
@@ -14,17 +16,17 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String acceptedTheInvitation(String targetName) {
-    return l10n.acceptedTheInvitation(targetName);
+    return l10n.acceptedTheInvitation(inlineName(targetName));
   }
 
   @override
   String activatedEndToEndEncryption(String senderName) {
-    return l10n.activatedEndToEndEncryption(senderName);
+    return l10n.activatedEndToEndEncryption(inlineName(senderName));
   }
 
   @override
   String answeredTheCall(String senderName) {
-    return l10n.answeredTheCall(senderName);
+    return l10n.answeredTheCall(inlineName(senderName));
   }
 
   @override
@@ -32,37 +34,40 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String bannedUser(String senderName, String targetName) {
-    return l10n.bannedUser(senderName, targetName);
+    return l10n.bannedUser(inlineName(senderName), inlineName(targetName));
   }
 
   @override
   String changedTheChatAvatar(String senderName) {
-    return l10n.changedTheChatAvatar(senderName);
+    return l10n.changedTheChatAvatar(inlineName(senderName));
   }
 
   @override
   String changedTheChatDescriptionTo(String senderName, _) {
-    return l10n.changedTheChatDescription(senderName);
+    return l10n.changedTheChatDescription(inlineName(senderName));
   }
 
   @override
   String changedTheChatNameTo(String senderName, _) {
-    return l10n.changedTheChatName(senderName);
+    return l10n.changedTheChatName(inlineName(senderName));
   }
 
   @override
   String changedTheChatPermissions(String senderName) {
-    return l10n.changedTheChatPermissions(senderName);
+    return l10n.changedTheChatPermissions(inlineName(senderName));
   }
 
   @override
   String changedTheDisplaynameTo(String targetName, String newDisplayname) {
-    return l10n.changedTheDisplaynameTo(targetName, newDisplayname);
+    return l10n.changedTheDisplaynameTo(
+      inlineName(targetName),
+      inlineName(newDisplayname),
+    );
   }
 
   @override
   String changedTheGuestAccessRules(String senderName) {
-    return l10n.changedTheGuestAccessRules(senderName);
+    return l10n.changedTheGuestAccessRules(inlineName(senderName));
   }
 
   @override
@@ -70,12 +75,15 @@ class MatrixLocals extends MatrixLocalizations {
     String senderName,
     String localizedString,
   ) {
-    return l10n.changedTheGuestAccessRulesTo(senderName, localizedString);
+    return l10n.changedTheGuestAccessRulesTo(
+      inlineName(senderName),
+      localizedString,
+    );
   }
 
   @override
   String changedTheHistoryVisibility(String senderName) {
-    return l10n.changedTheHistoryVisibility(senderName);
+    return l10n.changedTheHistoryVisibility(inlineName(senderName));
   }
 
   @override
@@ -83,32 +91,35 @@ class MatrixLocals extends MatrixLocalizations {
     String senderName,
     String localizedString,
   ) {
-    return l10n.changedTheHistoryVisibilityTo(senderName, localizedString);
+    return l10n.changedTheHistoryVisibilityTo(
+      inlineName(senderName),
+      localizedString,
+    );
   }
 
   @override
   String changedTheJoinRules(String senderName) {
-    return l10n.changedTheJoinRules(senderName);
+    return l10n.changedTheJoinRules(inlineName(senderName));
   }
 
   @override
   String changedTheJoinRulesTo(String senderName, String localizedString) {
-    return l10n.changedTheJoinRulesTo(senderName, localizedString);
+    return l10n.changedTheJoinRulesTo(inlineName(senderName), localizedString);
   }
 
   @override
   String changedTheProfileAvatar(String targetName) {
-    return l10n.changedTheProfileAvatar(targetName);
+    return l10n.changedTheProfileAvatar(inlineName(targetName));
   }
 
   @override
   String changedTheRoomAliases(String senderName) {
-    return l10n.changedTheRoomAliases(senderName);
+    return l10n.changedTheRoomAliases(inlineName(senderName));
   }
 
   @override
   String changedTheRoomInvitationLink(String senderName) {
-    return l10n.changedTheRoomInvitationLink(senderName);
+    return l10n.changedTheRoomInvitationLink(inlineName(senderName));
   }
 
   @override
@@ -121,7 +132,7 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String createdTheChat(String senderName) {
-    return l10n.createdTheChat(senderName);
+    return l10n.createdTheChat(inlineName(senderName));
   }
 
   @override
@@ -132,7 +143,7 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String endedTheCall(String senderName) {
-    return l10n.endedTheCall(senderName);
+    return l10n.endedTheCall(inlineName(senderName));
   }
 
   @override
@@ -143,7 +154,7 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String groupWith(String displayname) {
-    return l10n.groupWith(displayname);
+    return l10n.groupWith(inlineName(displayname));
   }
 
   @override
@@ -154,12 +165,15 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String hasWithdrawnTheInvitationFor(String senderName, String targetName) {
-    return l10n.hasWithdrawnTheInvitationFor(senderName, targetName);
+    return l10n.hasWithdrawnTheInvitationFor(
+      inlineName(senderName),
+      inlineName(targetName),
+    );
   }
 
   @override
   String invitedUser(String senderName, String targetName) {
-    return l10n.invitedUser(senderName, targetName);
+    return l10n.invitedUser(inlineName(senderName), inlineName(targetName));
   }
 
   @override
@@ -167,17 +181,17 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String joinedTheChat(String targetName) {
-    return l10n.joinedTheChat(targetName);
+    return l10n.joinedTheChat(inlineName(targetName));
   }
 
   @override
   String kicked(String senderName, String targetName) {
-    return l10n.kicked(senderName, targetName);
+    return l10n.kicked(inlineName(senderName), inlineName(targetName));
   }
 
   @override
   String kickedAndBanned(String senderName, String targetName) {
-    return l10n.kickedAndBanned(senderName, targetName);
+    return l10n.kickedAndBanned(inlineName(senderName), inlineName(targetName));
   }
 
   @override
@@ -186,21 +200,23 @@ class MatrixLocals extends MatrixLocalizations {
   @override
   String redactedAnEvent(Event redactedEvent) {
     return l10n.redactedAnEvent(
-      redactedEvent.redactedBecause?.senderFromMemoryOrFallback
-              .calcDisplayname() ??
-          l10n.user,
+      inlineName(
+        redactedEvent.redactedBecause?.senderFromMemoryOrFallback
+                .calcDisplayname() ??
+            l10n.user,
+      ),
     );
   }
 
   @override
   String rejectedTheInvitation(String targetName) {
-    return l10n.rejectedTheInvitation(targetName);
+    return l10n.rejectedTheInvitation(inlineName(targetName));
   }
 
   @override
   String removedBy(Event redactedEvent) {
     return l10n.redactedBy(
-      redactedEvent.senderFromMemoryOrFallback.calcDisplayname(),
+      inlineName(redactedEvent.senderFromMemoryOrFallback.calcDisplayname()),
     );
   }
 
@@ -209,47 +225,47 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String sentAFile(String senderName) {
-    return l10n.sentAFile(senderName);
+    return l10n.sentAFile(inlineName(senderName));
   }
 
   @override
   String sentAPicture(String senderName) {
-    return l10n.sentAPicture(senderName);
+    return l10n.sentAPicture(inlineName(senderName));
   }
 
   @override
   String sentASticker(String senderName) {
-    return l10n.sentASticker(senderName);
+    return l10n.sentASticker(inlineName(senderName));
   }
 
   @override
   String sentAVideo(String senderName) {
-    return l10n.sentAVideo(senderName);
+    return l10n.sentAVideo(inlineName(senderName));
   }
 
   @override
   String sentAnAudio(String senderName) {
-    return l10n.sentAnAudio(senderName);
+    return l10n.sentAnAudio(inlineName(senderName));
   }
 
   @override
   String sentCallInformations(String senderName) {
-    return l10n.sentCallInformations(senderName);
+    return l10n.sentCallInformations(inlineName(senderName));
   }
 
   @override
   String sharedTheLocation(String senderName) {
-    return l10n.sharedTheLocation(senderName);
+    return l10n.sharedTheLocation(inlineName(senderName));
   }
 
   @override
   String startedACall(String senderName) {
-    return l10n.startedACall(senderName);
+    return l10n.startedACall(inlineName(senderName));
   }
 
   @override
   String unbannedUser(String senderName, String targetName) {
-    return l10n.unbannedUser(senderName, targetName);
+    return l10n.unbannedUser(inlineName(senderName), inlineName(targetName));
   }
 
   @override
@@ -257,12 +273,12 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String unknownEvent(String typeKey) {
-    return l10n.userSentUnknownEvent('User', typeKey);
+    return l10n.userSentUnknownEvent('User', visibleId(typeKey));
   }
 
   @override
   String userLeftTheChat(String targetName) {
-    return l10n.userLeftTheChat(targetName);
+    return l10n.userLeftTheChat(inlineName(targetName));
   }
 
   @override
@@ -276,79 +292,84 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String sentReaction(String senderName, String reactionKey) =>
-      l10n.reactedWith(senderName, reactionKey);
+      l10n.reactedWith(inlineName(senderName), inlineName(reactionKey));
 
   @override
   // TODO: implement youAcceptedTheInvitation
   String get youAcceptedTheInvitation => l10n.youAcceptedTheInvitation;
 
   @override
-  String youBannedUser(String targetName) => l10n.youBannedUser(targetName);
+  String youBannedUser(String targetName) =>
+      l10n.youBannedUser(inlineName(targetName));
 
   @override
   String youHaveWithdrawnTheInvitationFor(String targetName) =>
-      l10n.youHaveWithdrawnTheInvitationFor(targetName);
+      l10n.youHaveWithdrawnTheInvitationFor(inlineName(targetName));
 
   @override
-  String youInvitedBy(String senderName) => l10n.youInvitedBy(senderName);
+  String youInvitedBy(String senderName) =>
+      l10n.youInvitedBy(inlineName(senderName));
 
   @override
-  String youInvitedUser(String targetName) => l10n.youInvitedUser(targetName);
+  String youInvitedUser(String targetName) =>
+      l10n.youInvitedUser(inlineName(targetName));
 
   @override
   // TODO: implement youJoinedTheChat
   String get youJoinedTheChat => l10n.youJoinedTheChat;
 
   @override
-  String youKicked(String targetName) => l10n.youKicked(targetName);
+  String youKicked(String targetName) => l10n.youKicked(inlineName(targetName));
 
   @override
   String youKickedAndBanned(String targetName) =>
-      l10n.youKickedAndBanned(targetName);
+      l10n.youKickedAndBanned(inlineName(targetName));
 
   @override
   // TODO: implement youRejectedTheInvitation
   String get youRejectedTheInvitation => l10n.youRejectedTheInvitation;
 
   @override
-  String youUnbannedUser(String targetName) => l10n.youUnbannedUser(targetName);
+  String youUnbannedUser(String targetName) =>
+      l10n.youUnbannedUser(inlineName(targetName));
 
   @override
   String wasDirectChatDisplayName(String oldDisplayName) =>
-      l10n.wasDirectChatDisplayName(oldDisplayName);
+      l10n.wasDirectChatDisplayName(inlineName(oldDisplayName));
 
   @override
   String get unknownUser => l10n.user;
 
   @override
-  String hasKnocked(String targetName) => l10n.hasKnocked(targetName);
+  String hasKnocked(String targetName) =>
+      l10n.hasKnocked(inlineName(targetName));
 
   @override
   String acceptedKeyVerification(String senderName) =>
-      l10n.acceptedKeyVerification(senderName);
+      l10n.acceptedKeyVerification(inlineName(senderName));
 
   @override
   String canceledKeyVerification(String senderName) =>
-      l10n.canceledKeyVerification(senderName);
+      l10n.canceledKeyVerification(inlineName(senderName));
 
   @override
   String completedKeyVerification(String senderName) =>
-      l10n.completedKeyVerification(senderName);
+      l10n.completedKeyVerification(inlineName(senderName));
 
   @override
   String isReadyForKeyVerification(String senderName) =>
-      l10n.isReadyForKeyVerification(senderName);
+      l10n.isReadyForKeyVerification(inlineName(senderName));
 
   @override
   String requestedKeyVerification(String senderName) =>
-      l10n.requestedKeyVerification(senderName);
+      l10n.requestedKeyVerification(inlineName(senderName));
 
   @override
   String startedKeyVerification(String senderName) =>
-      l10n.startedKeyVerification(senderName);
+      l10n.startedKeyVerification(inlineName(senderName));
 
   @override
-  String invitedBy(String senderName) => senderName;
+  String invitedBy(String senderName) => inlineName(senderName);
 
   @override
   String get cancelledSend => l10n.sendCanceled;
@@ -358,7 +379,7 @@ class MatrixLocals extends MatrixLocalizations {
     String senderName,
     Duration? duration,
   ) => l10n.sentVoiceMessage(
-    senderName,
+    inlineName(senderName),
     duration == null
         ? ''
         : '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
@@ -368,12 +389,13 @@ class MatrixLocals extends MatrixLocalizations {
   String get refreshingLastEvent => l10n.loadingPleaseWait;
 
   @override
-  String startedAPoll(String senderName) => '$senderName started a poll';
+  String startedAPoll(String senderName) =>
+      '${inlineName(senderName)} started a poll';
 
   @override
   String get pollHasBeenEnded => l10n.pollHasBeenEnded;
 
   @override
   String incomingCallFrom(String senderName) =>
-      l10n.incomingCallFrom(senderName);
+      l10n.incomingCallFrom(inlineName(senderName));
 }

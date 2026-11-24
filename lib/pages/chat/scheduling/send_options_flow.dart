@@ -73,7 +73,7 @@ extension SendOptionsFlow on ChatController {
     if (!mounted || anchor == null || options.isEmpty) return;
     final partnerName = partner == null
         ? null
-        : stripBidiOverrides(
+        : inlineName(
             room.unsafeGetUserFromMemoryOrFallback(partner).calcDisplayname(),
           );
     final choice = await showSendOptionsMenu(

@@ -12,8 +12,10 @@ import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat_details/chat_details.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
+import 'package:odango/utils/name_or.dart';
 import 'package:odango/utils/profile_header_geometry.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -321,13 +323,16 @@ class _NameBlock extends StatelessWidget {
     final l10n = L10n.of(context);
     final canRename =
         !room.isDirectChat && room.canChangeStateEvent(EventTypes.RoomName);
-    final name = visibleId(
-      cappedText(
-        room.safeLocalizedDisplayname(MatrixLocals(l10n)),
-        maxUnits: AppProfile.nameCap,
-      ),
-    );
     final direct = room.directChatMatrixID;
+    final name = nameOr(
+      inlineName(
+        cappedText(
+          room.safeLocalizedDisplayname(MatrixLocals(l10n)),
+          maxUnits: AppProfile.nameCap,
+        ),
+      ),
+      direct ?? l10n.group,
+    );
     final members =
         (room.summary.mInvitedMemberCount ?? 0) +
         (room.summary.mJoinedMemberCount ?? 0);

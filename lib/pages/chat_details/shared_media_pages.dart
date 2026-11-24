@@ -12,10 +12,12 @@ import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/image_viewer/image_viewer.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat_details/shared_media_feed.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:odango/utils/name_or.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:odango/utils/visible_id.dart';
@@ -202,11 +204,14 @@ class _FeedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final date = event.originServerTs.localizedTime(context);
-    final sender = visibleId(
-      cappedText(
-        event.senderFromMemoryOrFallback.calcDisplayname(),
-        maxUnits: AppProfile.nameCap,
+    final sender = nameOr(
+      inlineName(
+        cappedText(
+          event.senderFromMemoryOrFallback.calcDisplayname(),
+          maxUnits: AppProfile.nameCap,
+        ),
       ),
+      event.senderId,
     );
     final link = kind == SharedKind.links ? firstWebLink(event.body) : null;
     final (icon, title, subtitle, onTap) = switch (kind) {

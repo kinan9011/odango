@@ -25,6 +25,7 @@ import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/client_manager.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_localized_body.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/notification_avatar_extension.dart';
 import 'package:odango/utils/notification_background_handler.dart';
@@ -314,15 +315,13 @@ Future<void> _tryPushHelper(
           groupConversation: !event.room.isDirectChat,
           messages: [newMessage],
         ),
-    ticker: stripBidiOverrides(
-      event.calcLocalizedBodyFallback(
-        matrixLocals,
-        plaintextBody: true,
-        withSenderNamePrefix: !event.room.isDirectChat,
-        hideReply: true,
-        hideEdit: true,
-        removeMarkdown: true,
-      ),
+    ticker: event.safeLocalizedBodyFallback(
+      matrixLocals,
+      plaintextBody: true,
+      withSenderNamePrefix: !event.room.isDirectChat,
+      hideReply: true,
+      hideEdit: true,
+      removeMarkdown: true,
     ),
     importance: Importance.high,
     priority: Priority.max,

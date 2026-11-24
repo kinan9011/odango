@@ -12,13 +12,16 @@ import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/invite_selection.dart';
 import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/name_or.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/adaptive_dialogs/user_dialog.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/settings/settings_group.dart';
 
-String candidateName(InviteCandidate candidate) =>
-    visibleId(cappedText(candidate.displayName, maxUnits: AppProfile.nameCap));
+String candidateName(InviteCandidate candidate) => nameOr(
+  inlineName(cappedText(candidate.displayName, maxUnits: AppProfile.nameCap)),
+  candidate.id,
+);
 
 class InviteRow extends StatelessWidget {
   final InviteCandidate candidate;

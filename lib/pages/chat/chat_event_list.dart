@@ -18,6 +18,7 @@ import 'package:odango/pages/chat/message_menu.dart';
 import 'package:odango/pages/chat/seen_by_row.dart';
 import 'package:odango/pages/chat/typing_indicators.dart';
 import 'package:odango/utils/account_config.dart';
+import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/chat/message_ticks.dart';
 import 'package:odango/utils/chat/room_mention.dart';
 import 'package:odango/utils/chat/text_direction.dart';
@@ -51,13 +52,13 @@ class ChatEventList extends StatelessWidget {
       final inviteState = room.unsafeGetUserFromMemoryOrFallback(
         room.client.userID!,
       );
-      final sender = stripBidiOverrides(
+      final sender = inlineName(
         room
             .unsafeGetUserFromMemoryOrFallback(inviteState.senderId)
             .calcDisplayname(),
       );
-      final cleanRoomName = stripBidiOverrides(room.name);
-      final nameOrAlias = cleanRoomName.isNotEmpty
+      final cleanRoomName = inlineName(room.name);
+      final nameOrAlias = safeDisplayText(cleanRoomName).isNotEmpty
           ? cleanRoomName
           : visibleId(room.canonicalAlias);
       final roomAvatar = room.avatar;
