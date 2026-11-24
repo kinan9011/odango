@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/widgets/permission_slider_dialog.dart';
 
 import 'adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -23,7 +24,7 @@ Future<void> showMemberActionsPopupMenu({
   final l10n = L10n.of(context);
   final scaffoldMessenger = ScaffoldMessenger.of(context);
   final theme = Theme.of(context);
-  final displayname = user.calcDisplayname();
+  final displayname = stripBidiOverrides(user.calcDisplayname());
   final isMe = user.room.client.userID == user.id;
 
   final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;

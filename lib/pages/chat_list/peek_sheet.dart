@@ -362,7 +362,9 @@ class _Bubble extends StatelessWidget {
                     bottom: 2,
                   ),
                   child: Text(
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
+                    stripBidiOverrides(
+                      event.senderFromMemoryOrFallback.calcDisplayname(),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

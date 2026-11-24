@@ -20,9 +20,11 @@ import 'package:odango/pages/chat/typing_indicators.dart';
 import 'package:odango/utils/account_config.dart';
 import 'package:odango/utils/chat/message_ticks.dart';
 import 'package:odango/utils/chat/room_mention.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/platform_infos.dart';
+import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/mxc_image_viewer.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -49,14 +51,15 @@ class ChatEventList extends StatelessWidget {
       final inviteState = room.unsafeGetUserFromMemoryOrFallback(
         room.client.userID!,
       );
-      final sender = room
-          .unsafeGetUserFromMemoryOrFallback(inviteState.senderId)
-          .calcDisplayname();
-      final nameOrAlias = room.name.isNotEmpty
-          ? room.name
-          : room.canonicalAlias.isNotEmpty
-          ? room.canonicalAlias
-          : null;
+      final sender = stripBidiOverrides(
+        room
+            .unsafeGetUserFromMemoryOrFallback(inviteState.senderId)
+            .calcDisplayname(),
+      );
+      final cleanRoomName = stripBidiOverrides(room.name);
+      final nameOrAlias = cleanRoomName.isNotEmpty
+          ? cleanRoomName
+          : visibleId(room.canonicalAlias);
       final roomAvatar = room.avatar;
 
       return Center(
@@ -85,7 +88,7 @@ class ChatEventList extends StatelessWidget {
                     : null,
               ),
               Text(
-                nameOrAlias == null
+                nameOrAlias.isEmpty
                     ? L10n.of(context).youInvitedBy(sender)
                     : room.isSpace
                     ? L10n.of(

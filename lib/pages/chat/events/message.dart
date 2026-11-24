@@ -641,7 +641,7 @@ class _SenderAvatar extends StatelessWidget {
       final user = snapshot.data ?? fallback;
       return Avatar(
         mxContent: user.avatarUrl,
-        name: user.calcDisplayname(),
+        name: stripBidiOverrides(user.calcDisplayname()),
         colorSeed: user.id,
         onTap: () => showMemberActionsPopupMenu(
           context: context,

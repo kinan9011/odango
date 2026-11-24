@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_config.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -65,7 +66,9 @@ class TypingIndicators extends StatelessWidget {
                         Avatar(
                           size: avatarSize,
                           mxContent: typingUsers.first.avatarUrl,
-                          name: typingUsers.first.calcDisplayname(),
+                          name: stripBidiOverrides(
+                            typingUsers.first.calcDisplayname(),
+                          ),
                           colorSeed: typingUsers.first.id,
                         ),
                       if (typingUsers.length == 2)
@@ -77,7 +80,9 @@ class TypingIndicators extends StatelessWidget {
                                 ? typingUsers.last.avatarUrl
                                 : null,
                             name: typingUsers.length == 2
-                                ? typingUsers.last.calcDisplayname()
+                                ? stripBidiOverrides(
+                                    typingUsers.last.calcDisplayname(),
+                                  )
                                 : '+${typingUsers.length - 1}',
                             colorSeed: typingUsers.length == 2
                                 ? typingUsers.last.id

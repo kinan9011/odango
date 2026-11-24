@@ -74,7 +74,9 @@ class StateMessage extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsetsDirectional.only(end: 4),
                     child: Avatar(
-                      name: event.senderFromMemoryOrFallback.calcDisplayname(),
+                      name: stripBidiOverrides(
+                        event.senderFromMemoryOrFallback.calcDisplayname(),
+                      ),
                       size: 14,
                       colorSeed: event.senderId,
                       mxContent: event.senderFromMemoryOrFallback.avatarUrl,

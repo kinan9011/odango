@@ -15,6 +15,7 @@ import 'package:odango/pages/call/call_tile.dart';
 import 'package:odango/pages/call/call_view_model.dart';
 import 'package:odango/pages/call/start_time.dart';
 import 'package:odango/pages/call/utils/get_call_tiles.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
@@ -163,7 +164,9 @@ class CallPage extends StatelessWidget {
                             ? Center(
                                 child: Avatar(
                                   mxContent: ownUser.avatarUrl,
-                                  name: ownUser.calcDisplayname(),
+                                  name: stripBidiOverrides(
+                                    ownUser.calcDisplayname(),
+                                  ),
                                   colorSeed: ownUser.id,
                                   size: 128,
                                 ),

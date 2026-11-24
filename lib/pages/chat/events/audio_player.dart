@@ -14,6 +14,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/pages/chat/events/voice_bubble_view.dart';
 import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat/waveform.dart';
 import 'package:odango/utils/error_reporter.dart';
 import 'package:odango/utils/file_description.dart';
@@ -92,7 +93,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                     '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
                   ),
                   child: Text(
-                    '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${widget.event.senderFromMemoryOrFallback.calcDisplayname()}',
+                    '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${stripBidiOverrides(widget.event.senderFromMemoryOrFallback.calcDisplayname())}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -8,6 +8,7 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/invitation_selection/invite_row.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/invite_selection.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -89,7 +90,7 @@ class _Chip extends StatelessWidget {
                   children: [
                     Avatar(
                       mxContent: candidate.avatarUrl,
-                      name: candidate.displayName,
+                      name: stripBidiOverrides(candidate.displayName),
                       colorSeed: candidate.id,
                       size: AppMembers.chipAvatar,
                     ),

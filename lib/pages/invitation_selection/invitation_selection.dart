@@ -10,6 +10,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/invitation_selection/invitation_selection_view.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/invite_selection.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -46,8 +47,8 @@ class InvitationSelectionController extends State<InvitationSelection> {
         .map((r) => r.unsafeGetUserFromMemoryOrFallback(r.directChatMatrixID!))
         .toList();
     contacts.sort(
-      (a, b) => a.calcDisplayname().toLowerCase().compareTo(
-        b.calcDisplayname().toLowerCase(),
+      (a, b) => stripBidiOverrides(a.calcDisplayname()).toLowerCase().compareTo(
+        stripBidiOverrides(b.calcDisplayname()).toLowerCase(),
       ),
     );
     return contacts;

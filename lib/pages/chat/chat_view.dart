@@ -31,6 +31,7 @@ import 'package:odango/pages/topics/topic_chip_bar.dart';
 import 'package:odango/utils/account_config.dart';
 import 'package:odango/utils/appearance/chat_appearance_scope.dart';
 import 'package:odango/utils/chat/new_device_banner_model.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/topics/hidden_split.dart';
@@ -180,11 +181,13 @@ class ChatView extends StatelessWidget {
                                                     top: AppSpacing.s,
                                                   ),
                                               child: NewDeviceBanner(
-                                                name: controller.room
-                                                    .unsafeGetUserFromMemoryOrFallback(
-                                                      newDevice.userId,
-                                                    )
-                                                    .calcDisplayname(),
+                                                name: stripBidiOverrides(
+                                                  controller.room
+                                                      .unsafeGetUserFromMemoryOrFallback(
+                                                        newDevice.userId,
+                                                      )
+                                                      .calcDisplayname(),
+                                                ),
                                                 height: newDeviceHeight,
                                                 onVerify: () => context.go(
                                                   '/rooms/${controller.room.id}/encryption',

@@ -9,6 +9,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/pages/chat/events/reaction_pills.dart';
 import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/chat/reaction_summary.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -67,7 +68,11 @@ class _ReactorsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: Center(
-      child: Text(entry.key, maxLines: 2, overflow: TextOverflow.ellipsis),
+      child: Text(
+        stripBidiOverrides(entry.key),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
     ),
     content: SingleChildScrollView(
       child: Wrap(
@@ -79,7 +84,7 @@ class _ReactorsDialog extends StatelessWidget {
             Chip(
               avatar: Avatar(
                 mxContent: reactor.avatarUrl,
-                name: reactor.calcDisplayname(),
+                name: stripBidiOverrides(reactor.calcDisplayname()),
                 client: client,
                 presenceUserId: reactor.stateKey,
               ),

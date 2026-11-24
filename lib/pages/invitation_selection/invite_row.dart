@@ -9,6 +9,7 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/invite_selection.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/visible_id.dart';
@@ -104,7 +105,9 @@ class InviteRow extends StatelessWidget {
                                     'invite_avatar_${candidate.id}',
                                   ),
                                   mxContent: candidate.avatarUrl,
-                                  name: candidate.displayName,
+                                  name: stripBidiOverrides(
+                                    candidate.displayName,
+                                  ),
                                   colorSeed: candidate.id,
                                   size: AppMembers.avatar,
                                   onTap: () => UserDialog.show(

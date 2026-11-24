@@ -35,9 +35,10 @@ class ReplyContent extends StatelessWidget {
       initialData: displayEvent.senderFromMemoryOrFallback,
       future: displayEvent.fetchSenderUser(),
       builder: (context, snapshot) => ReplyQuoteView(
-        name:
-            snapshot.data?.calcDisplayname() ??
-            displayEvent.senderFromMemoryOrFallback.calcDisplayname(),
+        name: stripBidiOverrides(
+          snapshot.data?.calcDisplayname() ??
+              displayEvent.senderFromMemoryOrFallback.calcDisplayname(),
+        ),
         text: displayEvent
             .calcLocalizedBodyFallback(
               MatrixLocals(L10n.of(context)),

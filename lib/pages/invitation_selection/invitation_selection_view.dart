@@ -10,6 +10,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/invitation_selection/invitation_selection.dart';
 import 'package:odango/pages/invitation_selection/invite_row.dart';
 import 'package:odango/pages/invitation_selection/selection_chips.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/invite_selection.dart';
 import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -47,7 +48,8 @@ class InvitationSelectionView extends StatelessWidget {
         ],
       );
     }
-    final groupName = room.name.isEmpty ? l10n.group : room.name;
+    final cleanRoomName = stripBidiOverrides(room.name);
+    final groupName = cleanRoomName.isEmpty ? l10n.group : cleanRoomName;
     return ListenableBuilder(
       listenable: controller.selection,
       builder: (context, _) => SettingsScaffold.slivers(

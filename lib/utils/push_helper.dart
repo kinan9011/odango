@@ -242,7 +242,9 @@ Future<void> _tryPushHelper(
 
   final id = '${client.clientName}_${notification.roomId}'.hashCode;
 
-  final senderName = event.senderFromMemoryOrFallback.calcDisplayname();
+  final senderName = stripBidiOverrides(
+    event.senderFromMemoryOrFallback.calcDisplayname(),
+  );
   // Show notification
 
   final newMessage = Message(
@@ -302,7 +304,7 @@ Future<void> _tryPushHelper(
         messagingStyleInformation ??
         MessagingStyleInformation(
           Person(
-            name: ownUser.calcDisplayname(),
+            name: stripBidiOverrides(ownUser.calcDisplayname()),
             icon: userAvatarFile == null
                 ? null
                 : ByteArrayAndroidIcon(userAvatarFile),

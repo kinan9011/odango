@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_config.dart';
 import 'package:odango/config/themes.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/avatar.dart';
 
@@ -69,7 +70,7 @@ class CallTile extends StatelessWidget {
                       child: Avatar(
                         size: 64,
                         mxContent: user.avatarUrl,
-                        name: user.calcDisplayname(),
+                        name: stripBidiOverrides(user.calcDisplayname()),
                         colorSeed: user.id,
                       ),
                     ),
@@ -122,7 +123,7 @@ class CallTile extends StatelessWidget {
                         if (this.video?.isScreenShare == true)
                           Icon(Icons.screen_share_outlined, size: 12),
                         Text(
-                          user.calcDisplayname(),
+                          stripBidiOverrides(user.calcDisplayname()),
                           maxLines: 1,
                           style: TextStyle(fontSize: 12),
                         ),

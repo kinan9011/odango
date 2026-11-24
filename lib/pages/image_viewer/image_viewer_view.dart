@@ -11,6 +11,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/image_viewer/pointers_listener.dart';
 import 'package:odango/pages/image_viewer/video_player.dart';
 import 'package:odango/pages/image_viewer/viewer_chrome.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/platform_infos.dart';
@@ -304,7 +305,9 @@ class _TopBar extends StatelessWidget {
                       spacing: 1,
                       children: [
                         Text(
-                          event.senderFromMemoryOrFallback.calcDisplayname(),
+                          stripBidiOverrides(
+                            event.senderFromMemoryOrFallback.calcDisplayname(),
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(

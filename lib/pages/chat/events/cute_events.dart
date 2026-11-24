@@ -75,25 +75,18 @@ class _CuteContentState extends State<CuteContent> {
   }
 
   String? generateLabel(User? user) {
+    final name = stripBidiOverrides(
+      user?.displayName ??
+          widget.event.senderFromMemoryOrFallback.displayName ??
+          '',
+    );
     switch (widget.event.content['cute_type']) {
       case 'googly_eyes':
-        return L10n.of(context).googlyEyesContent(
-          user?.displayName ??
-              widget.event.senderFromMemoryOrFallback.displayName ??
-              '',
-        );
+        return L10n.of(context).googlyEyesContent(name);
       case 'cuddle':
-        return L10n.of(context).cuddleContent(
-          user?.displayName ??
-              widget.event.senderFromMemoryOrFallback.displayName ??
-              '',
-        );
+        return L10n.of(context).cuddleContent(name);
       case 'hug':
-        return L10n.of(context).hugContent(
-          user?.displayName ??
-              widget.event.senderFromMemoryOrFallback.displayName ??
-              '',
-        );
+        return L10n.of(context).hugContent(name);
     }
     return null;
   }

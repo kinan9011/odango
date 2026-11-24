@@ -12,6 +12,8 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/events/poll.dart';
 import 'package:odango/pages/chat/events/video_player.dart';
 import 'package:odango/pages/image_viewer/image_viewer.dart';
+import 'package:odango/utils/chat/text_direction.dart';
+import 'package:odango/utils/visible_id.dart';
 
 import '../../../config/app_config.dart';
 import '../../../utils/chat/room_mention.dart';
@@ -227,8 +229,10 @@ class MessageContent extends StatelessWidget {
           builder: (context, snapshot) {
             return _ButtonContent(
               label: L10n.of(context).startedACall(
-                snapshot.data?.calcDisplayname() ??
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
+                stripBidiOverrides(
+                  snapshot.data?.calcDisplayname() ??
+                      event.senderFromMemoryOrFallback.calcDisplayname(),
+                ),
               ),
               icon: '📞',
               textColor: buttonTextColor,
@@ -243,9 +247,11 @@ class MessageContent extends StatelessWidget {
           builder: (context, snapshot) {
             return _ButtonContent(
               label: L10n.of(context).userSentUnknownEvent(
-                snapshot.data?.calcDisplayname() ??
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
-                event.type,
+                stripBidiOverrides(
+                  snapshot.data?.calcDisplayname() ??
+                      event.senderFromMemoryOrFallback.calcDisplayname(),
+                ),
+                visibleId(event.type),
               ),
               icon: 'ℹ️',
               textColor: buttonTextColor,
@@ -278,14 +284,17 @@ class RedactionWidget extends StatelessWidget {
       future: event.redactedBecause?.fetchSenderUser(),
       builder: (context, snapshot) {
         final reason = event.redactedBecause?.content.tryGet<String>('reason');
-        final redactedBy =
-            snapshot.data?.calcDisplayname() ??
-            event.redactedBecause?.senderId.localpart ??
-            L10n.of(context).user;
+        final redactedBy = stripBidiOverrides(
+          snapshot.data?.calcDisplayname() ??
+              event.redactedBecause?.senderId.localpart ??
+              L10n.of(context).user,
+        );
         return _ButtonContent(
           label: reason == null
               ? L10n.of(context).redactedBy(redactedBy)
-              : L10n.of(context).redactedByBecause(redactedBy, reason),
+              : L10n.of(
+                  context,
+                ).redactedByBecause(redactedBy, stripBidiOverrides(reason)),
           icon: '🗑️',
           textColor: buttonTextColor.withAlpha(128),
           onPressed: () => onInfoTab!(event),

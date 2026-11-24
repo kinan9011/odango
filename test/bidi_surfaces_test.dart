@@ -135,6 +135,9 @@ void main() {
       'img alt': RegExp(r"attributes\['alt'\]"),
       'room name': RegExp(r'\.getLocalizedDisplayname\('),
       'maths attribute': RegExp(r"attributes\['data-mx-maths'\]"),
+      'display name': RegExp(r'\.calcDisplayname\('),
+      'reaction key text': RegExp(r'Text\(\s*entry\.key\b'),
+      'room name field': RegExp(r'\broom\.name\b(?!\.(isEmpty|isNotEmpty))'),
     };
     // Files that may hold a raw source, and why.
     const exempt = <String, String>{
@@ -214,6 +217,71 @@ void main() {
       ),
     );
     expect(preview!.text, 'preview');
+  });
+
+  test('a new place that reads a display name has to be looked at', () {
+    // Every file that reads a profile or member display name field, with what
+    // it does with it. A new file in this list fails the test until someone
+    // has checked it.
+    const checked = <String, String>{
+      'lib/utils/fluffy_share.dart': 'our own name, share text',
+      'lib/utils/devices/device_model.dart':
+          'device name through safeDisplayText',
+      'lib/utils/members/member_filter.dart': 'search match only, not shown',
+      'lib/widgets/member_actions_popup_menu_button.dart':
+          'handed to UserDialog, which strips',
+      'lib/widgets/own_avatar.dart': 'our own name',
+      'lib/widgets/adaptive_dialogs/user_dialog.dart': 'header name, stripped',
+      'lib/pages/chat/chat_input_row.dart': 'our own accounts',
+      'lib/pages/settings/settings.dart': 'our own name, edit prefill',
+      'lib/pages/settings/settings_view.dart': 'our own name',
+      'lib/pages/chat/events/cute_events.dart': 'label name, stripped',
+      'lib/pages/new_private_chat/new_private_chat_view.dart':
+          'contact name through safeDisplayText',
+      'lib/pages/global_search/search_result_widgets.dart':
+          'profile name through safeDisplayText',
+      'lib/pages/chat/sticker_picker_dialog.dart':
+          'pack name, tooltip stripped',
+      'lib/pages/chat/input_bar.dart':
+          'suggestion map, the tile shows it through safeDisplayText',
+      'lib/pages/chat/mention_suggestion_tile.dart': 'through safeDisplayText',
+      'lib/pages/invitation_selection/invite_row.dart': 'through visibleId',
+      'lib/pages/invitation_selection/selection_chips.dart':
+          'avatar initials, the label comes from candidateName in invite_row',
+      'lib/pages/invitation_selection/invitation_selection_view.dart':
+          'handed to InviteCandidate, invite_row shows it',
+      'lib/pages/settings_emotes/settings_emotes.dart': 'our own pack name',
+      'lib/pages/profile/profile_view.dart': 'our own name',
+      'lib/pages/chat_list/client_chooser_button.dart': 'our own accounts',
+    };
+    final read = RegExp(r"(?<!this)\.displayName\b|\['displayname'\]");
+    final unseen = <String>[
+      for (final file in Directory('lib').listSync(recursive: true))
+        if (file is File &&
+            file.path.endsWith('.dart') &&
+            !file.path.startsWith('lib/l10n/') &&
+            !checked.containsKey(file.path) &&
+            read.hasMatch(file.readAsStringSync()))
+          file.path,
+    ];
+    expect(unseen, isEmpty, reason: unseen.join('\n'));
+    final stripper = RegExp(
+      r'stripBidiOverrides\(|safeDisplayText\(|visibleId\(',
+    );
+    final lost = <String>[
+      for (final entry in checked.entries)
+        if (RegExp(
+              r'strip|safeDisplayText|visibleId|through',
+            ).hasMatch(entry.value) &&
+            !stripper.hasMatch(File(entry.key).readAsStringSync()))
+          entry.key,
+    ];
+    expect(lost, isEmpty, reason: lost.join('\n'));
+    expect(
+      checked.keys.where((path) => !File(path).existsSync()),
+      isEmpty,
+      reason: 'a checked file is gone, remove it from the list',
+    );
   });
 
   test('a new place that reads the body of an event has to be looked at', () {
@@ -296,6 +364,7 @@ bool _insideStripper(String source, int position) {
         final before = source.substring(0, i).trimRight();
         if (before.endsWith('stripBidiOverrides') ||
             before.endsWith('stripBidiControls') ||
+            before.endsWith('visibleId') ||
             before.endsWith('safeDisplayText')) {
           return true;
         }
