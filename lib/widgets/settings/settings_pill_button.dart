@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/utils/motion.dart';
+import 'package:odango/widgets/press_scale.dart';
 
 class SettingsPillButton extends StatelessWidget {
   final String label;
@@ -14,6 +15,8 @@ class SettingsPillButton extends StatelessWidget {
   final bool loading;
   final bool expand;
   final double height;
+  final bool secondary;
+  final bool pressScale;
 
   const SettingsPillButton({
     required this.label,
@@ -21,14 +24,16 @@ class SettingsPillButton extends StatelessWidget {
     this.loading = false,
     this.expand = true,
     this.height = AppDialog.bigButtonHeight,
+    this.secondary = false,
+    this.pressScale = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
-    final background = tokens.acc;
-    final foreground = tokens.onacc;
+    final background = secondary ? tokens.surf2 : tokens.acc;
+    final foreground = secondary ? tokens.fg : tokens.onacc;
     final enabled = onPressed != null && !loading;
     final button = Semantics(
       button: true,
@@ -89,7 +94,10 @@ class SettingsPillButton extends StatelessWidget {
         ),
       ),
     );
-    if (!expand) return button;
-    return SizedBox(width: double.infinity, child: button);
+    final scaled = pressScale
+        ? PressScale(enabled: enabled, child: button)
+        : button;
+    if (!expand) return scaled;
+    return SizedBox(width: double.infinity, child: scaled);
   }
 }

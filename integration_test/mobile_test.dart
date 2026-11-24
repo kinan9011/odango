@@ -17,6 +17,7 @@ import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
 import 'flows/multi_account.dart';
 import 'flows/odango_flows.dart';
+import 'flows/onboarding_flows.dart';
 import 'flows/privacy_topics_flows.dart';
 import 'flows/room_flows.dart';
 import 'flows/scheduling_flows.dart';
@@ -35,6 +36,8 @@ void main() {
   group('Odango Integration Tests', () {
     flow('Login and logout flow', loginAndChatBackup);
     flow('Basic Messaging', basicMessaging);
+    flow('Onboarding welcome and homeserver', onboardingWelcome);
+    flow('Lock screen', lockScreenFlow);
     // ponytail: run 42nd, this flow segfaulted the CI emulator in every run;
     // early it passes. Move it back once the emulator is stable.
     flow('Settings export chat', settingsExportFlow);

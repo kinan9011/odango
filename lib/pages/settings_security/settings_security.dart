@@ -119,7 +119,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       message: l10n.pleaseEnter6Digits,
       cancelLabel: l10n.cancel,
       validator: (text) {
-        if (text.length == 6 && int.tryParse(text)! >= 0) {
+        if (RegExp(r'^[0-9]{6}$').hasMatch(text)) {
           return null;
         }
         return l10n.pleaseEnter6Digits;

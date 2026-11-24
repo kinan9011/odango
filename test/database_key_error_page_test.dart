@@ -11,6 +11,7 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/database_key_error/database_key_error_page.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -160,7 +161,9 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOne);
     expect(find.text('Deleting local data…'), findsOne);
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester
+          .widget<SettingsPillButton>(find.byType(SettingsPillButton))
+          .onPressed,
       isNull,
     );
     expect(
@@ -196,7 +199,9 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester
+          .widget<SettingsPillButton>(find.byType(SettingsPillButton))
+          .onPressed,
       isNotNull,
     );
   });
@@ -254,7 +259,9 @@ void main() {
     expect(find.text('Moving local data aside…'), findsOne);
     expect(find.text('Deleting local data…'), findsNothing);
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester
+          .widget<SettingsPillButton>(find.byType(SettingsPillButton))
+          .onPressed,
       isNull,
     );
     for (final button in tester.widgetList<TextButton>(
@@ -278,7 +285,9 @@ void main() {
 
     expect(find.textContaining("couldn't be moved aside"), findsOne);
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester
+          .widget<SettingsPillButton>(find.byType(SettingsPillButton))
+          .onPressed,
       isNotNull,
     );
   });
@@ -347,7 +356,7 @@ void main() {
     await pumpAsidePage(tester, textDirection: TextDirection.rtl);
 
     expect(tester.takeException(), isNull);
-    expect(find.byType(FilledButton), findsOne);
+    expect(find.byType(SettingsPillButton), findsOne);
     expect(find.byType(TextButton), findsNWidgets(2));
   });
 
@@ -357,7 +366,7 @@ void main() {
     await pumpAsidePage(tester);
 
     for (final finder in [
-      find.byType(FilledButton),
+      find.byType(SettingsPillButton),
       find.byType(TextButton).first,
       find.byType(TextButton).last,
     ]) {

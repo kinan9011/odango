@@ -9,6 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
+import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/bootstrap/passphrase_rules.dart';
 import 'package:odango/utils/crypto_identity.dart';
 import 'package:odango/utils/error_reporter.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
@@ -35,7 +38,12 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
 
   @override
   void dispose() {
+    // cancelling reports back through onUpdate, to a model that is gone
+    value.keyVerification?.onUpdate = null;
     _cancelKeyVerification();
+    enterPassphraseOrRecovController.clear();
+    newPassphraseController.clear();
+    repeatPassphraseController.clear();
     enterPassphraseOrRecovController.dispose();
     newPassphraseController.dispose();
     repeatPassphraseController.dispose();
@@ -45,17 +53,10 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   }
 
   void _checkCanCreatePassphrase([_]) {
-    final passphrase = newPassphraseController.text;
-    value.newPassphraseEqualsRepeatPassphrase =
-        passphrase.isNotEmpty && passphrase == repeatPassphraseController.text;
-    value.newPassphraseLongEnough = passphrase.length >= 12;
-    value.newPassphraseUpperAndLowerCase =
-        passphrase.contains(RegExp(r'[A-Z]')) &&
-        passphrase.contains(RegExp(r'[a-z]'));
-    value.newPassphraseSpecialCharacters = passphrase.contains(
-      RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+    value.rules = PassphraseRules.of(
+      newPassphraseController.text,
+      repeatPassphraseController.text,
     );
-    value.newPassphraseNumbers = passphrase.contains(RegExp(r'\d'));
     notifyListeners();
   }
 
@@ -161,6 +162,8 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
       value.recoveryKey = await client.initCryptoIdentity(
         passphrase: passphrase,
       );
+      newPassphraseController.clear();
+      repeatPassphraseController.clear();
 
       if (state.connected) {
         Logs().i('Mark all megolm sessions as needing upload...');
@@ -179,6 +182,21 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     }
     notifyListeners();
   }
+
+  /// The request that has its comparison ready and no dialog yet, handed out
+  /// once until [verificationDialogClosed].
+  KeyVerification? takeVerificationDialog() {
+    final request = value.keyVerification;
+    if (request == null ||
+        request.state != KeyVerificationState.askSas ||
+        value.verificationDialogShown) {
+      return null;
+    }
+    value.verificationDialogShown = true;
+    return request;
+  }
+
+  void verificationDialogClosed() => value.verificationDialogShown = false;
 
   void _cancelKeyVerification() {
     final keyVerification = value.keyVerification;
@@ -203,6 +221,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     notifyListeners();
     try {
       await client.restoreCryptoIdentity(key);
+      enterPassphraseOrRecovController.clear();
       value.isLoading = false;
       value.cryptoIdentityState = await client.getCryptoIdentityState();
       notifyListeners();
@@ -267,10 +286,21 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     final file = result?.xFile;
     if (file == null) return;
     try {
-      final key = await file.readAsString();
+      final key = await readRecoveryKeyFile(
+        length: file.length,
+        read: file.readAsString,
+      );
+      if (key == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(L10n.of(context).recoveryKeyFileTooBig)),
+          );
+        }
+        return;
+      }
       enterPassphraseOrRecovController.text = key;
     } catch (e, s) {
-      Logs().d('Unable to read recovery key file', e, s);
+      Logs().d('Unable to read recovery key file', e.runtimeType, s);
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -305,4 +335,15 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     value.recoveryKeyStoredInSecureStorage = stored == true;
     notifyListeners();
   }
+}
+
+/// Reads a recovery key file unless it is too big to be one. The file comes
+/// from the user's storage, so its size is checked before anything is read.
+@visibleForTesting
+Future<String?> readRecoveryKeyFile({
+  required Future<int> Function() length,
+  required Future<String> Function() read,
+}) async {
+  if (await length() > AppOnboarding.recoveryKeyFileMaxBytes) return null;
+  return read();
 }

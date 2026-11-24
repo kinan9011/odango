@@ -19,6 +19,8 @@ class AppSearchField extends StatelessWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final bool enabled;
+  final bool autocorrect;
+  final TextInputType? keyboardType;
 
   const AppSearchField({
     required this.controller,
@@ -29,6 +31,8 @@ class AppSearchField extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.enabled = true,
+    this.autocorrect = true,
+    this.keyboardType,
     super.key,
   });
 
@@ -49,6 +53,8 @@ class AppSearchField extends StatelessWidget {
           focusNode: focusNode,
           autofocus: autofocus,
           enabled: enabled,
+          autocorrect: autocorrect,
+          keyboardType: keyboardType,
           maxLines: 1,
           textInputAction: TextInputAction.search,
           textDirection: firstStrongDirection(controller.text),

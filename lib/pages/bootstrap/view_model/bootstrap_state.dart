@@ -5,6 +5,7 @@
 
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/pages/bootstrap/passphrase_rules.dart';
 
 class BootstrapViewModelState {
   String? recoveryKey;
@@ -24,11 +25,8 @@ class BootstrapViewModelState {
   bool waitingForSecrets = false;
   bool noSecretsreceived = false;
 
-  bool newPassphraseEqualsRepeatPassphrase = false;
-  bool newPassphraseLongEnough = false;
-  bool newPassphraseUpperAndLowerCase = false;
-  bool newPassphraseSpecialCharacters = false;
-  bool newPassphraseNumbers = false;
+  PassphraseRules rules = PassphraseRules.none;
+  bool verificationDialogShown = false;
   bool passphraseOrRecoveryKeyEntered = false;
   bool recoveryKeyDownloaded = false;
   bool recoveryKeyStoredInSecureStorage = false;

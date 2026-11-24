@@ -439,3 +439,48 @@ abstract class RichLimits {
   static const int maxRenderMaths = 50;
   static const int maxRenderMathsUnits = 4096;
 }
+
+abstract class AppOnboarding {
+  static const double logoTile = 112;
+  static const double logoRadius = 34;
+  static const double cardRadius = 18;
+  static const double cardIcon = 24;
+  static const double statusTile = 72;
+  static const double statusTileRadius = 22;
+  static const double statusTileIcon = 32;
+  static const double contentMaxWidth = 360;
+  static const double headerHeight = 56;
+  static const double wordmark = 32;
+  static const double tagline = 16;
+  static const double pressScale = .98;
+  static const Duration press = Duration(milliseconds: 100);
+  static const Duration errorFade = Duration(milliseconds: 150);
+  static const int publicServersMax = 200;
+  static const int publicServersMaxBytes = 256 * 1024;
+  static const Duration publicServersTimeout = Duration(seconds: 8);
+  static const int recoveryKeyFileMaxBytes = 4096;
+  static const Duration clipboardClear = Duration(seconds: 60);
+}
+
+abstract class AppEmptyPane {
+  static const double pillRadius = 18;
+  static const EdgeInsets pillPadding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 12,
+  );
+  static const double maxTextWidth = 260;
+}
+
+abstract class AppLockUi {
+  static const double key = 60;
+  static const double keyGapX = 28;
+  static const double keyGapY = 16;
+  static const double dot = 14;
+  static const double dotPitch = 30;
+  static const double maxWidth = 360;
+  static const Duration dotIn = Duration(milliseconds: 150);
+  static const double dotRise = 20;
+  static const Duration titleIn = Duration(milliseconds: 320);
+  static const Duration unlock = Duration(milliseconds: 320);
+  static const double disabledOpacity = .4;
+}

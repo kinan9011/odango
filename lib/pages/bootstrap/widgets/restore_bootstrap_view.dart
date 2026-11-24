@@ -6,13 +6,16 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/app_config.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/bootstrap/view_model/bootstrap_view_model.dart';
 import 'package:odango/pages/key_verification/key_verification_dialog.dart';
+import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/device_extension.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 
 class RestoreBootstrapView extends StatelessWidget {
@@ -20,179 +23,224 @@ class RestoreBootstrapView extends StatelessWidget {
 
   const RestoreBootstrapView(this.viewModel, {super.key});
 
+  void _showVerificationOnce(BuildContext context) {
+    final request = viewModel.takeVerificationDialog();
+    if (request == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (context.mounted) {
+        await KeyVerificationDialog(request: request).show(context);
+      }
+      viewModel.verificationDialogClosed();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final keyVerification = viewModel.value.keyVerification;
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
+    final state = viewModel.value;
+    final keyVerification = state.keyVerification;
     if (keyVerification != null) {
       Logs().v('Key verification state:', keyVerification.state);
-      if (keyVerification.state == KeyVerificationState.askSas) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          KeyVerificationDialog(request: keyVerification).show(context);
-        });
-      }
+      _showVerificationOnce(context);
     }
-    final devices =
-        viewModel.value.connectedDevices
-            ?.map(
-              (device) => (
-                title: device.displayname,
-                lastActive: device.lastActive,
-                icon: device.icon,
-              ),
-            )
-            .toList() ??
-        [];
+    final devices = state.connectedDevices ?? [];
+    final obscured = state.obscureText;
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       children: [
         if (keyVerification != null) ...[
-          ListTile(
-            leading:
-                (keyVerification.state == KeyVerificationState.error ||
-                    viewModel.value.noSecretsreceived)
-                ? IconButton(
-                    onPressed: viewModel.value.isLoading
-                        ? null
-                        : viewModel.retryKeyVerification,
-                    tooltip: L10n.of(context).tryAgain,
-                    icon: Icon(Icons.refresh_outlined),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-            minLeadingWidth: 40,
-            title: Text(
-              viewModel.value.waitingForSecrets
-                  ? L10n.of(context).waitingForKeys
-                  : viewModel.value.noSecretsreceived
-                  ? L10n.of(context).noKeysTransmitted
-                  : L10n.of(context).restoreBootstrapDevicesDescription,
-
-              style: TextStyle(fontSize: 14),
-            ),
+          Row(
+            spacing: AppSpacing.l,
+            children: [
+              SizedBox.square(
+                dimension: AppChat.tapTarget,
+                child:
+                    (keyVerification.state == KeyVerificationState.error ||
+                        state.noSecretsreceived)
+                    ? IconButton(
+                        onPressed: state.isLoading
+                            ? null
+                            : viewModel.retryKeyVerification,
+                        tooltip: l10n.tryAgain,
+                        icon: Icon(Icons.refresh_rounded, color: tokens.acc),
+                      )
+                    : const Padding(
+                        padding: EdgeInsets.all(AppSpacing.m),
+                        child: CircularProgressIndicator.adaptive(),
+                      ),
+              ),
+              Expanded(
+                child: Text(
+                  state.waitingForSecrets
+                      ? l10n.waitingForKeys
+                      : state.noSecretsreceived
+                      ? l10n.noKeysTransmitted
+                      : l10n.restoreBootstrapDevicesDescription,
+                  style: TextStyle(color: tokens.fg, fontSize: 14, height: 1.4),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.xxl),
           Material(
-            color: theme.colorScheme.surfaceContainer,
+            color: tokens.surf,
             clipBehavior: Clip.hardEdge,
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            borderRadius: BorderRadius.circular(AppRadius.card),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 128),
+              constraints: const BoxConstraints(maxHeight: 144),
               child: Scrollbar(
                 thumbVisibility: true,
-                trackVisibility: true,
                 controller: viewModel.devicesScrollController,
                 child: ListView.builder(
                   controller: viewModel.devicesScrollController,
                   shrinkWrap: true,
                   itemCount: devices.length,
-                  itemBuilder: (context, i) => ListTile(
-                    leading: CircleAvatar(
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      backgroundColor: theme.colorScheme.primary,
-                      child: Icon(devices[i].icon),
-                    ),
-                    title: Text(
-                      devices[i].title,
-                      maxLines: 1,
-                      overflow: .ellipsis,
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      L10n.of(context).lastActiveAgo(
-                        devices[i].lastActive.localizedTime(context),
-                      ),
-                      style: TextStyle(fontSize: 11),
-                    ),
-                  ),
+                  itemBuilder: (context, i) => _DeviceRow(device: devices[i]),
                 ),
               ),
             ),
           ),
           Row(
             children: [
-              Expanded(child: Divider(height: 64)),
+              const Expanded(child: Divider(height: 64)),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(L10n.of(context).or),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+                child: Text(l10n.or, style: TextStyle(color: tokens.mut)),
               ),
-              Expanded(child: Divider(height: 64)),
+              const Expanded(child: Divider(height: 64)),
             ],
           ),
         ] else ...[
           Text(
-            L10n.of(context).restoreBootstrapEmptyDevicesDescription,
-            textAlign: .center,
+            l10n.restoreBootstrapEmptyDevicesDescription,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: tokens.mut, fontSize: 14, height: 1.4),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.giant),
         ],
-        TextField(
-          readOnly: viewModel.value.isLoading,
-          obscureText: viewModel.value.obscureText,
+        DialogTextField(
+          readOnly: state.isLoading,
+          sensitive: true,
+          obscureText: obscured,
           controller: viewModel.enterPassphraseOrRecovController,
           minLines: 1,
-          maxLines: viewModel.value.obscureText ? 1 : 4,
+          maxLines: 4,
+          autocorrect: false,
           onSubmitted: (_) => viewModel.unlock(context),
-          decoration: InputDecoration(
-            hintText: L10n.of(context).passphraseOrKey,
-            prefixIcon: IconButton(
-              icon: Icon(
-                viewModel.value.obscureText
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              onPressed: viewModel.toggleObscureText,
+          hintText: l10n.passphraseOrKey,
+          prefixIcon: IconButton(
+            tooltip: obscured ? l10n.showPassword : l10n.hidePassword,
+            onPressed: viewModel.toggleObscureText,
+            icon: Icon(
+              obscured
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              color: tokens.mut,
             ),
-            errorText: viewModel.value.unlockWithError?.toLocalizedString(
-              context,
-            ),
-            errorMaxLines: 4,
-            suffixIcon: viewModel.value.isLoading
-                ? SizedBox.square(
-                    dimension: 32,
-                    child: Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    ),
-                  )
-                : TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConfig.borderRadius / 2,
-                        ),
-                      ),
-                    ),
-                    onPressed: viewModel.value.passphraseOrRecoveryKeyEntered
-                        ? () => viewModel.unlock(context)
-                        : () => viewModel.openRecoveryKeyFile(context),
-                    child: Text(
-                      viewModel.value.passphraseOrRecoveryKeyEntered
-                          ? L10n.of(context).unlock
-                          : L10n.of(context).openFile,
-                    ),
-                  ),
           ),
+          errorText: state.unlockWithError?.toLocalizedString(context),
+          errorMaxLines: 4,
+          suffixIcon: state.isLoading
+              ? const SizedBox.square(
+                  dimension: 32,
+                  child: Center(
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                  ),
+                )
+              : TextButton(
+                  style: TextButton.styleFrom(foregroundColor: tokens.acc),
+                  onPressed: state.passphraseOrRecoveryKeyEntered
+                      ? () => viewModel.unlock(context)
+                      : () => viewModel.openRecoveryKeyFile(context),
+                  child: Text(
+                    state.passphraseOrRecoveryKeyEntered
+                        ? l10n.unlock
+                        : l10n.openFile,
+                  ),
+                ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.xxl),
         TextButton(
           onPressed: () async {
             final consent = await showOkCancelAlertDialog(
               context: context,
-              title: L10n.of(context).warning,
-              message: L10n.of(context).resetAccountWarning,
+              title: l10n.warning,
+              message: l10n.resetAccountWarning,
               isDestructive: true,
-              okLabel: L10n.of(context).resetAccount,
+              okLabel: l10n.resetAccount,
             );
             if (consent != OkCancelResult.ok) return;
             if (!context.mounted) return;
             viewModel.startResetAccount();
           },
-          style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
-          child: Text(L10n.of(context).resetAccount),
+          style: TextButton.styleFrom(
+            minimumSize: const Size.fromHeight(AppChat.tapTarget),
+            foregroundColor: tokens.red,
+          ),
+          child: Text(l10n.resetAccount),
         ),
       ],
+    );
+  }
+}
+
+class _DeviceRow extends StatelessWidget {
+  final DeviceKeys device;
+
+  const _DeviceRow({required this.device});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: AppSettingsLayout.rowHeight),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSettingsLayout.rowPadding,
+          vertical: AppSpacing.xs,
+        ),
+        child: Row(
+          spacing: AppSpacing.l,
+          children: [
+            Container(
+              width: AppSettingsLayout.tile,
+              height: AppSettingsLayout.tile,
+              decoration: BoxDecoration(
+                color: tokens.accs,
+                borderRadius: BorderRadius.circular(
+                  AppSettingsLayout.tileRadius,
+                ),
+              ),
+              child: Icon(device.icon, size: 19, color: tokens.acc),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    safeDisplayText(device.displayname, maxGraphemes: 48),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: tokens.fg,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    L10n.of(
+                      context,
+                    ).lastActiveAgo(device.lastActive.localizedTime(context)),
+                    style: TextStyle(color: tokens.mut, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -5,6 +5,7 @@
 
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/bootstrap/view_model/bootstrap_view_model.dart';
 import 'package:odango/pages/bootstrap/widgets/new_passphrase_view.dart';
@@ -13,6 +14,7 @@ import 'package:odango/pages/bootstrap/widgets/store_recovery_key_view.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/layouts/login_scaffold.dart';
 import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
 import 'package:odango/widgets/view_model_builder.dart';
 
 class BootstrapPage extends StatelessWidget {
@@ -21,7 +23,6 @@ class BootstrapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return ViewModelBuilder(
       create: () =>
           BootstrapViewModel(client: Matrix.of(context).client, reset: reset),
@@ -44,44 +45,36 @@ class BootstrapPage extends StatelessWidget {
             : L10n.of(context).setUpCryptoIdentity;
 
         return LoginScaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            leading: viewModel.value.recoveryKey != null
-                ? null
-                : CloseButton(
-                    onPressed: () async {
-                      if (!reset) {
-                        final consent = await showOkCancelAlertDialog(
-                          context: context,
-                          title: L10n.of(context).skipChatBackup,
-                          message: L10n.of(context).skipChatBackupWarning,
-                          okLabel: L10n.of(context).skip,
-                          isDestructive: true,
-                        );
-                        if (consent != OkCancelResult.ok) return;
-                        if (!context.mounted) return;
-                      }
-                      context.go('/rooms');
-                    },
-                  ),
-            title: Text(title),
-            actions: [
-              if (viewModel.value.recoveryKey != null)
-                Padding(
-                  padding: EdgeInsets.all(8),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                    ),
+          title: title,
+          leading: viewModel.value.recoveryKey != null
+              ? null
+              : LoginHeaderButton(
+                  icon: Icons.close_rounded,
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () async {
+                    if (!reset) {
+                      final consent = await showOkCancelAlertDialog(
+                        context: context,
+                        title: L10n.of(context).skipChatBackup,
+                        message: L10n.of(context).skipChatBackupWarning,
+                        okLabel: L10n.of(context).skip,
+                        isDestructive: true,
+                      );
+                      if (consent != OkCancelResult.ok) return;
+                      if (!context.mounted) return;
+                    }
+                    context.go('/rooms');
+                  },
+                ),
+          bottom: viewModel.value.recoveryKey == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xxl),
+                  child: SettingsPillButton(
+                    label: L10n.of(context).continueText,
                     onPressed: () => context.go('/rooms'),
-                    child: Text(L10n.of(context).continueText),
                   ),
                 ),
-            ],
-          ),
-
           body: cryptoIdentityState == null
               ? Center(child: CircularProgressIndicator.adaptive())
               : !cryptoIdentityState.initialized || viewModel.value.reset

@@ -19,6 +19,10 @@ class SettingsRadioRow<T> extends StatelessWidget {
   final ValueChanged<T>? onChanged;
   final String title;
   final String? subtitle;
+  final Widget? footer;
+  final Widget? trailing;
+  final String? footerLabel;
+  final bool monoTitle;
 
   const SettingsRadioRow({
     required this.value,
@@ -26,6 +30,10 @@ class SettingsRadioRow<T> extends StatelessWidget {
     required this.onChanged,
     required this.title,
     this.subtitle,
+    this.footer,
+    this.trailing,
+    this.footerLabel,
+    this.monoTitle = false,
     super.key,
   });
 
@@ -42,7 +50,7 @@ class SettingsRadioRow<T> extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       checked: selected,
       enabled: enabled,
-      label: subtitle == null ? title : '$title, $subtitle',
+      label: [title, ?subtitle, ?footerLabel].join(', '),
       excludeSemantics: true,
       onTap: enabled ? select : null,
       child: Opacity(
@@ -51,7 +59,7 @@ class SettingsRadioRow<T> extends StatelessWidget {
           onTap: enabled ? select : null,
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: subtitle == null
+              minHeight: subtitle == null && footer == null
                   ? AppSettingsLayout.rowHeight
                   : AppSettingsLayout.rowHeightSub,
             ),
@@ -73,6 +81,9 @@ class SettingsRadioRow<T> extends StatelessWidget {
                             color: tokens.fg,
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
+                            fontFamily: monoTitle
+                                ? AppTypography.monoFamily
+                                : null,
                           ),
                         ),
                         if (subtitle != null)
@@ -80,9 +91,14 @@ class SettingsRadioRow<T> extends StatelessWidget {
                             subtitle,
                             style: TextStyle(color: tokens.mut, fontSize: 12.5),
                           ),
+                        if (footer case final footer?) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          footer,
+                        ],
                       ],
                     ),
                   ),
+                  ?trailing,
                   const SizedBox(width: AppSpacing.m),
                   AnimatedContainer(
                     key: ringKey,

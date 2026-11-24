@@ -13,9 +13,11 @@ import 'package:matrix/msc_extensions/msc_2964_oidc_login_flow/msc_2964_oidc_log
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/pages/intro/intro_page.dart';
 import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/oidc_session_json_extension.dart';
 import 'package:odango/utils/sign_in_flows/check_homeserver.dart';
+import 'package:odango/utils/sign_in_flows/homeserver_input.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/universal_html.dart' as web;
@@ -43,16 +45,25 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
     final storedHomeserverString = store.getString(
       OidcSessionJsonExtension.homeserverStoreKey,
     );
-    final homeserverUrl = storedHomeserverString == null
+    final checkedHomeserver = storedHomeserverString == null
         ? null
-        : Uri.tryParse(storedHomeserverString);
+        : HomeserverInput.parse(storedHomeserverString, allowPath: true);
+    final homeserverUrl = switch (checkedHomeserver) {
+      HomeserverOk(:final uri) => uri,
+      _ => null,
+    };
 
     final oidcSessionString = store.getString(
       OidcSessionJsonExtension.storeKey,
     );
-    final session = oidcSessionString == null
-        ? null
-        : OidcSessionJsonExtension.fromJson(jsonDecode(oidcSessionString));
+    OidcLoginSession? session;
+    try {
+      session = oidcSessionString == null
+          ? null
+          : OidcSessionJsonExtension.fromJson(jsonDecode(oidcSessionString));
+    } catch (e) {
+      Logs().w('Stored OIDC session is not readable', e.runtimeType);
+    }
 
     await store.remove(OidcSessionJsonExtension.storeKey);
     await store.remove(OidcSessionJsonExtension.homeserverStoreKey);
@@ -78,7 +89,7 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
       final state = queryParameters['state'] as String;
 
       final client = await Matrix.of(context).getLoginClient();
-      await client.checkHomeserver(homeserverUrl);
+      await checkHomeserverSafely(client, homeserverUrl);
       await client.oidcLogin(session: session, code: code, state: state);
       if (!mounted) return;
       context.go('/backup');
@@ -98,6 +109,9 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
     }
   }
 
+  void _changeHomeserver() =>
+      context.go('${GoRouterState.of(context).uri.path}/sign_in');
+
   void _login() {
     final presetHomeserver = AppSettings.presetHomeserver.value;
     if (presetHomeserver.isEmpty) {
@@ -113,6 +127,17 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
     );
   }
 
+  String _homeserverLabel() {
+    final preset = AppSettings.presetHomeserver.value;
+    final raw = preset.isNotEmpty
+        ? preset
+        : AppSettings.defaultHomeserver.value;
+    return switch (HomeserverInput.parse(raw)) {
+      HomeserverOk(:final uri) => homeserverLabel(uri),
+      HomeserverRejected() => safeDisplayText(raw, maxGraphemes: 64),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return IntroPage(
@@ -122,7 +147,9 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
       welcomeText: AppSettings.welcomeText.value.isEmpty
           ? null
           : AppSettings.welcomeText.value,
+      homeserver: _homeserverLabel(),
       login: _login,
+      changeHomeserver: _changeHomeserver,
     );
   }
 }

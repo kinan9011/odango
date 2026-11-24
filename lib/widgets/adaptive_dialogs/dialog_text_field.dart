@@ -33,6 +33,13 @@ class DialogTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final bool autocorrect;
+  final Iterable<String>? autofillHints;
+  final int? errorMaxLines;
+  final bool? enableInteractiveSelection;
+
+  /// A value that must not reach the keyboard's suggestions or learning, even
+  /// while it is shown in plain text (the recovery key after the eye toggle).
+  final bool sensitive;
 
   const DialogTextField({
     super.key,
@@ -60,6 +67,10 @@ class DialogTextField extends StatelessWidget {
     this.textInputAction,
     this.inputFormatters,
     this.autocorrect = true,
+    this.autofillHints,
+    this.errorMaxLines,
+    this.enableInteractiveSelection,
+    this.sensitive = false,
   });
 
   OutlineInputBorder _border(BorderSide side) => OutlineInputBorder(
@@ -70,7 +81,8 @@ class DialogTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
-    final secret = obscureText || password;
+    final hidden = obscureText || password;
+    final secret = hidden || sensitive;
     final focused = BorderSide(
       color: tokens.acc,
       width: AppDialog.fieldFocusWidth,
@@ -84,8 +96,8 @@ class DialogTextField extends StatelessWidget {
       controller: controller,
       autofocus: autofocus,
       obscureText: obscureText,
-      minLines: minLines,
-      maxLines: secret ? 1 : maxLines,
+      minLines: hidden ? null : minLines,
+      maxLines: hidden ? 1 : maxLines,
       maxLength: maxLength,
       keyboardType: password && !obscureText
           ? TextInputType.visiblePassword
@@ -94,6 +106,8 @@ class DialogTextField extends StatelessWidget {
       enableSuggestions: !secret,
       enableIMEPersonalizedLearning: !secret,
       style: textStyle,
+      autofillHints: autofillHints,
+      enableInteractiveSelection: enableInteractiveSelection,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       textInputAction: textInputAction,
@@ -107,6 +121,7 @@ class DialogTextField extends StatelessWidget {
         errorBorder: _border(invalid),
         focusedErrorBorder: _border(invalid),
         errorText: errorText,
+        errorMaxLines: errorMaxLines,
         errorStyle: TextStyle(color: tokens.fg),
         hintText: hintText,
         labelText: labelText,

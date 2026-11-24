@@ -9,7 +9,12 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/display_text.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/sign_in_flows/check_homeserver.dart';
+import 'package:odango/utils/sign_in_flows/client_secret.dart';
+import 'package:odango/utils/sign_in_flows/homeserver_input.dart';
+import 'package:odango/utils/sign_in_flows/homeserver_problem_text.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
@@ -25,6 +30,14 @@ class Login extends StatefulWidget {
   @override
   LoginController createState() => LoginController();
 }
+
+/// What the password field says after a failed sign in. The text of a server
+/// error is untrusted and capped; everything else is described, not printed.
+@visibleForTesting
+String loginErrorText(BuildContext context, Object error) =>
+    error is MatrixException
+    ? safeDisplayText(error.errorMessage, maxGraphemes: 200)
+    : error.toLocalizedString(context);
 
 class LoginController extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
@@ -75,6 +88,17 @@ class LoginController extends State<Login> {
         identifier = AuthenticationUserIdentifier(user: username);
       }
       final client = await matrix.getLoginClient();
+      final server = client.homeserver;
+      final allowed = server == null
+          ? null
+          : HomeserverInput.parse(server.toString(), allowPath: true);
+      if (allowed is! HomeserverOk) {
+        throw HomeserverRejectedException(
+          allowed is HomeserverRejected
+              ? allowed.problem
+              : HomeserverProblem.badHost,
+        );
+      }
       await client.login(
         LoginType.mLoginPassword,
         identifier: identifier,
@@ -86,14 +110,13 @@ class LoginController extends State<Login> {
         password: passwordController.text,
         initialDeviceDisplayName: PlatformInfos.appDisplayName,
       );
+      passwordController.clear();
       if (mounted) {
         context.go('/backup');
       }
-    } on MatrixException catch (exception) {
-      setState(() => passwordError = exception.errorMessage);
-      return setState(() => loading = false);
     } catch (exception) {
-      setState(() => passwordError = exception.toString());
+      if (!mounted) return;
+      setState(() => passwordError = loginErrorText(context, exception));
       return setState(() => loading = false);
     }
 
@@ -115,19 +138,36 @@ class LoginController extends State<Login> {
     if (!userId.isValidMatrixIdStrict()) return;
     final oldHomeserver = widget.client.homeserver;
     try {
-      var newDomain = Uri.https(userId.domain!, '');
+      final typedDomain = Uri.https(userId.domain!, '');
+      var newDomain = typedDomain;
       widget.client.homeserver = newDomain;
       DiscoveryInformation? wellKnownInformation;
       try {
         wellKnownInformation = await widget.client.getWellknown();
-        if (wellKnownInformation.mHomeserver.baseUrl.toString().isNotEmpty) {
-          newDomain = wellKnownInformation.mHomeserver.baseUrl;
-        }
       } catch (_) {
         // do nothing, newDomain is already set to a reasonable fallback
       }
+      final announced = wellKnownInformation?.mHomeserver.baseUrl;
+      if (announced != null && announced.toString().isNotEmpty) {
+        final checked = HomeserverInput.checkServerSupplied(
+          announced,
+          typed: typedDomain,
+        );
+        if (checked is HomeserverRejected) {
+          widget.client.homeserver = oldHomeserver;
+          if (!mounted) return;
+          setState(
+            () => usernameError = announcedHomeserverText(
+              L10n.of(context),
+              checked.problem,
+            ),
+          );
+          return;
+        }
+        newDomain = (checked as HomeserverOk).uri;
+      }
       if (newDomain != oldHomeserver) {
-        await widget.client.checkHomeserver(newDomain);
+        await checkHomeserverSafely(widget.client, newDomain);
 
         if (widget.client.homeserver == null) {
           widget.client.homeserver = oldHomeserver;
@@ -189,7 +229,7 @@ class LoginController extends State<Login> {
     );
     if (input == null) return;
     if (!mounted) return;
-    final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
+    final clientSecret = newClientSecret();
     final response = await showFutureLoadingDialog(
       context: context,
       future: () => widget.client.requestTokenToResetPasswordEmail(
@@ -204,7 +244,8 @@ class LoginController extends State<Login> {
       useRootNavigator: false,
       context: context,
       title: l10n.passwordForgotten,
-      message: l10n.chooseAStrongPassword,
+      message:
+          '${l10n.chooseAStrongPassword}\n\n${l10n.passwordResetSignsOutOthers}',
       okLabel: l10n.ok,
       cancelLabel: l10n.cancel,
       hintText: '******',
@@ -225,7 +266,7 @@ class LoginController extends State<Login> {
     if (!mounted) return;
     final data = <String, dynamic>{
       'new_password': password,
-      'logout_devices': false,
+      'logout_devices': true,
       'auth': AuthenticationThreePidCreds(
         type: AuthenticationTypes.emailIdentity,
         threepidCreds: ThreepidCreds(
@@ -249,7 +290,7 @@ class LoginController extends State<Login> {
       );
       usernameController.text = input;
       passwordController.text = password;
-      login();
+      await login();
     }
   }
 
@@ -257,6 +298,9 @@ class LoginController extends State<Login> {
 
   @override
   void dispose() {
+    _coolDown?.cancel();
+    usernameController.clear();
+    passwordController.clear();
     usernameController.dispose();
     passwordController.dispose();
     super.dispose();

@@ -11,6 +11,7 @@ import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dar
 import 'package:odango/utils/app_temp_directory.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_init_client.dart';
 import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_radio_row.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -65,7 +66,7 @@ extension AuthFlows on FluffyChatTester {
     await waitFor('Sign in');
     await tapOn('Sign in');
     await enterText(TextField, 'http://$homeserver', index: 0);
-    await tapOn(RadioListTile<PublicHomeserverData>, index: 0);
+    await tapOn(SettingsRadioRow<PublicHomeserverData>, index: 0);
     await tapOn('Continue');
     await waitFor('Log in to http://$homeserver');
     await enterText(TextField, username, index: 0);

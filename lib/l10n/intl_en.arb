@@ -2142,15 +2142,6 @@
     "invite": "Invite",
     "inviteGroupChat": "📨 Group chat invite",
     "invalidInput": "Invalid input!",
-    "wrongPinEntered": "Wrong pin entered! Try again in {seconds} seconds...",
-    "@wrongPinEntered": {
-        "type": "String",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "pleaseEnterANumber": "Please enter a number greater than 0",
     "archiveRoomDescription": "The chat will be moved to the archive. Other users will be able to see that you have left the chat.",
     "roomUpgradeDescription": "The chat will then be recreated with the new room version. All participants will be notified that they need to switch to the new chat. You can find out more about room versions at https://spec.matrix.org/latest/rooms/",
@@ -2741,7 +2732,6 @@
     "hideRoomsInSpaces": "Hide rooms that are in a space",
     "possibleByYou": "This release was only possible thanks to your support. Odango remains free and open source.",
     "showThumbnailsInTimeline": "Show thumbnails of images and videos",
-    "appSubtitle": "Secure [matrix] Communication",
     "appDescription": "Communicate encrypted over the decentralized [matrix] network in an easy and accessible way for everyone.",
     "interactiveVerification": "Interactive verification",
     "interactiveVerificationDescription": "If you are next to each other or communicate via a secure channel then you can verify all devices at once by comparing a security number or emojis.",
@@ -5439,6 +5429,56 @@
         "description": "Shown when no more people can be picked in the invite list.",
         "placeholders": {
             "max": {
+                "type": "int"
+            }
+        }
+    },
+    "change": "Change",
+    "homeserverCardLabel": "Homeserver",
+    "selectChatToStartMessaging": "Select a chat to start messaging",
+    "invalidHomeserverAddress": "Enter a server address like matrix.org",
+    "homeserverNeedsHttps": "This server must use https://. Plain http is only allowed for servers on your own network.",
+    "homeserverInsecure": "This server asked the app to use an unencrypted connection, so sign-in was stopped.",
+    "passwordResetSignsOutOthers": "This also signs you out on your other devices.",
+    "verifyCompareWarning": "Only confirm if these match on both devices. If they differ, tap \"They Don't Match\": someone may be listening in.",
+    "verifyCancelledByUser": "The verification was cancelled.",
+    "verifyTimedOut": "The verification took too long. Try again.",
+    "verifyMismatch": "The codes did not match. Someone may be intercepting this connection.",
+    "verifyUnexpected": "The other device sent something unexpected. Try again.",
+    "recoveryKeyWarning": "Anyone with this key can read your old messages. Keep it somewhere only you can reach.",
+    "recoveryKeyCopiedClears": "Copied. The clipboard is cleared after 60 seconds while this app is open. A clipboard history may keep a copy.",
+    "recoveryKeyFileTooBig": "That file is too big to be a recovery key.",
+    "showRecoveryKey": "Show key",
+    "hideRecoveryKey": "Hide key",
+    "lockedTryAgainIn": "Too many tries. Try again in {seconds, plural, =1{1 second} other{{seconds} seconds}}.",
+    "@lockedTryAgainIn": {
+        "type": "String",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "biometricFailed": "Biometric unlock did not work. Enter your PIN.",
+    "biometricReason": "Unlock the app",
+    "pinKeypadDigit": "Digit {digit}",
+    "@pinKeypadDigit": {
+        "type": "String",
+        "placeholders": {
+            "digit": {
+                "type": "String"
+            }
+        }
+    },
+    "pinDeleteDigit": "Delete last digit",
+    "pinEntered": "{count} of {total} digits entered",
+    "@pinEntered": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
                 "type": "int"
             }
         }

@@ -4,8 +4,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/bootstrap/view_model/bootstrap_view_model.dart';
+import 'package:odango/utils/motion.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
 
 class NewPassphraseView extends StatelessWidget {
   final BootstrapViewModel viewModel;
@@ -14,116 +19,145 @@ class NewPassphraseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final canCreatePassphrase =
-        viewModel.value.newPassphraseEqualsRepeatPassphrase &&
-        viewModel.value.newPassphraseNumbers &&
-        viewModel.value.newPassphraseSpecialCharacters &&
-        viewModel.value.newPassphraseUpperAndLowerCase &&
-        viewModel.value.newPassphraseLongEnough;
-
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
+    final state = viewModel.value;
+    final rules = state.rules;
+    final obscure = state.obscureText;
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       children: [
-        Text(L10n.of(context).newPassphraseDescription, textAlign: .center),
-        const SizedBox(height: 16),
-        TextField(
-          obscureText: viewModel.value.obscureText,
-          readOnly: viewModel.value.isLoading,
+        Text(
+          l10n.newPassphraseDescription,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: tokens.mut, fontSize: 14, height: 1.4),
+        ),
+        const SizedBox(height: AppSpacing.huge),
+        DialogTextField(
+          password: true,
+          obscureText: obscure,
+          readOnly: state.isLoading,
           controller: viewModel.newPassphraseController,
-          decoration: InputDecoration(
-            suffixIcon: IconButton(
-              icon: Icon(
-                viewModel.value.obscureText
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-              ),
-              onPressed: viewModel.toggleObscureText,
-            ),
-            hintText: L10n.of(context).newPassphrase,
+          hintText: l10n.newPassphrase,
+          suffixIcon: _EyeButton(
+            obscured: obscure,
+            onPressed: viewModel.toggleObscureText,
           ),
         ),
-        const SizedBox(height: 16),
-        TextField(
-          obscureText: viewModel.value.obscureText,
-          readOnly: viewModel.value.isLoading,
+        const SizedBox(height: AppSpacing.xxl),
+        DialogTextField(
+          password: true,
+          obscureText: obscure,
+          readOnly: state.isLoading,
           controller: viewModel.repeatPassphraseController,
-          decoration: InputDecoration(
-            hintText: L10n.of(context).repeatPassphrase,
-          ),
+          hintText: l10n.repeatPassphrase,
         ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: canCreatePassphrase && !viewModel.value.isLoading
+        const SizedBox(height: AppSpacing.huge),
+        SettingsPillButton(
+          label: l10n.continueText,
+          loading: state.isLoading,
+          onPressed: rules.ok && !state.isLoading
               ? () => viewModel.setOrSkipPassphrase(
                   viewModel.newPassphraseController.text,
                   context,
                 )
               : null,
-          child: viewModel.value.isLoading
-              ? CircularProgressIndicator.adaptive()
-              : Text(L10n.of(context).continueText),
         ),
-        const SizedBox(height: 16),
         TextButton(
-          onPressed: viewModel.value.isLoading
+          onPressed: state.isLoading
               ? null
               : () => viewModel.setOrSkipPassphrase(null, context),
-          style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
-          child: Text(L10n.of(context).skip),
+          style: TextButton.styleFrom(
+            minimumSize: const Size.fromHeight(AppChat.tapTarget),
+            foregroundColor: tokens.red,
+          ),
+          child: Text(l10n.skip),
         ),
-        const SizedBox(height: 16),
-        _PassphraseCheckListTile(
-          checked: viewModel.value.newPassphraseEqualsRepeatPassphrase,
-          label: L10n.of(context).passphrasesMatch,
+        const SizedBox(height: AppSpacing.l),
+        _RuleRow(checked: rules.matches, label: l10n.passphrasesMatch),
+        _RuleRow(
+          checked: rules.longEnough,
+          label: l10n.passphraseLengthRequirement,
         ),
-        const SizedBox(height: 16),
-        _PassphraseCheckListTile(
-          checked: viewModel.value.newPassphraseLongEnough,
-          label: L10n.of(context).passphraseLengthRequirement,
+        _RuleRow(
+          checked: rules.upperAndLower,
+          label: l10n.passphraseUpperAndLowerCaseRequirement,
         ),
-        const SizedBox(height: 16),
-        _PassphraseCheckListTile(
-          checked: viewModel.value.newPassphraseUpperAndLowerCase,
-          label: L10n.of(context).passphraseUpperAndLowerCaseRequirement,
+        _RuleRow(
+          checked: rules.special,
+          label: l10n.passphraseSpecialCharactersRequirement,
         ),
-        const SizedBox(height: 16),
-        _PassphraseCheckListTile(
-          checked: viewModel.value.newPassphraseSpecialCharacters,
-          label: L10n.of(context).passphraseSpecialCharactersRequirement,
-        ),
-        const SizedBox(height: 16),
-        _PassphraseCheckListTile(
-          checked: viewModel.value.newPassphraseNumbers,
-          label: L10n.of(context).passphraseNumberRequirement,
+        _RuleRow(
+          checked: rules.number,
+          label: l10n.passphraseNumberRequirement,
         ),
       ],
     );
   }
 }
 
-class _PassphraseCheckListTile extends StatelessWidget {
-  final String label;
-  final bool checked;
-  const _PassphraseCheckListTile({required this.label, required this.checked});
+class _EyeButton extends StatelessWidget {
+  final bool obscured;
+  final VoidCallback onPressed;
+
+  const _EyeButton({required this.obscured, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      spacing: 8.0,
-      children: [
-        Icon(
-          checked ? Icons.check_circle_outlined : Icons.circle_outlined,
-          color: checked
-              ? theme.brightness == Brightness.light
-                    ? Colors.green.shade800
-                    : Colors.green.shade300
-              : theme.colorScheme.error,
-          size: 20,
+    final l10n = L10n.of(context);
+    return IconButton(
+      tooltip: obscured ? l10n.showPassword : l10n.hidePassword,
+      constraints: const BoxConstraints(
+        minWidth: AppChat.tapTarget,
+        minHeight: AppChat.tapTarget,
+      ),
+      onPressed: onPressed,
+      icon: Icon(
+        obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+        color: AppTokens.of(context).mut,
+      ),
+    );
+  }
+}
+
+/// One rule of the passphrase: the icon and the text both say whether it is
+/// met, never the colour alone.
+class _RuleRow extends StatelessWidget {
+  final String label;
+  final bool checked;
+
+  const _RuleRow({required this.label, required this.checked});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return Semantics(
+      checked: checked,
+      label: label,
+      excludeSemantics: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 36),
+        child: Row(
+          spacing: AppSpacing.l,
+          children: [
+            AnimatedSwitcher(
+              duration: motionDuration(context, AppMotion.checkToggle),
+              child: Icon(
+                checked ? Icons.check_circle_rounded : Icons.circle_outlined,
+                key: ValueKey(checked),
+                color: checked ? tokens.ok : tokens.mut,
+                size: 20,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(color: tokens.fg, fontSize: 13),
+              ),
+            ),
+          ],
         ),
-        Text(label, style: TextStyle(fontSize: 12)),
-      ],
+      ),
     );
   }
 }
