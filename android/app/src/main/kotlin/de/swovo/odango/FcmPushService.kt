@@ -1,4 +1,4 @@
-/*package com.swovo.odango
+/*package de.swovo.odango
 
 import com.famedly.fcm_shared_isolate.FcmSharedIsolateService
 

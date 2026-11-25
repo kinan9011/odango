@@ -18,7 +18,7 @@ If you run a modified version of Odango as a network service you must offer its 
 
 ## What is different
 
-- The app is named Odango, has the app id `com.swovo.odango`, and uses its own storage, URL schemes, notification and push identifiers. It does not share data with a FluffyChat installation and is not a drop-in update of it.
+- The app is named Odango, has the app id `de.swovo.odango`, and uses its own storage, URL schemes, notification and push identifiers. It does not share data with a FluffyChat installation and is not a drop-in update of it.
 - The visual design, navigation and several features are new (see the README).
 - The FluffyChat logo, mascot and banner are **not** part of Odango: they were removed because their licences (CC-BY-4.0, all rights reserved) do not fit a fork. The Odango logo and icons are original artwork of the Odango contributors.
 - No upstream infrastructure is used: Odango does not send crash reports to, check releases of, or request push gateways or homeserver lists from the FluffyChat project or its hosts. Help buttons open pages of the Odango website; the only link to the FluffyChat project is its source repository, shown as credit.

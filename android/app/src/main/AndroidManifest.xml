@@ -74,12 +74,12 @@
                <data android:scheme="matrix" />
             </intent-filter>
 
-            <!-- App can open com.swovo.odango:// uris -->
+            <!-- App can open de.swovo.odango:// uris -->
             <intent-filter>
                <action android:name="android.intent.action.VIEW" />
                <category android:name="android.intent.category.DEFAULT" />
                <category android:name="android.intent.category.BROWSABLE" />
-               <data android:scheme="com.swovo.odango" android:host="chat" />
+               <data android:scheme="de.swovo.odango" android:host="chat" />
             </intent-filter>
 
             <!-- App can receive shared text -->

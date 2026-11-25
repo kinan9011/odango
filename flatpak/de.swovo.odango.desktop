@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Odango
+GenericName=Matrix Client
+Comment=Chat with your friends
+Exec=odango
+Icon=de.swovo.odango
+Terminal=false
+Type=Application
+Categories=Network;Chat;InstantMessaging;

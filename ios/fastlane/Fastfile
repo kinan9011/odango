@@ -28,7 +28,7 @@ def setup_signing()
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       targets: "Runner",
-      profile_name: "match AppStore com.swovo.odango",
+      profile_name: "match AppStore de.swovo.odango",
       code_sign_identity: "Apple Distribution",
       build_configurations: "Release"
     )
@@ -36,7 +36,7 @@ def setup_signing()
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       targets: "Odango Share",
-      profile_name: "match AppStore com.swovo.odango.Odango-Share",
+      profile_name: "match AppStore de.swovo.odango.Odango-Share",
       code_sign_identity: "Apple Distribution",
       build_configurations: "Release"
     )
@@ -44,7 +44,7 @@ def setup_signing()
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       targets: "Notification Service Extension",
-      profile_name: "match AppStore com.swovo.odango.Notification-Service-Extension",
+      profile_name: "match AppStore de.swovo.odango.Notification-Service-Extension",
       code_sign_identity: "Apple Distribution",
       build_configurations: "Release"
     )

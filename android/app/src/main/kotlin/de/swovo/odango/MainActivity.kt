@@ -1,4 +1,4 @@
-package com.swovo.odango
+package de.swovo.odango
 
 import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.FlutterFragmentActivity

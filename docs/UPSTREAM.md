@@ -94,7 +94,7 @@ Rule: **keep Odango's identity and UI, take upstream's logic and security fixes.
 
 | Where | Resolve by |
 |---|---|
-| App name, ids, URL schemes, logos, store metadata (`com.swovo.odango`, `android/`, `ios/`, `macos/`, `snap/`, `assets/logo`) | Keep ours. Check that new upstream files don't reintroduce the FluffyChat name or ids. |
+| App name, ids, URL schemes, logos, store metadata (`de.swovo.odango`, `android/`, `ios/`, `macos/`, `snap/`, `assets/logo`) | Keep ours. Check that new upstream files don't reintroduce the FluffyChat name or ids. |
 | Pages redesigned in Odango (`lib/pages/chat*`, `lib/widgets/layouts`, settings, search) | Port the upstream logic change into our widgets by hand, do not take their layout. |
 | `pubspec.yaml`, `pubspec.lock` | Take upstream's dependency versions, keep our additions, then run `flutter pub get` and commit the lock. |
 | `lib/l10n/intl_en.arb` | Keep both sets of keys. Other `.arb` files come from Weblate: take upstream's. |

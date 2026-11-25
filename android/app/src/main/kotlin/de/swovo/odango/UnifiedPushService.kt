@@ -1,4 +1,4 @@
-package com.swovo.odango
+package de.swovo.odango
 
 import io.flutter.embedding.engine.FlutterEngine
 import android.content.Context

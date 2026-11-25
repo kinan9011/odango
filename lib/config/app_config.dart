@@ -15,17 +15,17 @@ abstract class AppConfig {
   static const bool hideTypingUsernames = false;
 
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
-  static const String deepLinkPrefix = 'com.swovo.odango://chat/';
-  static const String appleAppGroupId = 'group.com.swovo.odango';
+  static const String deepLinkPrefix = 'de.swovo.odango://chat/';
+  static const String appleAppGroupId = 'group.de.swovo.odango';
   static const String schemePrefix = 'matrix:';
   static const String pushNotificationsChannelId = 'odango_push';
-  static const String pushNotificationsAppId = 'com.swovo.odango';
+  static const String pushNotificationsAppId = 'de.swovo.odango';
   static const double borderRadius = 18.0;
   static const double spaceBorderRadius = 11.0;
   static const double columnWidth = 360.0;
 
-  static const String appId = 'com.swovo.odango';
-  static const String appOpenUrlScheme = 'com.swovo.odango';
+  static const String appId = 'de.swovo.odango';
+  static const String appOpenUrlScheme = 'de.swovo.odango';
   static const String appSsoUrlScheme = 'de.swovo.odango';
   // Identifies the notification activation callback on Windows. Never change!
   static const String windowsNotificationGuid =

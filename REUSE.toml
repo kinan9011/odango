@@ -28,6 +28,7 @@ path = [
     "integration_test/data/**",
     "integration_test/synapse/**",
     "snap/**",
+    "flatpak/**",
     "windows/**",
     "web/**",
     "test/metadata/**",

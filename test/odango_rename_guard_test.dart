@@ -347,7 +347,7 @@ void main() {
     String text(String path) => File(path).readAsStringSync();
 
     test('the app id is the same everywhere', () {
-      const id = 'com.swovo.odango';
+      const id = 'de.swovo.odango';
       final config = text('lib/config/app_config.dart');
       expect(config, contains("appId = '$id'"));
       expect(config, contains("appleAppGroupId = 'group.$id'"));
@@ -359,7 +359,7 @@ void main() {
       expect(gradle, contains('namespace = "$id"'));
       expect(gradle, contains('applicationId = "$id"'));
       final activity = text(
-        'android/app/src/main/kotlin/com/swovo/odango/MainActivity.kt',
+        'android/app/src/main/kotlin/de/swovo/odango/MainActivity.kt',
       );
       expect(activity, startsWith('package $id'));
       final manifest = text('android/app/src/main/AndroidManifest.xml');

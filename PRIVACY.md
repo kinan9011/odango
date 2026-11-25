@@ -20,4 +20,4 @@ Odango is a client for the Matrix network. This is what it does and does not do 
 - **Location messages** show a map that is loaded from the OpenStreetMap tile servers (`tile.openstreetmap.org`) whenever such a message is on screen. OpenStreetMap sees your IP address and the map area. This is inherited from the upstream app and not yet a setting.
 - **UnifiedPush** (only if you choose it) registers with the public UnifiedPush Matrix gateway or a gateway of your own.
 - **Encrypted rooms:** message content of encrypted rooms is kept only inside the encrypted local database, never in plain text preferences or logs.
-- **Your data is local.** There is no migration from FluffyChat or other apps: Odango keeps its own storage under the app id `com.swovo.odango`.
+- **Your data is local.** There is no migration from FluffyChat or other apps: Odango keeps its own storage under the app id `de.swovo.odango`.

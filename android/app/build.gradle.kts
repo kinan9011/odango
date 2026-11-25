@@ -33,7 +33,7 @@ configurations.all {
 
 
 android {
-    namespace = "com.swovo.odango"
+    namespace = "de.swovo.odango"
     // Workaround for https://github.com/juliansteenbakker/flutter_secure_storage/issues/1224
     compileSdk = 37 //flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -66,7 +66,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.swovo.odango"
+        applicationId = "de.swovo.odango"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
