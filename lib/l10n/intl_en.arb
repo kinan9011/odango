@@ -44,11 +44,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Crop",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "@@locale": "en",
     "@@last_modified": "2021-08-14 12:38:37.885451",
     "repeatPassword": "Repeat password",
@@ -1386,8 +1381,6 @@
     "switchToVoiceMessage": "Tap to switch to voice messages",
     "recordTooShort": "Hold longer to record",
     "recordVideoTooLong": "Video messages can be 1 minute long at most",
-    "slideToCancel": "Slide to cancel",
-    "lockRecording": "Slide up to lock",
     "mediaCannotBeCleaned": "This photo or video cannot be cleaned of its location on this device, so it was not sent. Turn off \"Remove location and camera details\" in Settings to send it as it is.",
     "liveLocationNotAllowed": "You cannot share your live location in this chat: its settings do not allow it.",
     "longPressToRecordVideoMessage": "Long press to record a video message.",

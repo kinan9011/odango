@@ -2744,11 +2744,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "裁剪",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "loadingMessages": "正在加载消息…",
     "buildDoesNotSupportFirebase": "此版本不支持 firebase 云消息。",
     "unableToRegisterDeviceForFirebase": "无法注册设备用于 firebase 云消息。",

@@ -2750,11 +2750,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Barr",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "loadingMessages": "Ag lódáil teachtaireachtaí...",
     "buildDoesNotSupportFirebase": "Ní thacaíonn an tógáil seo le teachtaireachtaí scamall firebase.",
     "unableToRegisterDeviceForFirebase": "Ní féidir gléas a chlárú le haghaidh teachtaireachtaí scamall firebase.",

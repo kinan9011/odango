@@ -2747,11 +2747,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Kadreeri",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "loadingMessages": "Laadin sõnumeid…",
     "buildDoesNotSupportFirebase": "See kompileeritud variant ei toeta Firebase Cloud Messaging teenust.",
     "unableToRegisterDeviceForFirebase": "Seadme registreerimine Firebase Cloud Messaging teenuses ei õnnestu.",

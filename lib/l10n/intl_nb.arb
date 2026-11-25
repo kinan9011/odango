@@ -2658,11 +2658,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Beskjær",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "resetAccountWarning": "Når du tilbakestiller kontoen din, mister du tilgangen til de gamle meldingene dine for alltid. Alle dine nåværende enheter må verifiseres på nytt. Du bør bare utføre denne handlingen dersom du ikke har noen andre enheter igjen til å verifisere økten din, og du har mistet gjenopprettingsnøkkelen og passordfrasen din!",
     "@resetAccountWarning": {
         "type": "String",

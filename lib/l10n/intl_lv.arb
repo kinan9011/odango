@@ -2650,11 +2650,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Apcirpt",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "restoreBootstrapEmptyDevicesDescription": "Lūgums ievadīt savu paroles vārdkopu vai atkopes atslēgu, lai apliecinātu šo ierīci un iegūtu piekļuvi savai šifrēto ziņu rezerves kopijai.",
     "@restoreBootstrapEmptyDevicesDescription": {
         "type": "String",

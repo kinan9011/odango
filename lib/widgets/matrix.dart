@@ -407,6 +407,19 @@ class MatrixState extends State<Matrix> {
     _applyPresence();
     _clearDueStatuses();
     unawaited(liveShare.endStaleShares());
+    liveShare.addListener(_showLiveShareError);
+  }
+
+  void _showLiveShareError() {
+    if (liveShare.error == null) return;
+    liveShare.error = null;
+    final snackbarContext =
+        FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+        context;
+    if (!snackbarContext.mounted) return;
+    ScaffoldMessenger.maybeOf(snackbarContext)?.showSnackBar(
+      SnackBar(content: Text(L10n.of(snackbarContext).liveSharingFailed)),
+    );
   }
 
   void _endCallWhenDisabled() {
@@ -665,6 +678,7 @@ class MatrixState extends State<Matrix> {
     onUiaRequest.clear();
 
     voiceMessageEventId.dispose();
+    liveShare.removeListener(_showLiveShareError);
     liveShare.dispose();
     serverCapabilities.dispose();
     _activeClientRevision.dispose();

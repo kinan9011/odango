@@ -2589,11 +2589,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Обрізати",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "accountsAndSettings": "Облікові записи та налаштування",
     "@accountsAndSettings": {
         "type": "String",

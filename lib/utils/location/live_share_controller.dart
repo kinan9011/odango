@@ -252,6 +252,7 @@ class LiveShareController extends ChangeNotifier {
       return true;
     } catch (_) {
       error = LiveShareError.sendFailed;
+      notifyListeners();
       return false;
     }
   }

@@ -2389,11 +2389,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Oříznout",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "discardEdits": "Máte neuložené změny. Opravdu je chcete zahodit?",
     "@discardEdits": {
         "type": "String",

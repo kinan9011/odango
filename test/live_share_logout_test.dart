@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/location/live_share_controller.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +35,7 @@ class _Store implements ShareStore {
 
 class _Ports implements LiveSharePorts {
   final events = <String>[];
+  bool failStop = false;
   final position = StreamController<GeoFix>.broadcast();
 
   @override
@@ -56,6 +58,7 @@ class _Ports implements LiveSharePorts {
     required Duration timeout,
     required DateTime start,
   }) async {
+    if (!live && failStop) throw Exception('offline');
     events.add(live ? 'info-live' : 'info-stopped');
     return r'$info';
   }
@@ -99,19 +102,24 @@ void main() {
     late MatrixState state;
     await tester.pumpWidget(
       MaterialApp(
-        home: Matrix(
-          clients: [client],
-          store: prefs,
-          liveSharePorts: ports,
-          child: Builder(
-            builder: (context) {
-              state = Matrix.of(context);
-              return const SizedBox();
-            },
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        home: Scaffold(
+          body: Matrix(
+            clients: [client],
+            store: prefs,
+            liveSharePorts: ports,
+            child: Builder(
+              builder: (context) {
+                state = Matrix.of(context);
+                return const SizedBox();
+              },
+            ),
           ),
         ),
       ),
     );
+    await tester.pumpAndSettle();
     addTearDown(
       () => client
           .dispose(closeDatabase: true)
@@ -137,6 +145,29 @@ void main() {
     expect(api.requests('/logout', method: 'POST'), hasLength(1));
     expect(state.liveShare.active, isFalse);
     expect(ports.store.record, isNull);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 35));
+  });
+
+  testWidgets('a share that cannot be stopped tells the user once', (
+    tester,
+  ) async {
+    final (state, client, ports, _) = await mount(tester, 'ShareStopFails');
+    await tester.runAsync(
+      () => state.liveShare.start(
+        _room,
+        const Duration(hours: 1),
+        owner: client.userID!,
+      ),
+    );
+    ports.failStop = true;
+    await tester.runAsync(state.liveShare.stop);
+    await tester.pump();
+    expect(
+      find.text('Your location could not be sent, so sharing stopped.'),
+      findsOneWidget,
+    );
+    expect(state.liveShare.error, isNull);
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 35));
   });

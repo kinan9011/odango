@@ -2743,11 +2743,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Bijsnijden",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "loadingMessages": "Berichten laden...",
     "buildDoesNotSupportFirebase": "Deze versie ondersteunt geen firebase cloud messaging.",
     "unableToRegisterDeviceForFirebase": "Niet in staat om het apparaat te registreren voor firebase cloud messaging.",
