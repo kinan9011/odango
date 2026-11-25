@@ -104,7 +104,7 @@ abstract class AppRoutes {
     }
 
     // Workaround for content sharings passed to go router:
-    if ({'content', 'sharemedia-com.swovo.odango'}.contains(state.uri.scheme)) {
+    if ({'content', 'sharemedia-de.swovo.odango'}.contains(state.uri.scheme)) {
       Logs().d('Ignore content sharing handling in go router');
       return '/';
     }

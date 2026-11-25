@@ -11,9 +11,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
-import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/client_download_content_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_localized_body.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/utils/notification_background_handler.dart';
 import 'package:odango/utils/platform_infos.dart';
@@ -67,17 +67,15 @@ extension LocalNotificationsExtension on MatrixState {
     final title = event.room.safeLocalizedDisplayname(
       MatrixLocals(L10n.of(context)),
     );
-    final body = stripBidiOverrides(
-      await event.calcLocalizedBody(
-        MatrixLocals(L10n.of(context)),
-        withSenderNamePrefix:
-            !event.room.isDirectChat ||
-            event.room.lastEvent?.senderId == client.userID,
-        plaintextBody: true,
-        hideReply: true,
-        hideEdit: true,
-        removeMarkdown: true,
-      ),
+    final body = await event.safeLocalizedBody(
+      MatrixLocals(L10n.of(context)),
+      withSenderNamePrefix:
+          !event.room.isDirectChat ||
+          event.room.lastEvent?.senderId == client.userID,
+      plaintextBody: true,
+      hideReply: true,
+      hideEdit: true,
+      removeMarkdown: true,
     );
     final avatarUrl = event.room.avatar;
 

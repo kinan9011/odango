@@ -12,7 +12,7 @@
 # cache/receive_sharing_intent/<uuid>/ and cannot reach other app files.
 set -euo pipefail
 DEVICE=${1:?usage: scripts/test_share_intent.sh <adb serial>}
-APP=com.swovo.odango
+APP=de.swovo.odango
 ADB="adb -s $DEVICE"
 
 case "$DEVICE" in

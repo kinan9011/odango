@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:matrix/matrix.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/topics/topic.dart';
 
 class TopicsLoadFailed implements Exception {
@@ -133,8 +134,9 @@ class TopicLoader {
         content: event.type == EventTypes.Encrypted ? const {} : event.content,
         timestamp: raw.originServerTs,
         unsigned: raw.unsigned,
-        displayName: (userId) =>
-            room.unsafeGetUserFromMemoryOrFallback(userId).calcDisplayname(),
+        displayName: (userId) => stripBidiOverrides(
+          room.unsafeGetUserFromMemoryOrFallback(userId).calcDisplayname(),
+        ),
       );
     } catch (_) {
       return null;

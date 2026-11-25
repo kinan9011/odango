@@ -20,7 +20,7 @@ Odango is a fork of [FluffyChat](https://github.com/krille-chan/fluffychat) by C
 - **Upstream:** Odango is no longer a GitHub fork but still follows the FluffyChat project: new upstream commits are reported by a daily check and brought in by review. See [docs/UPSTREAM.md](docs/UPSTREAM.md).
 - **Support:** please support the main repo, FluffyChat, on [Ko-fi](https://ko-fi.com/C1C86VN53). Without FluffyChat there is no Odango. The in-app *Support Odango* entry also explains that part of the support goes on to the FluffyChat source Odango is built on.
 
-Odango is a **new app** with its own app id, `com.swovo.odango`. It does not read the data of a FluffyChat installation and there is no migration: sign in again and your chats come back from your homeserver.
+Odango is a **new app** with its own app id, `de.swovo.odango`. It does not read the data of a FluffyChat installation and there is no migration: sign in again and your chats come back from your homeserver.
 
 ## Links
 
@@ -82,7 +82,7 @@ On Android and iOS the MDM configuration is not restricted except for runtime st
 
 ### Push notifications
 
-A push gateway knows the apps it serves, and the gateway of another app will not work for `com.swovo.odango`. This build therefore ships **without** a push gateway: push through Firebase or APNs needs your own Matrix push gateway (for example [Sygnal](https://github.com/matrix-org/sygnal)) and your own Firebase or Apple push setup, configured with the MDM key `pushNotificationsGatewayUrl`. UnifiedPush uses the public UnifiedPush Matrix gateway and needs no setup of your own.
+A push gateway knows the apps it serves, and the gateway of another app will not work for `de.swovo.odango`. This build therefore ships **without** a push gateway: push through Firebase or APNs needs your own Matrix push gateway (for example [Sygnal](https://github.com/matrix-org/sygnal)) and your own Firebase or Apple push setup, configured with the MDM key `pushNotificationsGatewayUrl`. UnifiedPush uses the public UnifiedPush Matrix gateway and needs no setup of your own.
 
 ### Crash reports and update checks
 

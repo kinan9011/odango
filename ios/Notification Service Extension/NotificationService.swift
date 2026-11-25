@@ -82,7 +82,7 @@ class NotificationService: UNNotificationServiceExtension {
 
         // Create database path:
         guard let containerPath = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: "group.com.swovo.odango"
+                forSecurityApplicationGroupIdentifier: "group.de.swovo.odango"
             ) else {
                 os_log("[OdangoPushHelper] Unable to get container path!")
                 contentHandler(bestAttemptContent)
@@ -165,7 +165,7 @@ class NotificationService: UNNotificationServiceExtension {
             kSecAttrService as String: "flutter_secure_storage_service",
             kSecAttrAccount as String: "database_password",
             kSecReturnData as String: true,
-            kSecAttrAccessGroup as String: "group.com.swovo.odango",
+            kSecAttrAccessGroup as String: "group.de.swovo.odango",
         ]
 
         var item: CFTypeRef?

@@ -2532,11 +2532,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "பயிர்",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "discardEdits": "உங்களிடம் சேமிக்கப்படாத மாற்றங்கள் உள்ளன. உங்கள் திருத்தங்களை நிராகரிக்கவா?",
     "@discardEdits": {
         "type": "String",

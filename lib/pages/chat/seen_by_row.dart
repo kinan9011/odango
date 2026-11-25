@@ -10,6 +10,7 @@ import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/room_status_extension.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -46,7 +47,7 @@ class SeenByRow extends StatelessWidget {
                 for (final user in seenByUsers)
                   SeenUser(
                     id: user.id,
-                    name: user.calcDisplayname(),
+                    name: stripBidiOverrides(user.calcDisplayname()),
                     avatar: user.avatarUrl,
                   ),
               ],

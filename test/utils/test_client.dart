@@ -34,6 +34,7 @@ Future<Client> prepareTestClient({
   String? clientName,
   BaseClient? httpClient,
   bool waitForFirstSync = true,
+  String userId = '@test:fakeServer.notExisting',
 }) async {
   await setUpVodozemac();
   SharedPreferences.setMockInitialValues({});
@@ -72,8 +73,10 @@ Future<Client> prepareTestClient({
     newDeviceID: 'ABCD1234',
     newDeviceName: 'Screenshot Tester',
     newToken: '1234',
-    newUserID: '@test:fakeServer.notExisting',
-    newOlmAccount: pickledOlmAccount,
+    newUserID: userId,
+    newOlmAccount: userId == '@test:fakeServer.notExisting'
+        ? pickledOlmAccount
+        : null,
   );
   return client;
 }

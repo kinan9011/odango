@@ -2136,11 +2136,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "切り抜き",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "discardEdits": "保存されていない変更があります。編集内容を破棄しますか？",
     "@discardEdits": {
         "type": "String",

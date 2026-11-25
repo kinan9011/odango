@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.swovo.odango</id>
+  <name>Odango</name>
+  <summary>Open-source Matrix messenger with end-to-end encryption</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  <developer id="de.swovo"><name>Odango contributors</name></developer>
+  <description>
+    <p>Odango is an open-source Matrix messenger with a familiar, Telegram-style interface. It is end-to-end encrypted, decentralized, and easy to use.</p>
+    <p>Based on the open Matrix protocol, Odango works with any Matrix server and is compatible with other Matrix clients like Element, Nheko, Cinny or NeoChat.</p>
+    <p>Odango is a fork of FluffyChat and keeps its AGPL-3.0 licence and upstream attribution.</p>
+  </description>
+  <launchable type="desktop-id">de.swovo.odango.desktop</launchable>
+  <url type="homepage">https://odango.swovo.de</url>
+  <url type="bugtracker">https://github.com/kinan9011/odango/issues</url>
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-info">moderate</content_attribute>
+    <content_attribute id="social-audio">intense</content_attribute>
+  </content_rating>
+  <screenshots>
+    <screenshot type="default"><image>https://raw.githubusercontent.com/kinan9011/odango/main/android/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png</image></screenshot>
+    <screenshot><image>https://raw.githubusercontent.com/kinan9011/odango/main/android/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png</image></screenshot>
+    <screenshot><image>https://raw.githubusercontent.com/kinan9011/odango/main/android/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png</image></screenshot>
+  </screenshots>
+  <releases>
+    <release version="1.0.0" date="2026-11-25"/>
+  </releases>
+</component>

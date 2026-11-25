@@ -6,6 +6,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 
 import '../config/app_config.dart';
 
@@ -25,16 +26,16 @@ extension RoomStatusExtension on Room {
       if (typingUsers.first.id != directChatMatrixID) {
         typingText = L10n.of(
           context,
-        ).userIsTyping(typingUsers.first.calcDisplayname());
+        ).userIsTyping(inlineName(typingUsers.first.calcDisplayname()));
       }
     } else if (typingUsers.length == 2) {
       typingText = L10n.of(context).userAndUserAreTyping(
-        typingUsers.first.calcDisplayname(),
-        typingUsers[1].calcDisplayname(),
+        inlineName(typingUsers.first.calcDisplayname()),
+        inlineName(typingUsers[1].calcDisplayname()),
       );
     } else if (typingUsers.length > 2) {
       typingText = L10n.of(context).userAndOthersAreTyping(
-        typingUsers.first.calcDisplayname(),
+        inlineName(typingUsers.first.calcDisplayname()),
         (typingUsers.length - 1),
       );
     }

@@ -39,9 +39,36 @@ TextDirection? firstStrongDirection(String text) {
   return null;
 }
 
-final _bidiOverrides = RegExp(r'[\u202A-\u202E]');
+final _bidiNoise = RegExp(r'[\u202A-\u202E\u2066-\u2069]');
 
 /// Drops the embedding and override controls (U+202A-202E) that can reorder
-/// text. Marks (LRM, RLM, ALM) and isolates (U+2066-2069) stay.
-String stripBidiOverrides(String text) =>
-    text.contains(_bidiOverrides) ? text.replaceAll(_bidiOverrides, '') : text;
+/// text, and balances the isolates (U+2066-2069): a closer that closes
+/// nothing is dropped, an initiator that is left open is closed at the end,
+/// because an open isolate runs to the end of the paragraph and reorders the
+/// text that follows the name. Marks (LRM, RLM, ALM) and balanced isolates
+/// stay.
+String stripBidiOverrides(String text) {
+  if (!text.contains(_bidiNoise)) return text;
+  final out = StringBuffer();
+  var open = 0;
+  for (final rune in text.runes) {
+    if (rune >= 0x202A && rune <= 0x202E) continue;
+    if (rune >= 0x2066 && rune <= 0x2068) open++;
+    if (rune == 0x2069) {
+      if (open == 0) continue;
+      open--;
+    }
+    out.writeCharCode(rune);
+  }
+  return out.toString() + '\u2069' * open;
+}
+
+final _lineBreaks = RegExp(
+  r'[\n\r\u000B\u000C\u001C-\u001E\u0085\u2028\u2029]',
+);
+
+/// A name that goes inside a sentence: every line or paragraph break becomes
+/// a space (a break ends an isolate early and splits the sentence), then
+/// [stripBidiOverrides].
+String inlineName(String text) =>
+    stripBidiOverrides(text.replaceAll(_lineBreaks, ' '));

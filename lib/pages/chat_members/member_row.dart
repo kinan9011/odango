@@ -9,7 +9,9 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/members/member_role.dart';
+import 'package:odango/utils/name_or.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/member_actions_popup_menu_button.dart';
@@ -35,8 +37,11 @@ class MemberRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppTokens.of(context);
     final l10n = L10n.of(context);
-    final name = visibleId(
-      cappedText(user.calcDisplayname(), maxUnits: AppProfile.nameCap),
+    final name = nameOr(
+      inlineName(
+        cappedText(user.calcDisplayname(), maxUnits: AppProfile.nameCap),
+      ),
+      user.id,
     );
     final badge = memberBadgeOf(user.powerLevel.role);
     final membership = membershipBadgeLabel(user.membership, l10n);
@@ -83,7 +88,7 @@ class MemberRow extends StatelessWidget {
                         opacity: joined ? 1 : .5,
                         child: Avatar(
                           mxContent: user.avatarUrl,
-                          name: user.calcDisplayname(),
+                          name: stripBidiOverrides(user.calcDisplayname()),
                           presenceUserId: user.stateKey,
                           colorSeed: user.id,
                           size: AppMembers.avatar,

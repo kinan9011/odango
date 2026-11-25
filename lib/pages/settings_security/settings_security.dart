@@ -119,7 +119,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       message: l10n.pleaseEnter6Digits,
       cancelLabel: l10n.cancel,
       validator: (text) {
-        if (text.length == 6 && int.tryParse(text)! >= 0) {
+        if (RegExp(r'^[0-9]{6}$').hasMatch(text)) {
           return null;
         }
         return l10n.pleaseEnter6Digits;
@@ -171,16 +171,19 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     final resp = await showFutureLoadingDialog(
       context: context,
       delay: false,
-      future: () => matrix.client.uiaRequestBackground<IdServerUnbindResult?>(
-        (auth) => matrix.client.deactivateAccount(auth: auth, erase: true),
-      ),
+      future: () => matrix.client.uiaRequestBackground<IdServerUnbindResult?>((
+        auth,
+      ) async {
+        await matrix.liveShare.stopFor(matrix.client.userID);
+        return matrix.client.deactivateAccount(auth: auth, erase: true);
+      }),
     );
 
     if (!resp.isError) {
       if (!mounted) return;
       await showFutureLoadingDialog(
         context: context,
-        future: () => matrix.client.logout(),
+        future: () => matrix.logoutClient(matrix.client),
       );
     }
   }

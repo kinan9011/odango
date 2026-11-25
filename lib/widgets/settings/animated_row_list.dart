@@ -49,6 +49,13 @@ class RowListMotion {
     sequential: false,
   );
 
+  static const search = RowListMotion(
+    fade: AppMotion.search,
+    move: AppMotion.search,
+    curve: AppMotion.easeOutQuint,
+    sequential: false,
+  );
+
   Duration get total => sequential ? fade + move : move;
 
   double get _split => fade.inMicroseconds / total.inMicroseconds;

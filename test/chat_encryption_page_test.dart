@@ -433,19 +433,35 @@ void main() {
       await h.finish(tester);
     });
 
+    testWidgets('a name with nothing visible shows the id as the title', (
+      tester,
+    ) async {
+      final room = withAlice();
+      putState(
+        room,
+        EventTypes.RoomMember,
+        {'membership': 'join', 'displayname': '\u200F\u2067\u2069'},
+        stateKey: '@alice:example.com',
+        sender: '@alice:example.com',
+      );
+      await open(tester, room);
+      expect(find.textContaining('@alice:example.com'), findsNWidgets(2));
+      await h.finish(tester);
+    });
+
     testWidgets('a name with a bidi control is marked (T1)', (tester) async {
       final rlo = String.fromCharCode(0x202E);
       final room = withAlice();
       putState(
         room,
         EventTypes.RoomMember,
-        {'membership': 'join', 'displayname': 'Al${rlo}ice'},
+        {'membership': 'join', 'displayname': 'Al${rlo}ice\u200F'},
         stateKey: '@alice:example.com',
         sender: '@alice:example.com',
       );
       await open(tester, room);
       expect(find.textContaining(rlo), findsNothing);
-      expect(find.textContaining('Al\u{FFFD}ice'), findsOneWidget);
+      expect(find.textContaining('Alice\u200F'), findsOneWidget);
       await h.finish(tester);
     });
   });

@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.swovo.odango</string>
+		<string>de.swovo.odango</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
@@ -32,11 +32,11 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.swovo.odango.uris</string>
+			<string>de.swovo.odango.uris</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-				<string>com.swovo.odango</string>
+				<string>de.swovo.odango</string>
 				<string>matrix</string>
 			</array>
 		</dict>

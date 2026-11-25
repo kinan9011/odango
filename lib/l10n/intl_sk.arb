@@ -1243,11 +1243,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Orezat",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "notAnImage": "Súbor nie je obrázok.",
     "importEmojis": "Importovat Emoji",
     "importFromZipFile": "Importovat zo .zip súboru",

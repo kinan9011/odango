@@ -9,15 +9,19 @@ import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/invite_selection.dart';
 import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/name_or.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/adaptive_dialogs/user_dialog.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/settings/settings_group.dart';
 
-String candidateName(InviteCandidate candidate) =>
-    visibleId(cappedText(candidate.displayName, maxUnits: AppProfile.nameCap));
+String candidateName(InviteCandidate candidate) => nameOr(
+  inlineName(cappedText(candidate.displayName, maxUnits: AppProfile.nameCap)),
+  candidate.id,
+);
 
 class InviteRow extends StatelessWidget {
   final InviteCandidate candidate;
@@ -104,7 +108,9 @@ class InviteRow extends StatelessWidget {
                                     'invite_avatar_${candidate.id}',
                                   ),
                                   mxContent: candidate.avatarUrl,
-                                  name: candidate.displayName,
+                                  name: stripBidiOverrides(
+                                    candidate.displayName,
+                                  ),
                                   colorSeed: candidate.id,
                                   size: AppMembers.avatar,
                                   onTap: () => UserDialog.show(

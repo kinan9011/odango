@@ -79,13 +79,14 @@ class PollWidget extends StatelessWidget {
                 if (entry.value.contains(answer.id))
                   PollVoter(
                     id: entry.key,
-                    name:
-                        event.room
-                            .getState(EventTypes.RoomMember, entry.key)
-                            ?.asUser(event.room)
-                            .calcDisplayname() ??
-                        entry.key.localpart ??
-                        entry.key,
+                    name: stripBidiOverrides(
+                      event.room
+                              .getState(EventTypes.RoomMember, entry.key)
+                              ?.asUser(event.room)
+                              .calcDisplayname() ??
+                          entry.key.localpart ??
+                          entry.key,
+                    ),
                     avatar: event.room
                         .getState(EventTypes.RoomMember, entry.key)
                         ?.asUser(event.room)

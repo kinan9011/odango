@@ -7,7 +7,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/archive/archive_view.dart';
-import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
 import 'package:odango/widgets/matrix.dart';
@@ -21,22 +20,25 @@ class Archive extends StatefulWidget {
 
 class ArchiveController extends State<Archive> {
   List<ArchivedRoom> archive = [];
+  Future<List<ArchivedRoom>>? _load;
 
-  Future<List<ArchivedRoom>> getArchive(BuildContext context) async {
-    if (archive.isNotEmpty) return archive;
-    return archive = await Matrix.of(context).client.loadArchiveWithTimeline();
-  }
+  Future<List<ArchivedRoom>> get loading => _load ??= _fetch();
 
-  Future<void> forgetRoomAction(int i) async {
+  Future<List<ArchivedRoom>> _fetch() async =>
+      archive = await Matrix.of(context).client.loadArchiveWithTimeline();
+
+  void retry() => setState(() => _load = null);
+
+  Future<void> forgetRoomAction(Room room) async {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
-        Logs().v('Forget room ${archive.last.room.safeLocalizedDisplayname()}');
-        await archive[i].room.forget();
-        archive.removeAt(i);
+        Logs().v('Forget archived room');
+        await room.forget();
+        archive.removeWhere((archived) => archived.room.id == room.id);
       },
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> forgetAllAction() async {
@@ -60,15 +62,13 @@ class ArchiveController extends State<Archive> {
         final count = archive.length;
         while (archive.isNotEmpty) {
           onProgress(1 - (archive.length / count));
-          Logs().v(
-            'Forget room ${archive.last.room.safeLocalizedDisplayname()}',
-          );
+          Logs().v('Forget archived room');
           await archive.last.room.forget();
           archive.removeLast();
         }
       },
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override

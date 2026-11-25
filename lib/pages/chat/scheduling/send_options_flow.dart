@@ -16,6 +16,7 @@ import 'package:odango/pages/chat/scheduling/schedule_labels.dart';
 import 'package:odango/pages/chat/scheduling/schedule_sheet.dart';
 import 'package:odango/pages/chat/scheduling/send_options_menu.dart';
 import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/rich_text/html_serializer.dart';
 import 'package:odango/utils/scheduling/scheduled_content.dart';
 import 'package:odango/utils/scheduling/scheduled_messages.dart';
@@ -72,7 +73,9 @@ extension SendOptionsFlow on ChatController {
     if (!mounted || anchor == null || options.isEmpty) return;
     final partnerName = partner == null
         ? null
-        : room.unsafeGetUserFromMemoryOrFallback(partner).calcDisplayname();
+        : inlineName(
+            room.unsafeGetUserFromMemoryOrFallback(partner).calcDisplayname(),
+          );
     final choice = await showSendOptionsMenu(
       context,
       options: options,

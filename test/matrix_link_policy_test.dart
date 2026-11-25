@@ -74,7 +74,7 @@ void main() {
             event: r'$event1:example.org',
             via: const [],
           ),
-          'com.swovo.odango://chat/@alice:example.org': (
+          'de.swovo.odango://chat/@alice:example.org': (
             kind: ScannedKind.user,
             id: '@alice:example.org',
             event: null,

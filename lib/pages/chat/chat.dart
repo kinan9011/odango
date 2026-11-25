@@ -45,6 +45,7 @@ import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/media/playback_temp_file.dart';
 import 'package:odango/utils/ogg_opus_remuxer.dart';
 import 'package:odango/utils/other_party_can_receive.dart';
 import 'package:odango/utils/platform_infos.dart';
@@ -74,9 +75,10 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:universal_html/universal_html.dart' as web;
 
 import '../../utils/account_bundles.dart';
+import '../../utils/chat/composer_text_edit.dart';
 import '../../utils/localized_exception_extension.dart';
-import 'send_file_dialog.dart';
-import 'send_location_dialog.dart';
+import 'live_location/share_location_flow.dart';
+import 'send_file_sheet.dart';
 
 class ChatPage extends StatelessWidget {
   final String roomId;
@@ -221,15 +223,12 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() => dragging = false);
     if (details.files.isEmpty) return;
 
-    await showAdaptiveDialog(
+    await showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: details.files,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: details.files,
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
@@ -642,15 +641,12 @@ class ChatController extends State<ChatPageWithRoom>
         .map((item) => item.value)
         .toList();
     if (files.isEmpty) return;
-    showAdaptiveDialog(
+    showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: files,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: files,
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
@@ -1267,29 +1263,23 @@ class ChatController extends State<ChatPageWithRoom>
     final files = await selectFiles(context, allowMultiple: true, type: type);
     if (files.isEmpty) return;
     if (!mounted) return;
-    await showAdaptiveDialog(
+    await showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: files,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: files,
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
   Future<void> sendImageFromClipBoard(Uint8List? image) async {
     if (image == null) return;
-    await showAdaptiveDialog(
+    await showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: [XFile.fromData(image)],
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: [XFile.fromData(image)],
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
@@ -1301,15 +1291,12 @@ class ChatController extends State<ChatPageWithRoom>
     if (files.isEmpty) return;
     if (!mounted) return;
 
-    await showAdaptiveDialog(
+    await showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: files,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: files,
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
@@ -1319,15 +1306,12 @@ class ChatController extends State<ChatPageWithRoom>
     if (file == null) return;
     if (!mounted) return;
 
-    await showAdaptiveDialog(
+    await showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: [file],
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: [file],
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
@@ -1362,15 +1346,12 @@ class ChatController extends State<ChatPageWithRoom>
     if (xFiles == null || xFiles.isEmpty) return;
 
     if (!mounted) return;
-    showAdaptiveDialog(
+    showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: xFiles,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: xFiles,
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
@@ -1378,15 +1359,12 @@ class ChatController extends State<ChatPageWithRoom>
     final files = await Pasteboard.files();
     if (files.isNotEmpty) {
       if (!mounted) return;
-      await showAdaptiveDialog(
+      await showSendFileSheet(
         context: context,
-        builder: (c) => SendFileDialog(
-          files: files.map(XFile.new).toList(),
-          room: room,
-          outerContext: context,
-          threadRootEventId: activeThreadId,
-          threadLastEventId: threadLastEventId,
-        ),
+        files: files.map(XFile.new).toList(),
+        room: room,
+        threadRootEventId: activeThreadId,
+        threadLastEventId: threadLastEventId,
       );
       return;
     }
@@ -1424,19 +1402,29 @@ class ChatController extends State<ChatPageWithRoom>
     if (file == null) return;
     if (!mounted) return;
 
-    await showAdaptiveDialog(
+    await showSendFileSheet(
       context: context,
-      builder: (c) => SendFileDialog(
-        files: [file],
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
+      files: [file],
+      room: room,
+      threadRootEventId: activeThreadId,
+      threadLastEventId: threadLastEventId,
     );
   }
 
   Future<void> onVoiceMessageSend(
+    String path,
+    int duration,
+    List<int> waveform,
+    String fileName,
+  ) async {
+    try {
+      await _sendVoiceMessage(path, duration, waveform, fileName);
+    } finally {
+      await deleteTempQuietly(path);
+    }
+  }
+
+  Future<void> _sendVoiceMessage(
     String path,
     int duration,
     List<int> waveform,
@@ -1551,12 +1539,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  Future<void> sendLocationAction() async {
-    await showAdaptiveDialog(
-      context: context,
-      builder: (c) => SendLocationDialog(room: room),
-    );
-  }
+  Future<void> sendLocationAction() => shareLocationFlow(context, room);
 
   String _getSelectedEventString() {
     var copyString = '';
@@ -1632,7 +1615,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  Future<void> redactEventsAction() async {
+  Future<bool> redactEventsAction() async {
     final reasonInput = selectedEvents.any((event) => event.status.isSent)
         ? await showTextInputDialog(
             context: context,
@@ -1647,10 +1630,10 @@ class ChatController extends State<ChatPageWithRoom>
             cancelLabel: L10n.of(context).cancel,
           )
         : null;
-    if (reasonInput == null) return;
+    if (reasonInput == null) return false;
     final reason = reasonInput.isEmpty ? null : reasonInput;
-    if (!mounted) return;
-    await showFutureLoadingDialog(
+    if (!mounted) return false;
+    final result = await showFutureLoadingDialog(
       context: context,
       futureWithProgress: (onProgress) async {
         final count = selectedEvents.length;
@@ -1679,10 +1662,12 @@ class ChatController extends State<ChatPageWithRoom>
         }
       },
     );
+    if (!mounted) return !result.isError;
     setState(() {
       showEmojiPicker = false;
       selectedEvents.clear();
     });
+    return !result.isError;
   }
 
   List<Client?> get currentRoomBundle {
@@ -1775,6 +1760,7 @@ class ChatController extends State<ChatPageWithRoom>
     bool highlightEvent = true,
     bool timelineReloaded = false,
   }) async {
+    if (timeline == null) return;
     final foundEvent = timeline!.events.firstWhereOrNull(
       (event) => event.eventId == eventId,
     );
@@ -1856,27 +1842,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   void typeEmoji(Emoji? emoji) {
     if (emoji == null) return;
-    final text = sendController.text;
-    final selection = sendController.selection;
-    final start = selection.baseOffset == -1 ? 0 : selection.baseOffset;
-    final newText = sendController.text.isEmpty
-        ? emoji.emoji
-        : text.replaceRange(selection.start, selection.end, emoji.emoji);
-    sendController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(
-        // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: start + emoji.emoji.length,
-      ),
-    );
+    sendController.value = insertAtSelection(sendController.value, emoji.emoji);
   }
 
   void emojiPickerBackspace() {
-    sendController
-      ..text = sendController.text.characters.skipLast(1).toString()
-      ..selection = TextSelection.fromPosition(
-        TextPosition(offset: sendController.text.length),
-      );
+    sendController.value = backspaceAtSelection(sendController.value);
   }
 
   void refresh() {

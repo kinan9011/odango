@@ -8,7 +8,7 @@
 PRODUCT_NAME = Odango
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.swovo.odango
+PRODUCT_BUNDLE_IDENTIFIER = de.swovo.odango
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 FluffyChat authors, 2026 Odango contributors. All rights reserved.

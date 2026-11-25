@@ -15,6 +15,7 @@ import 'package:odango/pages/app_lock_unavailable/app_lock_unavailable_page.dart
 import 'package:odango/utils/app_lock_settings.dart';
 import 'package:odango/utils/secure_storage.dart';
 import 'package:odango/widgets/fluffy_chat_app.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -88,9 +89,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Secure storage is not answering'), findsOne);
-    expect(find.byType(FilledButton), findsOneWidget);
+    expect(find.byType(SettingsPillButton), findsOneWidget);
     expect(find.byType(TextButton), findsNothing);
-    await tester.tap(find.byType(FilledButton));
+    await tester.tap(find.byType(SettingsPillButton));
     await tester.pump();
     expect(retried, 1);
   });
@@ -109,19 +110,23 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FilledButton));
+    await tester.tap(find.byType(SettingsPillButton));
     await tester.pump();
-    await tester.tap(find.byType(FilledButton), warnIfMissed: false);
+    await tester.tap(find.byType(SettingsPillButton), warnIfMissed: false);
     await tester.pump();
     expect(retried, 1);
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester
+          .widget<SettingsPillButton>(find.byType(SettingsPillButton))
+          .onPressed,
       isNull,
     );
     gate.complete();
     await tester.pumpAndSettle();
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester
+          .widget<SettingsPillButton>(find.byType(SettingsPillButton))
+          .onPressed,
       isNotNull,
     );
   });
@@ -190,7 +195,7 @@ void main() {
       await tester.pumpWidget(shown.single);
       await tester.pumpAndSettle();
       await tester.runAsync(() async {
-        await tester.tap(find.byType(FilledButton));
+        await tester.tap(find.byType(SettingsPillButton));
       });
       await tester.pump();
       await tester.runAsync(

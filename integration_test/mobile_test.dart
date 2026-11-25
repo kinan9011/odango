@@ -15,8 +15,10 @@ import 'flows/conversation_flows.dart';
 import 'flows/dialog_flows.dart';
 import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
+import 'flows/media_flows.dart';
 import 'flows/multi_account.dart';
 import 'flows/odango_flows.dart';
+import 'flows/onboarding_flows.dart';
 import 'flows/privacy_topics_flows.dart';
 import 'flows/room_flows.dart';
 import 'flows/scheduling_flows.dart';
@@ -35,6 +37,8 @@ void main() {
   group('Odango Integration Tests', () {
     flow('Login and logout flow', loginAndChatBackup);
     flow('Basic Messaging', basicMessaging);
+    flow('Onboarding welcome and homeserver', onboardingWelcome);
+    flow('Lock screen', lockScreenFlow);
     // ponytail: run 42nd, this flow segfaulted the CI emulator in every run;
     // early it passes. Move it back once the emulator is stable.
     flow('Settings export chat', settingsExportFlow);
@@ -70,6 +74,8 @@ void main() {
     flow('Search encrypted chats', searchEncryptedFlow);
     flow('Search unencrypted chats', searchServerFlow);
     flow('Search index wiped on logout', searchWipeFlow);
+    flow('Chat search', chatSearchFlow);
+    flow('Pinned messages', pinnedMessagesFlow);
     flow('Chat details', chatDetailsFlow);
     flow('Room access', roomAccessFlow);
     flow('Room permissions', roomPermissionsFlow);
@@ -81,6 +87,9 @@ void main() {
     flow('Settings blocked users', settingsBlockedUsersFlow);
     flow('Settings double-tap reaction', settingsDoubleTapReactionFlow);
     flow('Settings homeserver features', settingsHomeserverFlow);
+    flow('Media metadata removed on send', mediaMetadataFlow);
+    flow('Live location start and stop', liveLocationFlow);
+    flow('Maps off by default', mapsOffFlow);
     // Signs out every other session of the user: keep it after the flows that
     // use sessions of their own.
     flow('Settings linked devices', settingsLinkedDevicesFlow);

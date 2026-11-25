@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/themes.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/utd_why_sheet.dart';
 import 'package:odango/utils/chat/text_direction.dart';
@@ -16,12 +16,13 @@ import 'package:odango/utils/retention/retention_labels.dart';
 import 'package:odango/utils/retention/retention_policy.dart';
 import 'package:odango/widgets/avatar.dart';
 
-import '../../../config/app_config.dart';
-
 class StateMessage extends StatelessWidget {
   final Event event;
   final void Function()? onExpand;
   final bool isCollapsed;
+
+  static const pillKey = ValueKey('state_pill');
+
   const StateMessage(
     this.event, {
     this.onExpand,
@@ -31,106 +32,116 @@ class StateMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
+    final undecryptable =
+        event.type != RetentionPolicy.eventType &&
+        event.type == EventTypes.Encrypted &&
+        !event.redacted;
+    final onTap =
+        onExpand ??
+        (undecryptable ? () => showUtdWhySheet(context, event) : null);
+    const white = TextStyle(color: Colors.white);
+    final text = switch (event) {
+      _ when event.type == RetentionPolicy.eventType => retentionServiceText(
+        l10n,
+        event,
+      ),
+      _ when event.type != EventTypes.Encrypted || event.redacted =>
+        stripBidiOverrides(event.calcLocalizedBodyFallback(MatrixLocals(l10n))),
+      _ => l10n.messageNotDecryptable,
+    };
+    final more = onExpand == null ? null : l10n.moreEvents;
+    final pill = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppInChat.statePillRadius),
+        color: tokens.chip,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppInChat.statePillHPad,
+          vertical: AppInChat.statePillVPad,
+        ),
+        child: Text.rich(
+          TextSpan(
+            style: white,
+            children: [
+              if (event.type != RetentionPolicy.eventType &&
+                  event.type == EventTypes.Encrypted &&
+                  !event.redacted)
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 4),
+                    child: Avatar(
+                      name: stripBidiOverrides(
+                        event.senderFromMemoryOrFallback.calcDisplayname(),
+                      ),
+                      size: 14,
+                      colorSeed: event.senderId,
+                      mxContent: event.senderFromMemoryOrFallback.avatarUrl,
+                      client: event.room.client,
+                    ),
+                  ),
+                ),
+              TextSpan(text: text),
+              if (undecryptable)
+                const WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(start: 4),
+                    child: Icon(
+                      Icons.info_outline_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              if (more != null) ...[
+                const TextSpan(text: '\n'),
+                TextSpan(
+                  text: more,
+                  style: const TextStyle(decoration: TextDecoration.underline),
+                ),
+              ],
+            ],
+          ),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w500,
+            decoration: event.redacted ? TextDecoration.lineThrough : null,
+            decorationColor: Colors.white,
+          ),
+        ),
+      ),
+    );
     return AnimatedSize(
-      duration: motionDuration(context, FluffyThemes.animationDuration),
-      curve: FluffyThemes.animationCurve,
+      duration: motionDuration(context, AppMotion.pageMove),
+      curve: AppMotion.standard,
       child: isCollapsed
           ? const SizedBox.shrink()
           : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s),
               child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Material(
-                    color: theme.colorScheme.surface.withAlpha(128),
-                    borderRadius: BorderRadius.circular(
-                      AppConfig.borderRadius / 3,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
+                child: Semantics(
+                  button: onTap != null,
+                  label: more == null ? text : '$text, $more',
+                  excludeSemantics: true,
+                  onTap: onTap,
+                  child: GestureDetector(
+                    key: pillKey,
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onTap,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: onTap == null ? 0 : AppChat.tapTarget,
                       ),
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            if (event.type == RetentionPolicy.eventType)
-                              TextSpan(
-                                text: retentionServiceText(
-                                  L10n.of(context),
-                                  event,
-                                ),
-                              )
-                            else if (event.type != EventTypes.Encrypted ||
-                                event.redacted)
-                              TextSpan(
-                                text: stripBidiOverrides(
-                                  event.calcLocalizedBodyFallback(
-                                    MatrixLocals(L10n.of(context)),
-                                  ),
-                                ),
-                              )
-                            else ...[
-                              WidgetSpan(
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.only(
-                                    end: 4.0,
-                                  ),
-                                  child: Avatar(
-                                    name: event.senderFromMemoryOrFallback
-                                        .calcDisplayname(),
-                                    size: 14,
-                                    colorSeed: event.senderId,
-                                    mxContent: event
-                                        .senderFromMemoryOrFallback
-                                        .avatarUrl,
-                                  ),
-                                ),
-                              ),
-                              TextSpan(
-                                text: L10n.of(context).messageNotDecryptable,
-                              ),
-                              if (!event.redacted)
-                                WidgetSpan(
-                                  child: Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                      start: 4.0,
-                                    ),
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(7),
-                                      onTap: () =>
-                                          showUtdWhySheet(context, event),
-                                      child: Icon(
-                                        Icons.info_outlined,
-                                        size: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                            if (onExpand != null) ...[
-                              const TextSpan(text: '\n'),
-                              TextSpan(
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: theme.colorScheme.primary,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = onExpand,
-                                text: L10n.of(context).moreEvents,
-                              ),
-                            ],
-                          ],
+                      child: Padding(
+                        padding: const EdgeInsets.all(
+                          AppInChat.statePillMargin,
                         ),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 11,
-                          decoration: event.redacted
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
+                        child: Center(child: pill),
                       ),
                     ),
                   ),

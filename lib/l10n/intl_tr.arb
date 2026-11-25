@@ -2311,11 +2311,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Kırpmak",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "accountsAndSettings": "Hesap ve ayarlar",
     "@accountsAndSettings": {
         "type": "String",

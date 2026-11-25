@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/key_verification/key_verification_dialog.dart';
 import 'package:odango/utils/beautify_string_extension.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/avatar.dart';
@@ -70,7 +71,7 @@ Future<bool> showTrustUserInRoomDialog(BuildContext context, Room room) async {
                   Row(
                     children: [
                       Avatar(
-                        name: user.calcDisplayname(),
+                        name: stripBidiOverrides(user.calcDisplayname()),
                         colorSeed: user.id,
                         mxContent: user.avatarUrl,
                         size: 14,
@@ -78,7 +79,7 @@ Future<bool> showTrustUserInRoomDialog(BuildContext context, Room room) async {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          user.calcDisplayname(),
+                          stripBidiOverrides(user.calcDisplayname()),
                           style: theme.textTheme.labelSmall,
                           maxLines: 1,
                           textAlign: TextAlign.start,

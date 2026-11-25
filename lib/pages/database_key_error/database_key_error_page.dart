@@ -5,9 +5,15 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/themes.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:odango/widgets/settings/settings_group.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
+import 'package:odango/widgets/status_tile.dart';
 
 class DatabaseKeyErrorPage extends StatefulWidget {
   final VoidCallback onRetry;
@@ -43,10 +49,16 @@ class DatabaseKeyErrorPage extends StatefulWidget {
     bool resetMayRemovePin = false,
     bool keyProblem = true,
   }) => MaterialApp(
-    localizationsDelegates: L10n.localizationsDelegates,
+    localizationsDelegates: [
+      ...L10n.localizationsDelegates,
+      ...GlobalMaterialLocalizations.delegates,
+    ],
     supportedLocales: L10n.supportedLocales,
     builder: (context, child) => Theme(
-      data: FluffyThemes.buildTheme(context, Brightness.light),
+      data: FluffyThemes.buildTheme(
+        context,
+        MediaQuery.platformBrightnessOf(context),
+      ),
       child: child!,
     ),
     home: DatabaseKeyErrorPage(
@@ -135,31 +147,32 @@ class _DatabaseKeyErrorPageState extends State<DatabaseKeyErrorPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
     return Scaffold(
+      backgroundColor: tokens.bg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.huge),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 16,
+                  spacing: AppSpacing.xxl,
                   children: [
-                    Icon(
-                      Icons.lock_outline_rounded,
-                      size: 56,
-                      color: theme.colorScheme.primary,
-                    ),
+                    const StatusTile(icon: Icons.lock_outline_rounded),
                     Semantics(
                       header: true,
                       child: Text(
                         l10n.databaseKeyUnavailableTitle,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall,
+                        style: TextStyle(
+                          color: tokens.fg,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     Text(
@@ -167,49 +180,58 @@ class _DatabaseKeyErrorPageState extends State<DatabaseKeyErrorPage> {
                           ? l10n.databaseKeyUnavailableBody
                           : l10n.databaseOpenFailedBody,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium,
+                      style: TextStyle(
+                        color: tokens.mut,
+                        fontSize: 15,
+                        height: 1.4,
+                      ),
                     ),
                     if (_problem case final problem?)
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          problem,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.error,
+                      SettingsGroup(
+                        rows: [
+                          SettingsNotice(
+                            text: problem,
+                            icon: Icons.error_outline_rounded,
+                            tone: SettingsNoticeTone.error,
                           ),
-                        ),
+                        ],
                       ),
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                      ),
+                    SettingsPillButton(
+                      label: l10n.tryAgain,
                       onPressed: _busy ? null : widget.onRetry,
-                      child: Text(l10n.tryAgain),
                     ),
                     if (_busy)
                       Semantics(
                         liveRegion: true,
                         child: Column(
-                          spacing: 8,
+                          spacing: AppSpacing.s,
                           children: [
                             const CircularProgressIndicator.adaptive(),
-                            Text(_busyLabel, textAlign: TextAlign.center),
+                            Text(
+                              _busyLabel,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: tokens.mut),
+                            ),
                           ],
                         ),
                       ),
                     if (widget.onSetAside != null)
                       TextButton(
                         style: TextButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
+                          minimumSize: const Size.fromHeight(
+                            AppDialog.buttonHeight + 4,
+                          ),
+                          foregroundColor: tokens.acc,
                         ),
                         onPressed: _busy ? null : _confirmSetAside,
                         child: Text(l10n.databaseSetAsideAction),
                       ),
                     TextButton(
                       style: TextButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        foregroundColor: theme.colorScheme.error,
+                        minimumSize: const Size.fromHeight(
+                          AppDialog.buttonHeight + 4,
+                        ),
+                        foregroundColor: tokens.red,
                       ),
                       onPressed: _busy ? null : _confirmReset,
                       child: Text(l10n.databaseKeyResetAction),

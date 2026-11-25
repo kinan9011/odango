@@ -1,0 +1,60 @@
+app-id: de.swovo.odango
+runtime: org.gnome.Platform
+runtime-version: '49'
+sdk: org.gnome.Sdk
+command: odango
+separate-locales: false
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --device=dri
+  - --talk-name=org.freedesktop.secrets
+  - --talk-name=org.freedesktop.Notifications
+  - --filesystem=xdg-download
+modules:
+  - name: odango
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/odango
+      - cp -r odango-bundle/* /app/odango/
+      - install -Dm755 odango-launcher.sh /app/bin/odango
+      - install -Dm644 de.swovo.odango.desktop /app/share/applications/de.swovo.odango.desktop
+      - install -Dm644 de.swovo.odango.metainfo.xml /app/share/metainfo/de.swovo.odango.metainfo.xml
+      - install -Dm644 odango.png /app/share/icons/hicolor/512x512/apps/de.swovo.odango.png
+    sources:
+      - type: archive
+        only-arches: [x86_64]
+        url: https://github.com/kinan9011/odango/releases/download/v1.0.0/odango-linux-x64.tar.gz
+        sha256: FILL_AT_SUBMISSION
+        strip-components: 0
+        dest: odango-bundle
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/kinan9011/odango/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: .assets[] | select(.name=="odango-linux-x64.tar.gz") | .browser_download_url
+      - type: archive
+        only-arches: [aarch64]
+        url: https://github.com/kinan9011/odango/releases/download/v1.0.0/odango-linux-arm64.tar.gz
+        sha256: FILL_AT_SUBMISSION
+        strip-components: 0
+        dest: odango-bundle
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/kinan9011/odango/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: .assets[] | select(.name=="odango-linux-arm64.tar.gz") | .browser_download_url
+      - type: script
+        dest-filename: odango-launcher.sh
+        commands:
+          - exec /app/odango/odango "$@"
+      - type: file
+        path: de.swovo.odango.desktop
+      - type: file
+        path: de.swovo.odango.metainfo.xml
+      - type: file
+        path: ../snap/gui/odango.png
+        dest-filename: odango.png

@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -10,8 +11,14 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/key_verification/verification_error_text.dart';
+import 'package:odango/utils/chat/display_text.dart';
+import 'package:odango/utils/motion.dart';
 import 'package:odango/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/future_loading_dialog.dart';
@@ -21,11 +28,16 @@ class KeyVerificationDialog extends StatefulWidget {
     context: context,
     builder: (context) => this,
     barrierDismissible: false,
+    animationStyle: dialogAnimationStyle(context),
   );
 
   final KeyVerification request;
 
   const KeyVerificationDialog({super.key, required this.request});
+
+  /// How long "They match" stays disabled after the codes appear, so that a
+  /// stray tap or a key repeat cannot confirm codes nobody has looked at.
+  static const armDelay = Duration(milliseconds: 400);
 
   @override
   KeyVerificationPageState createState() => KeyVerificationPageState();
@@ -33,21 +45,27 @@ class KeyVerificationDialog extends StatefulWidget {
 
 class KeyVerificationPageState extends State<KeyVerificationDialog> {
   void Function()? originalOnUpdate;
-  late final List<dynamic> sasEmoji;
+  List<dynamic>? sasEmoji;
+  final TextEditingController _ssss = TextEditingController();
+  Timer? _armTimer;
+  bool _sasArmed = false;
 
   @override
   void initState() {
     originalOnUpdate = widget.request.onUpdate;
     widget.request.onUpdate = () {
       originalOnUpdate?.call();
-      setState(() {});
+      if (mounted) setState(() {});
     };
     widget.request.client.getProfileFromUserId(widget.request.userId).then((p) {
+      if (!mounted) return;
       profile = p;
       setState(() {});
     });
     rootBundle.loadString('assets/sas-emoji.json').then((e) {
-      sasEmoji = json.decode(e);
+      if (!mounted) return;
+      final decoded = json.decode(e);
+      sasEmoji = decoded is List ? decoded : null;
       setState(() {});
     });
     super.initState();
@@ -63,7 +81,9 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     ].contains(widget.request.state)) {
       widget.request.cancel('m.user');
     }
-    textEditingController?.dispose();
+    _armTimer?.cancel();
+    _ssss.clear();
+    _ssss.dispose();
     super.dispose();
   }
 
@@ -87,7 +107,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         return valid;
       },
     );
-    if (valid.error != null) {
+    if (valid.result != true) {
       if (!mounted) return;
       await showOkAlertDialog(
         useRootNavigator: false,
@@ -97,265 +117,315 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     }
   }
 
-  TextEditingController? textEditingController;
+  /// [showsCodes]: the comparison is on screen, so the delay starts now.
+  void _armSasButton(bool showsCodes) {
+    if (!showsCodes) {
+      _armTimer?.cancel();
+      _armTimer = null;
+      _sasArmed = false;
+      return;
+    }
+    // A safety delay, not an animation: reduced motion does not shorten it.
+    _armTimer ??= Timer(KeyVerificationDialog.armDelay, () {
+      if (mounted) setState(() => _sasArmed = true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
+    final request = widget.request;
+    final state = request.state;
+    _armSasButton(
+      state == KeyVerificationState.askSas &&
+          (request.sasTypes.contains('emoji') ||
+              request.sasNumbers.length >= 3),
+    );
 
     User? user;
-    final directChatId = widget.request.client.getDirectChatFromUserId(
-      widget.request.userId,
-    );
+    final directChatId = request.client.getDirectChatFromUserId(request.userId);
     if (directChatId != null) {
-      user = widget.request.client
-          .getRoomById(directChatId)!
-          .unsafeGetUserFromMemoryOrFallback(widget.request.userId);
+      user = request.client
+          .getRoomById(directChatId)
+          ?.unsafeGetUserFromMemoryOrFallback(request.userId);
     }
-    final displayName =
-        user?.calcDisplayname() ?? widget.request.userId.localpart!;
-    var title = Text(L10n.of(context).verifyTitle);
+    final displayName = safeDisplayText(
+      user?.calcDisplayname() ?? request.userId.localpart ?? request.userId,
+      maxGraphemes: 48,
+    );
+    var title = l10n.verifyTitle;
     Widget body;
     final buttons = <Widget>[];
 
-    switch (widget.request.state) {
+    switch (state) {
       case KeyVerificationState.showQRSuccess:
       case KeyVerificationState.confirmQRScan:
-        throw 'Not implemented';
+        body = _Waiting(text: l10n.waitingPartnerAcceptRequest);
+        buttons.add(
+          AdaptiveDialogAction(
+            onPressed: request.cancel,
+            child: Text(l10n.cancel),
+          ),
+        );
       case KeyVerificationState.askSSSS:
-        // prompt the user for their ssss passphrase / key
-        textEditingController = TextEditingController();
-        String input;
-        body = Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            mainAxisSize: .min,
-            children: <Widget>[
-              Text(
-                L10n.of(context).askSSSSSign,
-                style: const TextStyle(fontSize: 20),
-              ),
-              Container(height: 10),
-              TextField(
-                controller: textEditingController,
-                autofocus: false,
-                autocorrect: false,
-                onSubmitted: (s) {
-                  input = s;
-                  checkInput(input);
-                },
-                minLines: 1,
-                maxLines: 1,
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: L10n.of(context).passphraseOrKey,
-                  prefixStyle: TextStyle(color: theme.colorScheme.primary),
-                  suffixStyle: TextStyle(color: theme.colorScheme.primary),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-        );
-        buttons.add(
-          AdaptiveDialogAction(
-            child: Text(L10n.of(context).submit),
-            onPressed: () => checkInput(textEditingController!.text),
-          ),
-        );
-        buttons.add(
-          AdaptiveDialogAction(
-            child: Text(L10n.of(context).skip),
-            onPressed: () => widget.request.openSSSS(skip: true),
-          ),
-        );
-        break;
-      case KeyVerificationState.askAccept:
-        title = Text(L10n.of(context).newVerificationRequest);
         body = Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 16),
+            Text(
+              l10n.askSSSSSign,
+              style: TextStyle(color: tokens.fg, fontSize: 16, height: 1.4),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            DialogTextField(
+              controller: _ssss,
+              password: true,
+              obscureText: true,
+              autocorrect: false,
+              onSubmitted: checkInput,
+              hintText: l10n.passphraseOrKey,
+            ),
+          ],
+        );
+        buttons.add(
+          AdaptiveDialogAction(
+            child: Text(l10n.submit),
+            onPressed: () => checkInput(_ssss.text),
+          ),
+        );
+        buttons.add(
+          AdaptiveDialogAction(
+            child: Text(l10n.skip),
+            onPressed: () => request.openSSSS(skip: true),
+          ),
+        );
+      case KeyVerificationState.askAccept:
+        title = l10n.newVerificationRequest;
+        body = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Avatar(
               mxContent: user?.avatarUrl,
               name: displayName,
-              colorSeed: widget.request.userId,
-              size: Avatar.defaultSize * 2,
+              colorSeed: request.userId,
+              size: Avatar.defaultSize * 1.5,
             ),
-            const SizedBox(height: 16),
-            Text(L10n.of(context).askVerificationRequest(displayName)),
+            const SizedBox(height: AppSpacing.xxl),
+            Text(
+              l10n.askVerificationRequest(displayName),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: tokens.fg, fontSize: 16, height: 1.4),
+            ),
           ],
         );
         buttons.add(
           AdaptiveDialogAction(
-            onPressed: () => widget.request.rejectVerification().then((_) {
+            onPressed: () => request.rejectVerification().then((_) {
               if (!context.mounted) return;
               Navigator.of(context, rootNavigator: false).pop(false);
             }),
-            child: Text(
-              L10n.of(context).reject,
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
+            child: Text(l10n.reject, style: TextStyle(color: tokens.red)),
           ),
         );
         buttons.add(
           AdaptiveDialogAction(
-            onPressed: () => widget.request.acceptVerification(),
-            child: Text(L10n.of(context).accept),
+            onPressed: request.acceptVerification,
+            child: Text(l10n.accept),
           ),
         );
-        break;
       case KeyVerificationState.askChoice:
       case KeyVerificationState.waitingAccept:
-        body = Center(
-          child: Column(
-            children: <Widget>[
-              const SizedBox(height: 16),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Avatar(
-                    mxContent: user?.avatarUrl,
-                    name: displayName,
-                    colorSeed: widget.request.userId,
-                  ),
-                  const SizedBox(
-                    width: Avatar.defaultSize + 2,
-                    height: Avatar.defaultSize + 2,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                L10n.of(context).waitingPartnerAcceptRequest,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-        buttons.add(
-          AdaptiveDialogAction(
-            onPressed: () => widget.request.cancel(),
-            child: Text(L10n.of(context).cancel),
-          ),
-        );
-
-        break;
-      case KeyVerificationState.askSas:
-        TextSpan compareWidget;
-        // maybe add a button to switch between the two and only determine default
-        // view for if "emoji" is a present sasType or not?
-
-        if (widget.request.sasTypes.contains('emoji')) {
-          title = Text(
-            L10n.of(context).compareEmojiMatch,
-            maxLines: 1,
-            style: const TextStyle(fontSize: 16),
-          );
-          compareWidget = TextSpan(
-            children: widget.request.sasEmojis
-                .map((e) => WidgetSpan(child: _Emoji(e, sasEmoji)))
-                .toList(),
-          );
-        } else {
-          title = Text(L10n.of(context).compareNumbersMatch);
-          final numbers = widget.request.sasNumbers;
-          final numbstr = '${numbers.first}-${numbers[1]}-${numbers[2]}';
-          compareWidget = TextSpan(
-            text: numbstr,
-            style: const TextStyle(fontSize: 40),
-          );
-        }
         body = Column(
-          mainAxisSize: .min,
-          children: <Widget>[
-            Text.rich(compareWidget, textAlign: TextAlign.center),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Avatar(
+                  mxContent: user?.avatarUrl,
+                  name: displayName,
+                  colorSeed: request.userId,
+                ),
+                const SizedBox(
+                  width: Avatar.defaultSize + 2,
+                  height: Avatar.defaultSize + 2,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            Text(
+              l10n.waitingPartnerAcceptRequest,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: tokens.mut, fontSize: 15),
+            ),
           ],
         );
         buttons.add(
           AdaptiveDialogAction(
-            onPressed: () => widget.request.rejectSas(),
+            onPressed: request.cancel,
+            child: Text(l10n.cancel),
+          ),
+        );
+      case KeyVerificationState.askSas:
+        final emoji = request.sasTypes.contains('emoji');
+        final numbers = request.sasNumbers;
+        if (!emoji && numbers.length < 3) {
+          body = _Waiting(text: l10n.waitingPartnerNumbers);
+          break;
+        }
+        title = emoji ? l10n.compareEmojiMatch : l10n.compareNumbersMatch;
+        body = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Both devices must show the same sequence in the same order,
+            // so it is never mirrored in a right-to-left language.
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: emoji
+                  ? _EmojiGrid(emojis: request.sasEmojis, table: sasEmoji)
+                  : _Numbers(numbers: numbers.take(3).toList()),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            Text(
+              l10n.verifyCompareWarning,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: tokens.mut, fontSize: 13, height: 1.4),
+            ),
+          ],
+        );
+        buttons.add(
+          AdaptiveDialogAction(
+            onPressed: request.rejectSas,
             child: Text(
-              L10n.of(context).theyDontMatch,
-              style: TextStyle(color: theme.colorScheme.error),
+              l10n.theyDontMatch,
+              style: TextStyle(color: tokens.red),
             ),
           ),
         );
         buttons.add(
           AdaptiveDialogAction(
-            onPressed: () => widget.request.acceptSas(),
-            child: Text(L10n.of(context).theyMatch),
+            onPressed: _sasArmed ? request.acceptSas : null,
+            child: Text(l10n.theyMatch),
           ),
         );
-        break;
       case KeyVerificationState.waitingSas:
-        final acceptText = widget.request.sasTypes.contains('emoji')
-            ? L10n.of(context).waitingPartnerEmoji
-            : L10n.of(context).waitingPartnerNumbers;
-        body = Column(
-          mainAxisSize: .min,
-          children: <Widget>[
-            const SizedBox(height: 16),
-            const CircularProgressIndicator.adaptive(strokeWidth: 2),
-            const SizedBox(height: 16),
-            Text(acceptText, textAlign: TextAlign.center),
-          ],
+        body = _Waiting(
+          text: request.sasTypes.contains('emoji')
+              ? l10n.waitingPartnerEmoji
+              : l10n.waitingPartnerNumbers,
         );
-        break;
       case KeyVerificationState.done:
-        title = Text(L10n.of(context).verifySuccess);
-        body = const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Icon(
-            Icons.verified_outlined,
-            color: Colors.green,
-            size: 128.0,
-          ),
-        );
+        title = l10n.verifySuccess;
+        body = Icon(Icons.verified_rounded, color: tokens.ok, size: 64);
         buttons.add(
           AdaptiveDialogAction(
-            child: Text(L10n.of(context).close),
+            child: Text(l10n.close),
             onPressed: () =>
                 Navigator.of(context, rootNavigator: false).pop(true),
           ),
         );
-        break;
       case KeyVerificationState.error:
-        title = const Text('');
         body = Column(
-          mainAxisSize: .min,
-          children: <Widget>[
-            const SizedBox(height: 16),
-            Icon(Icons.cancel, color: theme.colorScheme.error, size: 64.0),
-            const SizedBox(height: 16),
-            // TODO: Add better error UI to user
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cancel_rounded, color: tokens.red, size: 56),
+            const SizedBox(height: AppSpacing.xxl),
             Text(
-              'Error ${widget.request.canceledCode}: ${widget.request.canceledReason}',
+              verificationErrorText(l10n, request.canceledCode),
               textAlign: TextAlign.center,
+              style: TextStyle(color: tokens.fg, fontSize: 16, height: 1.4),
             ),
           ],
         );
         buttons.add(
           AdaptiveDialogAction(
-            child: Text(L10n.of(context).close),
+            child: Text(l10n.close),
             onPressed: () =>
                 Navigator.of(context, rootNavigator: false).pop(false),
           ),
         );
-        break;
     }
 
     return AlertDialog(
-      title: title,
+      constraints: const BoxConstraints(maxWidth: AppDialog.maxWidth),
+      scrollable: true,
+      title: Text(title),
       content: SizedBox(
-        height: 256,
-        width: 256,
-        child: ListView(children: [body]),
+        width: double.maxFinite,
+        child: AnimatedSwitcher(
+          duration: motionDuration(context, AppMotion.banner),
+          child: KeyedSubtree(key: ValueKey(state), child: body),
+        ),
       ),
       actions: buttons,
     );
   }
+}
+
+class _Waiting extends StatelessWidget {
+  final String text;
+
+  const _Waiting({required this.text});
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const CircularProgressIndicator.adaptive(strokeWidth: 2),
+      const SizedBox(height: AppSpacing.xxl),
+      Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: AppTokens.of(context).mut, fontSize: 15),
+      ),
+    ],
+  );
+}
+
+class _Numbers extends StatelessWidget {
+  final List<int> numbers;
+
+  const _Numbers({required this.numbers});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppTokens.of(context);
+    return Semantics(
+      label: numbers.join(', '),
+      excludeSemantics: true,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: AppSpacing.xxl,
+        children: [
+          for (final number in numbers)
+            Text(
+              '$number',
+              style: AppTypography.mono.copyWith(
+                color: tokens.fg,
+                fontSize: 32,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmojiGrid extends StatelessWidget {
+  final List<KeyVerificationEmoji> emojis;
+  final List<dynamic>? table;
+
+  const _EmojiGrid({required this.emojis, required this.table});
+
+  @override
+  Widget build(BuildContext context) => Wrap(
+    alignment: WrapAlignment.center,
+    spacing: AppSpacing.s,
+    runSpacing: AppSpacing.l,
+    children: [for (final emoji in emojis) _Emoji(emoji, table)],
+  );
 }
 
 class _Emoji extends StatelessWidget {
@@ -365,15 +435,19 @@ class _Emoji extends StatelessWidget {
   const _Emoji(this.emoji, this.sasEmoji);
 
   String getLocalizedName() {
-    final sasEmoji = this.sasEmoji;
-    if (sasEmoji == null) {
-      // asset is still being loaded
+    final table = sasEmoji;
+    if (table == null || emoji.number < 0 || emoji.number >= table.length) {
       return emoji.name;
     }
-    final translations = Map<String, String?>.from(
-      sasEmoji[emoji.number]['translated_descriptions'],
-    );
-    translations['en'] = emoji.name;
+    final entry = table[emoji.number];
+    final descriptions = entry is Map ? entry['translated_descriptions'] : null;
+    if (descriptions is! Map) return emoji.name;
+    final translations = <String, String?>{
+      for (final item in descriptions.entries)
+        if (item.key is String && item.value is String?)
+          item.key as String: item.value as String?,
+      'en': emoji.name,
+    };
     for (final locale in PlatformDispatcher.instance.locales) {
       final wantLocaleParts = locale.toString().split('_');
       final wantLanguage = wantLocaleParts.removeAt(0);
@@ -392,16 +466,28 @@ class _Emoji extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: .min,
-      children: <Widget>[
-        Text(emoji.emoji, style: const TextStyle(fontSize: 50)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Text(getLocalizedName()),
+    final tokens = AppTokens.of(context);
+    final name = getLocalizedName();
+    return Semantics(
+      label: name,
+      excludeSemantics: true,
+      child: SizedBox(
+        width: 64,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji.emoji, style: const TextStyle(fontSize: 40)),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: tokens.mut, fontSize: 12),
+            ),
+          ],
         ),
-        const SizedBox(height: 10, width: 5),
-      ],
+      ),
     );
   }
 }

@@ -44,11 +44,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Crop",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "@@locale": "en",
     "@@last_modified": "2021-08-14 12:38:37.885451",
     "repeatPassword": "Repeat password",
@@ -471,6 +466,11 @@
     },
     "chooseAStrongPassword": "Choose a strong password",
     "@chooseAStrongPassword": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "archiveEmpty": "No archived chats",
+    "@archiveEmpty": {
         "type": "String",
         "placeholders": {}
     },
@@ -1267,6 +1267,123 @@
         "type": "String",
         "placeholders": {}
     },
+    "mapsOffTitle": "Maps are off",
+    "mapsOffHint": "A map loads pictures from a map server, which sees roughly where you are looking and your IP address. Turn maps on in Settings if that is fine for you.",
+    "turnOnMaps": "Turn on maps",
+    "mediaSettingsGroup": "Photos, videos and maps",
+    "removeMediaMetadata": "Remove location and camera details",
+    "removeMediaMetadataDescription": "Cleans photos and videos before they are sent. A video that carries a location track is not sent. Files and other documents are sent as they are.",
+    "mapTilesTitle": "Maps",
+    "mapTilesOff": "Off",
+    "mapTilesOsm": "OpenStreetMap",
+    "mapTilesCustom": "Your own tile server",
+    "mapTilesCustomHint": "Tile server address",
+    "mapTilesInvalid": "Use an https address with the z, x and y placeholders in curly braces",
+    "mapTilesOptInHint": "Maps load pictures from the server you choose. That server sees roughly where you are looking and your IP address. It never gets your Matrix ID.",
+    "liveLocation": "Live location",
+    "shareLiveLocation": "Share live location",
+    "sendMyLocation": "Send my current location",
+    "liveLocationHint": "Everyone in this chat can see where you are until the time runs out or you stop. If this app is closed your phone stops updating, and others see your last spot until the time runs out.",
+    "liveFor15Min": "15 minutes",
+    "liveFor1Hour": "1 hour",
+    "liveFor8Hours": "8 hours",
+    "youAreSharingLocation": "You are sharing your location",
+    "updatedJustNow": "Updated just now",
+    "updatedMinutesAgo": "Updated {n} min ago",
+    "@updatedMinutesAgo": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "timeLeft": "{duration} left",
+    "@timeLeft": {
+        "placeholders": {
+            "duration": {
+                "type": "String"
+            }
+        }
+    },
+    "extendOneHour": "Extend by 1 hour",
+    "stopSharing": "Stop sharing",
+    "liveLocationEnded": "Live location ended",
+    "liveLocationUntil": "Live until {time}",
+    "@liveLocationUntil": {
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "distanceAway": "{distance} away",
+    "@distanceAway": {
+        "placeholders": {
+            "distance": {
+                "type": "String"
+            }
+        }
+    },
+    "sharingCount": "{n} sharing",
+    "@sharingCount": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "liveSharingFailed": "Your location could not be sent, so sharing stopped.",
+    "nobodyIsSharing": "Nobody is sharing right now",
+    "myLocation": "My location",
+    "shortMinutes": "{n} min",
+    "@shortMinutes": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "shortHours": "{n} h",
+    "@shortHours": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "toolCrop": "Crop and rotate",
+    "toolDraw": "Draw",
+    "toolBlur": "Blur",
+    "toolText": "Text",
+    "toolSticker": "Sticker",
+    "editorTools": "Editing tools",
+    "blurStrength": "Blur strength",
+    "blurShapeCircle": "Round area",
+    "blurShapeRect": "Square area",
+    "addText": "Add text",
+    "addSticker": "Add sticker",
+    "textHint": "Type your text",
+    "sendAsFile": "Send as file",
+    "groupAsAlbum": "Group as album",
+    "viewOnce": "View once",
+    "viewOnceHint": "Apps that support this show it behind a cover until it is tapped. Other apps still show it.",
+    "highQuality": "High quality (HD)",
+    "highQualityDescription": "Keeps more detail and sends a bigger file.",
+    "viewOnceBadge": "View once",
+    "tapToView": "Tap to view",
+    "voiceMessagesTitle": "Voice messages",
+    "voiceMessagesDescription": "Show the record button for voice messages.",
+    "videoMessagesTitle": "Video messages",
+    "videoMessagesDescription": "Let the record button switch to round video messages.",
+    "voiceVideoGroup": "Voice and video messages",
+    "roundVideo": "Video message",
+    "switchToVideoMessage": "Tap to switch to video messages",
+    "switchToVoiceMessage": "Tap to switch to voice messages",
+    "recordTooShort": "Hold longer to record",
+    "recordVideoTooLong": "Video messages can be 1 minute long at most",
+    "mediaCannotBeCleaned": "This photo or video cannot be cleaned of its location on this device, so it was not sent. Turn off \"Remove location and camera details\" in Settings to send it as it is.",
+    "liveLocationNotAllowed": "You cannot share your live location in this chat: its settings do not allow it.",
+    "longPressToRecordVideoMessage": "Long press to record a video message.",
     "link": "Link",
     "or": "Or",
     "@or": {
@@ -1301,6 +1418,108 @@
     "passwordRecoverySettings": "Password recovery settings",
     "passwordRecovery": "Password recovery",
     "@passwordRecovery": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pinnedMessages": "Pinned messages",
+    "@pinnedMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pinnedMessage": "Pinned message",
+    "@pinnedMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pinnedMessageOf": "Pinned message {position} of {count}",
+    "@pinnedMessageOf": {
+        "type": "String",
+        "placeholders": {
+            "position": {
+                "type": "int"
+            },
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "pinnedUnavailable": "Message not available",
+    "@pinnedUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "check": "Check",
+    "@check": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "compressHint": "Smaller files, less detail.",
+    "@compressHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "captionOneFileOnly": "You can add a caption when you send one file.",
+    "@captionOneFileOnly": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageStatusSending": "Sending…",
+    "@messageStatusSending": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageStatusSent": "Sent",
+    "@messageStatusSent": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageStatusError": "Not sent",
+    "@messageStatusError": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageEncryptedEndToEnd": "End-to-end encrypted",
+    "@messageEncryptedEndToEnd": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "messageNotEncrypted": "Not end-to-end encrypted",
+    "@messageNotEncrypted": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "senderDevice": "Sent from",
+    "@senderDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "verifiedDevice": "Verified device",
+    "@verifiedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unverifiedDevice": "Device not verified",
+    "@unverifiedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "blockedDevice": "Blocked device",
+    "@blockedDevice": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unknownDeviceSender": "A device we have no keys for",
+    "@unknownDeviceSender": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "deviceInfoUnavailable": "Device information unavailable",
+    "@deviceInfoUnavailable": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "unverifiedDeviceHint": "Only trust this message if you know this device is theirs.",
+    "@unverifiedDeviceHint": {
         "type": "String",
         "placeholders": {}
     },
@@ -1487,7 +1706,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "sendImages": "Send {count} image",
+    "sendImages": "Send {count} images",
     "@sendImages": {
         "type": "String",
         "placeholders": {
@@ -1704,15 +1923,6 @@
     "@unknownEncryptionAlgorithm": {
         "type": "String",
         "placeholders": {}
-    },
-    "unknownEvent": "Unknown event '{type}'",
-    "@unknownEvent": {
-        "type": "String",
-        "placeholders": {
-            "type": {
-                "type": "String"
-            }
-        }
     },
     "unmuteChat": "Unmute chat",
     "@unmuteChat": {
@@ -2044,15 +2254,6 @@
     "invite": "Invite",
     "inviteGroupChat": "📨 Group chat invite",
     "invalidInput": "Invalid input!",
-    "wrongPinEntered": "Wrong pin entered! Try again in {seconds} seconds...",
-    "@wrongPinEntered": {
-        "type": "String",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "pleaseEnterANumber": "Please enter a number greater than 0",
     "archiveRoomDescription": "The chat will be moved to the archive. Other users will be able to see that you have left the chat.",
     "roomUpgradeDescription": "The chat will then be recreated with the new room version. All participants will be notified that they need to switch to the new chat. You can find out more about room versions at https://spec.matrix.org/latest/rooms/",
@@ -2110,7 +2311,6 @@
             }
         }
     },
-    "searchMore": "Search more...",
     "gallery": "Gallery",
     "files": "Files",
     "sessionLostBody": "Your session is lost. Please report this error to the developers at {url}. The error message is: {error}",
@@ -2539,7 +2739,6 @@
     "attribution": "Attribution",
     "skipChatBackup": "Skip chat backup",
     "skipChatBackupWarning": "Are you sure? Without enabling the chat backup you may lose access to your messages if you switch your device.",
-    "noMoreResultsFound": "No more results found",
     "chatSearchedUntil": "Chat searched until {time}",
     "@chatSearchedUntil": {
         "type": "String",
@@ -2645,7 +2844,6 @@
     "hideRoomsInSpaces": "Hide rooms that are in a space",
     "possibleByYou": "This release was only possible thanks to your support. Odango remains free and open source.",
     "showThumbnailsInTimeline": "Show thumbnails of images and videos",
-    "appSubtitle": "Secure [matrix] Communication",
     "appDescription": "Communicate encrypted over the decentralized [matrix] network in an easy and accessible way for everyone.",
     "interactiveVerification": "Interactive verification",
     "interactiveVerificationDescription": "If you are next to each other or communicate via a secure channel then you can verify all devices at once by comparing a security number or emojis.",
@@ -5343,6 +5541,56 @@
         "description": "Shown when no more people can be picked in the invite list.",
         "placeholders": {
             "max": {
+                "type": "int"
+            }
+        }
+    },
+    "change": "Change",
+    "homeserverCardLabel": "Homeserver",
+    "selectChatToStartMessaging": "Select a chat to start messaging",
+    "invalidHomeserverAddress": "Enter a server address like matrix.org",
+    "homeserverNeedsHttps": "This server must use https://. Plain http is only allowed for servers on your own network.",
+    "homeserverInsecure": "This server asked the app to use an unencrypted connection, so sign-in was stopped.",
+    "passwordResetSignsOutOthers": "This also signs you out on your other devices.",
+    "verifyCompareWarning": "Only confirm if these match on both devices. If they differ, tap \"They Don't Match\": someone may be listening in.",
+    "verifyCancelledByUser": "The verification was cancelled.",
+    "verifyTimedOut": "The verification took too long. Try again.",
+    "verifyMismatch": "The codes did not match. Someone may be intercepting this connection.",
+    "verifyUnexpected": "The other device sent something unexpected. Try again.",
+    "recoveryKeyWarning": "Anyone with this key can read your old messages. Keep it somewhere only you can reach.",
+    "recoveryKeyCopiedClears": "Copied. The clipboard is cleared after 60 seconds while this app is open. A clipboard history may keep a copy.",
+    "recoveryKeyFileTooBig": "That file is too big to be a recovery key.",
+    "showRecoveryKey": "Show key",
+    "hideRecoveryKey": "Hide key",
+    "lockedTryAgainIn": "Too many tries. Try again in {seconds, plural, =1{1 second} other{{seconds} seconds}}.",
+    "@lockedTryAgainIn": {
+        "type": "String",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "biometricFailed": "Biometric unlock did not work. Enter your PIN.",
+    "biometricReason": "Unlock the app",
+    "pinKeypadDigit": "Digit {digit}",
+    "@pinKeypadDigit": {
+        "type": "String",
+        "placeholders": {
+            "digit": {
+                "type": "String"
+            }
+        }
+    },
+    "pinDeleteDigit": "Delete last digit",
+    "pinEntered": "{count} of {total} digits entered",
+    "@pinEntered": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "total": {
                 "type": "int"
             }
         }

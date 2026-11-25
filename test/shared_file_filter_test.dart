@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:odango/utils/shared_media_filter.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-const _appData = '/data/user/0/com.swovo.odango';
+const _appData = '/data/user/0/de.swovo.odango';
 const _cache = '$_appData/cache';
 const _root = '$_cache/receive_sharing_intent';
 const _u = '123e4567-e89b-12d3-a456-426614174000';
@@ -42,7 +42,7 @@ void main() {
       _root,
       'receive_sharing_intent/$_u/a.png',
       '/storage/emulated/0/Download/a.pdf',
-      '/data/user/0/com.swovo.odango.evil/receive_sharing_intent/$_u/a.png',
+      '/data/user/0/de.swovo.odango.evil/receive_sharing_intent/$_u/a.png',
     ]) {
       test('drops $path', () {
         expect(isPluginShareCopy(path, shareRoot: _root), isFalse);

@@ -10,9 +10,12 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/media/playback_temp_file.dart';
+import 'package:odango/utils/media/record_gesture_driver.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:path/path.dart' as path_lib;
@@ -20,6 +23,13 @@ import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'events/audio_player.dart';
+
+void pushAmplitude(List<double> timeline, double value) {
+  timeline.add(value);
+  if (timeline.length > AppInChat.maxAmplitudes) timeline.removeAt(0);
+}
+
+enum RecordMode { voice, video }
 
 class RecordingViewModel extends StatefulWidget {
   final Widget Function(BuildContext, RecordingViewModelState) builder;
@@ -30,7 +40,59 @@ class RecordingViewModel extends StatefulWidget {
   RecordingViewModelState createState() => RecordingViewModelState();
 }
 
-class RecordingViewModelState extends State<RecordingViewModel> {
+class RecordingViewModelState extends State<RecordingViewModel>
+    implements RecordHooks {
+  RecordMode mode = RecordMode.voice;
+
+  late final RecordGestureDriver driver = RecordGestureDriver(
+    hooks: this,
+    now: () => _clock.elapsed,
+  );
+  final Stopwatch _clock = Stopwatch()..start();
+
+  Room? _room;
+  Future<void> Function(String, int, List<int>, String)? _send;
+  VoidCallback? _onVideo;
+  VoidCallback? _onTap;
+  VoidCallback? _onTooShort;
+
+  /// The composer tells the model what its gestures do; called on every build.
+  void bind({
+    required Room room,
+    required Future<void> Function(String, int, List<int>, String) onSend,
+    required VoidCallback onVideo,
+    required VoidCallback onTap,
+    required VoidCallback onTooShort,
+  }) {
+    _room = room;
+    _send = onSend;
+    _onVideo = onVideo;
+    _onTap = onTap;
+    _onTooShort = onTooShort;
+  }
+
+  void toggleMode() => setState(
+    () => mode = mode == RecordMode.voice ? RecordMode.video : RecordMode.voice,
+  );
+
+  @override
+  Future<void> start() => startRecording(_room!);
+
+  @override
+  Future<void> finish() => stopAndSend(_send!);
+
+  @override
+  bool get recording => isRecording;
+
+  @override
+  void tooShort() => _onTooShort?.call();
+
+  @override
+  void video() => _onVideo?.call();
+
+  @override
+  void tap() => _onTap?.call();
+
   Timer? _recorderSubscription;
   Duration duration = Duration.zero;
 
@@ -40,8 +102,20 @@ class RecordingViewModelState extends State<RecordingViewModel> {
   final List<double> amplitudeTimeline = [];
 
   String? fileName;
+  String? _path;
 
   bool isPaused = false;
+
+  @visibleForTesting
+  void attachRecording(
+    AudioRecorder recorder, {
+    required String path,
+    required String name,
+  }) => setState(() {
+    _audioRecorder = recorder;
+    _path = path;
+    fileName = name;
+  });
 
   Future<void> startRecording(Room room) async {
     room.client.getConfig(); // Preload server file configuration.
@@ -77,6 +151,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
         path = path_lib.join(tempDir.path, fileName);
       }
 
+      _path = path;
       final result = await audioRecorder.hasPermission();
       if (result != true) {
         if (!mounted) return;
@@ -118,6 +193,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
 
   @override
   void dispose() {
+    driver.dispose();
     _reset();
     super.dispose();
   }
@@ -130,7 +206,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
       final amplitude = await _audioRecorder!.getAmplitude();
       var value = 100 + amplitude.current * 2;
       value = value < 1 ? 1 : value;
-      amplitudeTimeline.add(value);
+      pushAmplitude(amplitudeTimeline, value);
       setState(() {
         duration += const Duration(milliseconds: 100);
       });
@@ -142,6 +218,8 @@ class RecordingViewModelState extends State<RecordingViewModel> {
     _recorderSubscription?.cancel();
     _audioRecorder?.stop();
     _audioRecorder = null;
+    deleteTempQuietly(_path);
+    _path = null;
 
     fileName = null;
     duration = Duration.zero;
@@ -149,7 +227,9 @@ class RecordingViewModelState extends State<RecordingViewModel> {
     isPaused = false;
   }
 
+  @override
   void cancel() {
+    if (!mounted) return;
     setState(_reset);
   }
 
@@ -191,7 +271,8 @@ class RecordingViewModelState extends State<RecordingViewModel> {
       waveform.add((amplitudeTimeline[i] / 100 * 1024).round());
     }
 
-    onSend(path, duration.inMilliseconds, waveform, fileName!);
+    _path = null;
+    unawaited(onSend(path, duration.inMilliseconds, waveform, fileName!));
 
     cancel();
   }

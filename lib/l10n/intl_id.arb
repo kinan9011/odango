@@ -2717,11 +2717,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Potong",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "today": "Hari Ini",
     "sending": "Mengirim",
     "generatingThumbnail": "Membuat thumbnail",

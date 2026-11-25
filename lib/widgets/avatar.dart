@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:odango/config/app_tokens.dart';
 import 'package:odango/config/design_constants.dart';
 import 'package:odango/utils/string_color.dart';
+import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/mxc_image.dart';
 import 'package:odango/widgets/presence_builder.dart';
 
@@ -54,7 +55,9 @@ class Avatar extends StatelessWidget {
   });
 
   String _calcFallbackLetters() {
-    final name = this.name?.trim();
+    final name = this.name == null
+        ? null
+        : stripBidiControls(this.name!).trim();
     if (name == null || name.isEmpty) return '@';
     final words = name.split(' ');
     if (words.length <= 1) return name.characters.first;

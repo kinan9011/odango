@@ -96,9 +96,20 @@ void main() {
       expect(stripBidiOverrides('a$lre$rle$pdf$lro${rlo}b'), 'ab');
     });
 
-    test('keeps marks and isolates', () {
-      final kept = 'a$lrm$rlm$alm$lri$rli$fsi${pdi}b';
+    test('keeps marks and balanced isolates', () {
+      final kept = 'a$lrm$rlm$alm$lri$rli${pdi}x$fsi${pdi}b$pdi';
       expect(stripBidiOverrides(kept), kept);
+    });
+
+    test('closes an isolate that is left open', () {
+      expect(stripBidiOverrides('a${rli}b'), 'a${rli}b$pdi');
+      expect(stripBidiOverrides('$lri${rli}b'), '$lri${rli}b$pdi$pdi');
+      expect(stripBidiOverrides('a$fsi${rlo}b'), 'a${fsi}b$pdi');
+    });
+
+    test('drops an isolate closer that closes nothing', () {
+      expect(stripBidiOverrides('a${pdi}b'), 'ab');
+      expect(stripBidiOverrides('$rli${pdi}b$pdi'), '$rli${pdi}b');
     });
 
     test('plain text is returned as is', () {

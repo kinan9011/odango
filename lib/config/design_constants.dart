@@ -287,6 +287,20 @@ abstract class AppMotion {
   static const Duration chipsHeight = Duration(milliseconds: 350);
   static const Curve tabSwipeCurve = PolyOutCurve();
   static const Duration radioToggle = Duration(milliseconds: 200);
+  static const Duration search = Duration(milliseconds: 350);
+  static const Duration searchFade = Duration(milliseconds: 150);
+  static const Duration suggestion = Duration(milliseconds: 150);
+  static const Duration recordEnter = Duration(milliseconds: 150);
+  static const Duration keyboardDuration = Duration(milliseconds: 250);
+  static const Curve keyboard = Cubic(
+    .19919472913616398,
+    .010644531250000006,
+    .27920937042459737,
+    .91025390625,
+  );
+  static const Duration badgeIn = Duration(milliseconds: 100);
+  static const Duration pinnedSwitch = Duration(milliseconds: 360);
+  static const Duration pinnedLine = Duration(milliseconds: 220);
 }
 
 abstract class AppProfile {
@@ -333,6 +347,62 @@ abstract class AppMembers {
   static const int devicesCap = 100;
 }
 
+abstract class AppInChat {
+  static const double replyStrip = 52;
+  static const double recordShift = 24;
+  static const int maxAmplitudes = 10000;
+  static const int maxSuggestions = 20;
+  static const double suggestionRow = 48;
+  static const double suggestionAvatar = 36;
+  static const double suggestionRows = 3.5;
+  static const double suggestionMaxFraction = .22;
+  static const double suggestionShift = 6;
+  static const double suggestionTextScale = 1.2;
+  static const double emojiPanelMin = 220;
+  static const double emojiPanelMaxFraction = .5;
+  static const double sendTile = 96;
+  static const double sendPreviewMax = 280;
+  static const int previewDecode = 768;
+  static const int maxPreviewFiles = 20;
+  static const double fileIcon = 42;
+  static const int deviceNameCap = 64;
+  static const double keyboardMin = 100;
+  static const int emojiColumns = 8;
+  static const double emojiSize = 32;
+  static const int stickerPacks = 30;
+  static const int stickersPerPack = 200;
+  static const int packNameCap = 64;
+  static const int stickerLabelCap = 100;
+  static const int jsonCap = 20000;
+  static const double searchFieldHeight = 44;
+  static const double searchRadius = 22;
+  static const int maxQueryUnits = 256;
+  static const int searchResultCap = AppProfile.feedCap;
+  static const int maxHighlights = 20;
+  static const double resultRow = 64;
+  static const double resultAvatar = 36;
+  static const int snippetUnits = 500;
+  static const double pinnedBar = 48;
+  static const double pinnedLine = 3;
+  static const double pinnedLineRadius = 2;
+  static const double statePillRadius = 16;
+  static const double statePillHPad = 12;
+  static const double statePillVPad = 7;
+  static const double statePillMargin = 4;
+  static const double pinnedShift = 4;
+  static const double pinnedTextScale = 1.15;
+  static const int pinnedConcurrency = 5;
+  static const Duration pinnedRetry = Duration(seconds: 15);
+  static const int pinnedMax = 100;
+  static const int pinnedSheetMax = 50;
+  static const double roundVideo = 132;
+  static const double roundRing = 4;
+  static const int albumMax = 10;
+  static const double viewOnceCover = 160;
+  static const double albumWidth = 256;
+  static const double albumGap = 2;
+}
+
 abstract class AppEncryption {
   static const int userRowsCap = 500;
 }
@@ -374,4 +444,49 @@ abstract class RichLimits {
   static const int maxRenderSpoilers = 100;
   static const int maxRenderMaths = 50;
   static const int maxRenderMathsUnits = 4096;
+}
+
+abstract class AppOnboarding {
+  static const double logoTile = 112;
+  static const double logoRadius = 34;
+  static const double cardRadius = 18;
+  static const double cardIcon = 24;
+  static const double statusTile = 72;
+  static const double statusTileRadius = 22;
+  static const double statusTileIcon = 32;
+  static const double contentMaxWidth = 360;
+  static const double headerHeight = 56;
+  static const double wordmark = 32;
+  static const double tagline = 16;
+  static const double pressScale = .98;
+  static const Duration press = Duration(milliseconds: 100);
+  static const Duration errorFade = Duration(milliseconds: 150);
+  static const int publicServersMax = 200;
+  static const int publicServersMaxBytes = 256 * 1024;
+  static const Duration publicServersTimeout = Duration(seconds: 8);
+  static const int recoveryKeyFileMaxBytes = 4096;
+  static const Duration clipboardClear = Duration(seconds: 60);
+}
+
+abstract class AppEmptyPane {
+  static const double pillRadius = 18;
+  static const EdgeInsets pillPadding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 12,
+  );
+  static const double maxTextWidth = 260;
+}
+
+abstract class AppLockUi {
+  static const double key = 60;
+  static const double keyGapX = 28;
+  static const double keyGapY = 16;
+  static const double dot = 14;
+  static const double dotPitch = 30;
+  static const double maxWidth = 360;
+  static const Duration dotIn = Duration(milliseconds: 150);
+  static const double dotRise = 20;
+  static const Duration titleIn = Duration(milliseconds: 320);
+  static const Duration unlock = Duration(milliseconds: 320);
+  static const double disabledOpacity = .4;
 }

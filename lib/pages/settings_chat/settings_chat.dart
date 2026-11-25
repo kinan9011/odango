@@ -12,6 +12,7 @@ import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/widgets/app_sheet.dart';
 
+import 'map_server_sheet.dart';
 import 'settings_chat_view.dart';
 
 class SettingsChat extends StatefulWidget {
@@ -22,6 +23,11 @@ class SettingsChat extends StatefulWidget {
 }
 
 class SettingsChatController extends State<SettingsChat> {
+  Future<void> pickMapServer() => showAppSheet<void>(
+    context: context,
+    builder: (_) => const MapServerSheet(),
+  );
+
   Future<void> pickDoubleTapReaction() async {
     final emoji = await showAppSheet<String>(
       context: context,

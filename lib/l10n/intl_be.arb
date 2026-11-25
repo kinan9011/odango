@@ -2540,11 +2540,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Абрэзаць",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "accountsAndSettings": "Уліковыя запісы і налады",
     "@accountsAndSettings": {
         "type": "String",

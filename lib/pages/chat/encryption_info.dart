@@ -3,21 +3,64 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:flutter/gestures.dart';
+import 'dart:async';
+
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/config/app_config.dart';
-import 'package:odango/config/themes.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/motion.dart';
 
-class EncryptionInfo extends StatelessWidget {
+class EncryptionInfo extends StatefulWidget {
   final Room room;
+
+  static const pillKey = ValueKey('encryption_pill');
 
   const EncryptionInfo({super.key, required this.room});
 
+  @override
+  State<EncryptionInfo> createState() => _EncryptionInfoState();
+}
+
+class _EncryptionInfoState extends State<EncryptionInfo> {
+  late Future<int> _count = _unverifiedDevices();
+  StreamSubscription<Object?>? _devices;
+
+  @override
+  void initState() {
+    super.initState();
+    _listen();
+  }
+
+  void _listen() {
+    _devices?.cancel();
+    _devices = widget.room.client.onSync.stream
+        .where((sync) => sync.deviceLists != null)
+        .listen((_) {
+          setState(() {
+            _count = _unverifiedDevices();
+          });
+        });
+  }
+
+  @override
+  void didUpdateWidget(EncryptionInfo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.room.id == widget.room.id) return;
+    _count = _unverifiedDevices();
+    _listen();
+  }
+
+  @override
+  void dispose() {
+    _devices?.cancel();
+    super.dispose();
+  }
+
   Future<int> _unverifiedDevices() async {
+    final room = widget.room;
     if (!room.encrypted) return 0;
     final users = await room.requestParticipants();
     final devicesKeysLists = users
@@ -43,58 +86,76 @@ class EncryptionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
     return AnimatedSize(
-      duration: motionDuration(context, FluffyThemes.animationDuration),
-      curve: FluffyThemes.animationCurve,
+      duration: motionDuration(context, AppMotion.banner),
       child: FutureBuilder(
-        future: _unverifiedDevices(),
-        builder: (context, asyncSnapshot) {
-          final unverifiedDevices = asyncSnapshot.data ?? 0;
-          if (unverifiedDevices == 0) return const SizedBox.shrink();
+        future: _count,
+        builder: (context, snapshot) {
+          final count = snapshot.data ?? 0;
+          if (count == 0) return const SizedBox.shrink();
+          final text = l10n.countUnverifiedDevices(count);
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s),
             child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Material(
-                  color: theme.colorScheme.surface.withAlpha(128),
-                  borderRadius: BorderRadius.circular(
-                    AppConfig.borderRadius / 3,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4.0,
+              child: Semantics(
+                button: true,
+                label: '$text, ${l10n.check}',
+                excludeSemantics: true,
+                onTap: () => context.go('/rooms/${widget.room.id}/encryption'),
+                child: GestureDetector(
+                  key: EncryptionInfo.pillKey,
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () =>
+                      context.go('/rooms/${widget.room.id}/encryption'),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: AppChat.tapTarget,
                     ),
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            child: Icon(Icons.lock_person_outlined, size: 13),
+                    child: Center(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: tokens.chip,
+                          borderRadius: BorderRadius.circular(
+                            AppInChat.statePillRadius,
                           ),
-                          TextSpan(text: ' '),
-                          TextSpan(
-                            text: L10n.of(
-                              context,
-                            ).countUnverifiedDevices(unverifiedDevices),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppInChat.statePillHPad,
+                            vertical: AppInChat.statePillVPad,
                           ),
-                          TextSpan(text: ' '),
-                          TextSpan(
-                            style: TextStyle(
-                              color: theme.colorScheme.primary,
-                              decoration: TextDecoration.underline,
-                              decorationColor: theme.colorScheme.primary,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Icon(
+                                    Icons.lock_person_outlined,
+                                    size: 14,
+                                    color: tokens.warn,
+                                  ),
+                                ),
+                                TextSpan(text: ' $text '),
+                                TextSpan(
+                                  text: l10n.check,
+                                  style: const TextStyle(
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () =>
-                                  context.go('/rooms/${room.id}/encryption'),
-                            text: 'Check',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 11),
                     ),
                   ),
                 ),

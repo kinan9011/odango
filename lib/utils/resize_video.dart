@@ -7,6 +7,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:light_compressor_v2/light_compressor_v2.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
+import 'package:odango/utils/media/playback_temp_file.dart';
 import 'package:odango/utils/platform_infos.dart';
 
 extension ResizeImage on XFile {
@@ -38,10 +39,13 @@ extension ResizeImage on XFile {
       Logs().w('Error while fetching video media info', e, s);
     }
 
+    final bytes = destinationPath != null
+        ? await XFile(destinationPath).readAsBytes()
+        : await readAsBytes();
+    await deleteTempQuietly(destinationPath);
+
     return MatrixVideoFile(
-      bytes: destinationPath != null
-          ? await XFile(destinationPath).readAsBytes()
-          : await readAsBytes(),
+      bytes: bytes,
       name: name,
       mimeType: destinationPath != null
           ? lookupMimeType(destinationPath)
@@ -58,6 +62,7 @@ extension ResizeImage on XFile {
     try {
       final thumbnailPath = await LightCompressor().getVideoThumbnail(path);
       final bytes = await XFile(thumbnailPath).readAsBytes();
+      await deleteTempQuietly(thumbnailPath);
       return MatrixImageFile(bytes: bytes, name: name);
     } catch (e, s) {
       Logs().w('Error while compressing video', e, s);

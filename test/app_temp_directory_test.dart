@@ -60,14 +60,21 @@ void main() {
     );
   });
 
-  test('the three writers use it, none writes into the cache root (G3)', () {
+  test('the writers use it, none writes into the cache root (G3)', () {
     for (final path in [
-      'lib/pages/chat/events/audio_player.dart',
-      'lib/pages/image_viewer/video_player.dart',
+      'lib/utils/media/playback_temp_file.dart',
       'lib/pages/chat/recording_view_model.dart',
     ]) {
       final source = File(path).readAsStringSync();
-      expect(source, contains('appTempDirectory()'), reason: path);
+      expect(source, contains('appTempDirectory('), reason: path);
+      expect(source, isNot(contains('getTemporaryDirectory')), reason: path);
+    }
+    for (final path in [
+      'lib/pages/chat/events/audio_player.dart',
+      'lib/pages/image_viewer/video_player.dart',
+    ]) {
+      final source = File(path).readAsStringSync();
+      expect(source, contains('PlaybackTempFile.write('), reason: path);
       expect(source, isNot(contains('getTemporaryDirectory')), reason: path);
     }
   });

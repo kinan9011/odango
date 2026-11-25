@@ -559,10 +559,12 @@ class GlobalSearchController extends State<GlobalSearch> {
 
   String senderName(SearchHit hit) {
     final room = _client.getRoomById(hit.message.roomId);
-    final name = room
-        ?.unsafeGetUserFromMemoryOrFallback(hit.message.senderId)
-        .calcDisplayname();
-    return safeDisplayText(name ?? hit.message.senderId);
+    return safeDisplayText(
+      room
+              ?.unsafeGetUserFromMemoryOrFallback(hit.message.senderId)
+              .calcDisplayname() ??
+          hit.message.senderId,
+    );
   }
 
   String chatName(String roomId) {

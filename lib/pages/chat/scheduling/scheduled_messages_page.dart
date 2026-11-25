@@ -16,6 +16,8 @@ import 'package:odango/utils/scheduling/scheduled_messages.dart';
 import 'package:odango/utils/scheduling/scheduled_store.dart';
 import 'package:odango/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:odango/widgets/matrix.dart';
+import 'package:odango/widgets/settings/settings_notice.dart';
+import 'package:odango/widgets/settings/settings_scaffold.dart';
 
 /// Route `/rooms/:roomid/scheduled`.
 class ScheduledMessagesPage extends StatelessWidget {
@@ -28,14 +30,15 @@ class ScheduledMessagesPage extends StatelessWidget {
     final matrix = Matrix.of(context);
     final room = matrix.client.getRoomById(roomId);
     if (room == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text(L10n.of(context).oopsSomethingWentWrong)),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(L10n.of(context).youAreNoLongerParticipatingInThisChat),
+      final l10n = L10n.of(context);
+      return SettingsScaffold(
+        title: l10n.oopsSomethingWentWrong,
+        children: [
+          SettingsNotice(
+            tone: SettingsNoticeTone.error,
+            text: l10n.youAreNoLongerParticipatingInThisChat,
           ),
-        ),
+        ],
       );
     }
     return ScheduledMessagesBody(
@@ -81,8 +84,9 @@ class ScheduledMessagesController extends State<ScheduledMessagesBody> {
   ScheduledItem? get selected =>
       items.where((i) => i.key == selectedKey).firstOrNull;
 
-  String nameOf(String userId) =>
-      room.unsafeGetUserFromMemoryOrFallback(userId).calcDisplayname();
+  String nameOf(String userId) => safeDisplayText(
+    room.unsafeGetUserFromMemoryOrFallback(userId).calcDisplayname(),
+  );
 
   @override
   void initState() {

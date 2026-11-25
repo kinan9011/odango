@@ -13,11 +13,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/pages/chat/events/voice_bubble_view.dart';
-import 'package:odango/utils/app_temp_directory.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/chat/waveform.dart';
 import 'package:odango/utils/error_reporter.dart';
 import 'package:odango/utils/file_description.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
+import 'package:odango/utils/media/playback_temp_file.dart';
 import 'package:odango/utils/url_launcher.dart';
 import 'package:ogg_caf_converter/ogg_caf_converter.dart';
 
@@ -56,9 +57,12 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
   List<int>? _waveform;
   String? _durationString;
 
+  PlaybackTempFile? _temp;
+
   @override
   void dispose() {
     super.dispose();
+    PlaybackTempFile.release(_temp);
     final audioPlayer = matrix.voiceMessageEventId.value != widget.event.eventId
         ? null
         : matrix.audioPlayer;
@@ -92,7 +96,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                     '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
                   ),
                   child: Text(
-                    '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${widget.event.senderFromMemoryOrFallback.calcDisplayname()}',
+                    '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${stripBidiOverrides(widget.event.senderFromMemoryOrFallback.calcDisplayname())}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -171,11 +175,12 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       final attachmentUrl = widget.event.attachmentOrThumbnailMxcUrl();
 
       if (!kIsWeb && attachmentUrl != null) {
-        final tempDir = await appTempDirectory();
         final fileName = Uri.encodeComponent(attachmentUrl.pathSegments.last);
-        file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-
-        await file.writeAsBytes(matrixFile.bytes);
+        final temp = _temp = await PlaybackTempFile.write(
+          bytes: matrixFile.bytes,
+          name: '${fileName}_${matrixFile.name}',
+        );
+        file = temp.file;
 
         if (Platform.isIOS &&
             matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
@@ -208,6 +213,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     final audioPlayer = matrix.audioPlayer = AudioPlayer();
 
     if (file != null) {
+      unawaited(PlaybackTempFile.activate(_temp));
       audioPlayer.setFilePath(file.path);
     } else {
       await audioPlayer.setAudioSource(

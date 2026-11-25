@@ -13,11 +13,9 @@ import 'package:odango/pages/chat_details/chat_details.dart';
 import 'package:odango/pages/chat_details/shared_media_pages.dart';
 import 'package:odango/pages/chat_members/member_row.dart';
 import 'package:odango/utils/chat_details/shared_media_feed.dart';
-import 'package:odango/utils/tab_swipe.dart';
 import 'package:odango/widgets/settings/animated_row_list.dart';
 import 'package:odango/widgets/settings/sliver_animated_row_list.dart';
 import 'package:odango/widgets/sliver_slide_in.dart';
-import 'package:odango/widgets/underline_tab_strip.dart';
 
 const _kinds = [
   SharedKind.media,
@@ -33,51 +31,6 @@ List<String> detailsTabLabels(L10n l10n, {required bool members}) => [
   l10n.searchTypeVoice,
   if (members) l10n.chatDetailsMembers,
 ];
-
-class DetailsTabStripDelegate extends SliverPersistentHeaderDelegate {
-  final List<String> labels;
-  final ChatDetailsController controller;
-
-  const DetailsTabStripDelegate({
-    required this.labels,
-    required this.controller,
-  });
-
-  @override
-  double get minExtent => AppProfile.tabStripHeight;
-
-  @override
-  double get maxExtent => AppProfile.tabStripHeight;
-
-  @override
-  bool shouldRebuild(covariant DetailsTabStripDelegate oldDelegate) => true;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) => ColoredBox(
-    color: AppTokens.of(context).bg,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSettingsLayout.sideMargin,
-      ),
-      child: Material(
-        color: AppTokens.of(context).surf,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.banner),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: UnderlineTabStrip(
-          labels: labels,
-          selected: controller.tabIndex.clamp(0, labels.length - 1),
-          onSelect: controller.selectTab,
-        ),
-      ),
-    ),
-  );
-}
 
 class DetailsTabContent extends StatelessWidget {
   final Room room;
@@ -196,55 +149,5 @@ class DetailsMembers extends StatelessWidget {
         ],
       );
     },
-  );
-}
-
-class DetailsSwipe extends StatefulWidget {
-  final ChatDetailsController controller;
-  final int count;
-  final Widget child;
-
-  const DetailsSwipe({
-    required this.controller,
-    required this.count,
-    required this.child,
-    super.key,
-  });
-
-  @override
-  State<DetailsSwipe> createState() => _DetailsSwipeState();
-}
-
-class _DetailsSwipeState extends State<DetailsSwipe> {
-  double _dx = 0;
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    behavior: HitTestBehavior.translucent,
-    onHorizontalDragStart: (_) => _dx = 0,
-    onHorizontalDragUpdate: (details) => _dx += details.primaryDelta ?? 0,
-    onHorizontalDragEnd: (details) {
-      final width = context.size?.width ?? 0;
-      final velocity = details.primaryVelocity ?? 0;
-      final controller = widget.controller;
-      final target = swipeTarget(
-        index: controller.tabIndex.clamp(0, widget.count - 1),
-        count: widget.count,
-        dx: _dx,
-        vx: velocity,
-        width: width,
-        rtl: Directionality.of(context) == TextDirection.rtl,
-      );
-      if (target == null) return;
-      controller.selectTab(
-        target,
-        duration: tabSwipeDuration(
-          dx: width - _dx.abs(),
-          width: width,
-          velocity: velocity,
-        ),
-      );
-    },
-    child: widget.child,
   );
 }

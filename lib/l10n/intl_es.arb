@@ -2589,11 +2589,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Cortar",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "sendingFilesDoNotExit": "Enviando {count} archivos... ¡Por favor espere!",
     "@sendingFilesDoNotExit": {
         "type": "String",

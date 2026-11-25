@@ -2417,11 +2417,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Ritaglia",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "discardEdits": "Hai dei cambiamenti non salvati. Elimina le tue modifiche?",
     "@discardEdits": {
         "type": "String",

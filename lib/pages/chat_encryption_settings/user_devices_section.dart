@@ -10,8 +10,10 @@ import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/beautify_string_extension.dart';
 import 'package:odango/utils/capped_text.dart';
+import 'package:odango/utils/chat/text_direction.dart';
 import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/motion.dart';
+import 'package:odango/utils/name_or.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/settings/settings_group.dart';
 
@@ -48,8 +50,11 @@ class UserDevicesSection extends StatelessWidget {
             l10n.knownSince(since.localizedTime(context)),
           )
         : (Icons.gpp_maybe_outlined, tokens.warn, l10n.unverified);
-    final name = visibleId(
-      cappedText(user.calcDisplayname(), maxUnits: AppProfile.nameCap),
+    final name = nameOr(
+      inlineName(
+        cappedText(user.calcDisplayname(), maxUnits: AppProfile.nameCap),
+      ),
+      user.id,
     );
     final devices = (keys?.deviceKeys.values ?? const <DeviceKeys>[]).toList();
     final shown = devices.take(AppMembers.devicesCap).toList();

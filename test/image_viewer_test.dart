@@ -184,10 +184,13 @@ void main() {
     expect(
       tester
           .widget<ExcludeFocus>(
-            find.ancestor(
-              of: find.byKey(const ValueKey('viewer_chrome')),
-              matching: find.byType(ExcludeFocus),
-            ),
+            // the nearest one: the app lock wraps the whole app in another
+            find
+                .ancestor(
+                  of: find.byKey(const ValueKey('viewer_chrome')),
+                  matching: find.byType(ExcludeFocus),
+                )
+                .first,
           )
           .excluding,
       isTrue,

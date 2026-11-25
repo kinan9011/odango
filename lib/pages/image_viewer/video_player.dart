@@ -9,9 +9,9 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
-import 'package:odango/utils/app_temp_directory.dart';
 import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:odango/utils/media/playback_temp_file.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/widgets/blur_hash.dart';
 import 'package:video_player/video_player.dart';
@@ -71,16 +71,15 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
           Uri.dataFromBytes(videoFile.bytes, mimeType: videoFile.mimeType),
         );
       } else {
-        final tempDir = await appTempDirectory();
         final fileNameStr =
             widget.event.attachmentMxcUrl?.pathSegments.last ??
             widget.event.body;
         final fileName = Uri.encodeComponent(fileNameStr);
-        final file = File('${tempDir.path}/${fileName}_${videoFile.name}');
-        if (await file.exists() == false) {
-          await file.writeAsBytes(videoFile.bytes);
-        }
-        videoPlayerController = VideoPlayerController.file(file);
+        final temp = _temp = await PlaybackTempFile.write(
+          bytes: videoFile.bytes,
+          name: '${fileName}_${videoFile.name}',
+        );
+        videoPlayerController = VideoPlayerController.file(temp.file);
       }
       _videoPlayerController = videoPlayerController;
 
@@ -108,11 +107,15 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
     }
   }
 
+  PlaybackTempFile? _temp;
+
   void _disposeControllers() {
     _chewieController?.dispose();
     _videoPlayerController?.dispose();
     _chewieController = null;
     _videoPlayerController = null;
+    _temp?.delete();
+    _temp = null;
   }
 
   @override

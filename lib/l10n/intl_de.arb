@@ -2735,11 +2735,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Zuschneiden",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "compressingVideo": "Video wird komprimiert...",
     "accountsAndSettings": "Konten und Einstellungen",
     "@accountsAndSettings": {

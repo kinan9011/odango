@@ -15,7 +15,10 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/archive_guard.dart';
 import 'package:odango/utils/backup_dump_validator.dart';
 import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/media/media_send_pipeline.dart';
 import 'package:odango/utils/other_party_can_receive.dart';
+import 'package:odango/utils/sign_in_flows/homeserver_input.dart';
+import 'package:odango/utils/sign_in_flows/homeserver_problem_text.dart';
 import 'package:odango/utils/sign_in_flows/web_auth.dart';
 
 import 'uia_request_manager.dart';
@@ -44,6 +47,9 @@ extension LocalizedExceptionExtension on Object {
         context,
       ).fileIsTooBigForServer(_formatFileSize(exception.maxFileSize));
     }
+    if (this is MediaCleanException) {
+      return L10n.of(context).mediaCannotBeCleaned;
+    }
     if (this is ArchiveGuardException) {
       final l10n = L10n.of(context);
       return switch ((this as ArchiveGuardException).error) {
@@ -63,6 +69,12 @@ extension LocalizedExceptionExtension on Object {
     }
     if (this is BackupRestoreFailedException) {
       return L10n.of(context).backupRestoreFailed;
+    }
+    if (this is HomeserverRejectedException) {
+      return announcedHomeserverText(
+        L10n.of(context),
+        (this as HomeserverRejectedException).problem,
+      );
     }
     if (this is UnsafeAuthUrlException) {
       return L10n.of(context).unsafeSignInUrl;

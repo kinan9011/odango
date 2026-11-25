@@ -24,12 +24,14 @@ import 'package:odango/utils/date_time_extension.dart';
 import 'package:odango/utils/file_description.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/matrix_sdk_extensions/safe_localized_body.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/string_color.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:odango/widgets/member_actions_popup_menu_button.dart';
 
+import 'bubble_event_types.dart';
 import 'deleted_bubble_content.dart';
 import 'message_bubble.dart';
 import 'message_content.dart';
@@ -110,13 +112,7 @@ class Message extends StatelessWidget {
   Widget build(BuildContext context) {
     final undecryptable = event.isUndecryptable;
     final menuEnabled = !longPressSelect && !event.redacted;
-    if (!undecryptable &&
-        !{
-          EventTypes.Message,
-          EventTypes.Sticker,
-          EventTypes.CallInvite,
-          PollEventContent.startType,
-        }.contains(event.type)) {
+    if (!undecryptable && !isBubbleEventType(event.type)) {
       if (event.type.startsWith('m.call.')) {
         return const SizedBox.shrink();
       }
@@ -641,7 +637,7 @@ class _SenderAvatar extends StatelessWidget {
       final user = snapshot.data ?? fallback;
       return Avatar(
         mxContent: user.avatarUrl,
-        name: user.calcDisplayname(),
+        name: stripBidiOverrides(user.calcDisplayname()),
         colorSeed: user.id,
         onTap: () => showMemberActionsPopupMenu(
           context: context,
@@ -736,7 +732,7 @@ class _ThreadChip extends StatelessWidget {
           onPressed: onTap,
           icon: const Icon(Icons.message),
           label: Text(
-            '${L10n.of(context).countReplies(children.length)} | ${stripBidiOverrides(children.first.calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true))}',
+            '${L10n.of(context).countReplies(children.length)} | ${children.first.safeLocalizedBodyFallback(MatrixLocals(L10n.of(context)), withSenderNamePrefix: true)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

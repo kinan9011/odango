@@ -9,9 +9,17 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/pages/chat/events/album_bubble.dart';
 import 'package:odango/pages/chat/events/poll.dart';
 import 'package:odango/pages/chat/events/video_player.dart';
+import 'package:odango/pages/chat/events/view_once.dart';
+import 'package:odango/pages/chat/round_video/round_video_rules.dart';
 import 'package:odango/pages/image_viewer/image_viewer.dart';
+import 'package:odango/utils/chat/text_direction.dart';
+import 'package:odango/utils/location/beacon_names.dart';
+import 'package:odango/utils/location/geo_uri.dart';
+import 'package:odango/utils/media/album_grouper.dart';
+import 'package:odango/utils/visible_id.dart';
 
 import '../../../config/app_config.dart';
 import '../../../utils/chat/room_mention.dart';
@@ -23,8 +31,10 @@ import 'audio_player.dart';
 import 'cute_events.dart';
 import 'html_message.dart';
 import 'image_bubble.dart';
+import 'live_location_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
+import 'round_video_bubble.dart';
 
 class MessageContent extends StatelessWidget {
   final Event event;
@@ -56,6 +66,16 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Message:
       case EventTypes.Encrypted:
       case EventTypes.Sticker:
+        final album = AlbumScope.of(context);
+        if (!event.redacted && album?.roleOf(event) == AlbumRole.leader) {
+          return AlbumBubble(
+            events: album!.albumOf(event)!,
+            timeline: timeline,
+            borderRadius: borderRadius,
+            caption: album.captionOf(event),
+            textColor: textColor,
+          );
+        }
         switch (event.messageType) {
           case MessageTypes.Image:
           case MessageTypes.Sticker:
@@ -84,20 +104,23 @@ class MessageContent extends StatelessWidget {
                 width = max(32, maxSize * (w / h));
               }
             }
-            return ImageBubble(
-              event,
-              width: width,
-              height: height,
-              fit: fit,
-              borderRadius: borderRadius,
-              timeline: timeline,
-              textColor: textColor,
-              onTap: () => showDialog(
-                context: context,
-                builder: (_) => ImageViewer(
-                  event,
-                  timeline: timeline,
-                  outerContext: context,
+            return ViewOnceGate(
+              event: event,
+              child: ImageBubble(
+                event,
+                width: width,
+                height: height,
+                fit: fit,
+                borderRadius: borderRadius,
+                timeline: timeline,
+                textColor: textColor,
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (_) => ImageViewer(
+                    event,
+                    timeline: timeline,
+                    outerContext: context,
+                  ),
                 ),
               ),
             );
@@ -121,11 +144,20 @@ class MessageContent extends StatelessWidget {
               linkColor: linkColor,
             );
           case MessageTypes.Video:
-            return EventVideoPlayer(
-              event,
-              textColor: textColor,
-              linkColor: linkColor,
-              timeline: timeline,
+            if (RoundVideoRules.isRound(event.content)) {
+              return ViewOnceGate(
+                event: event,
+                child: RoundVideoBubble(event, timeline: timeline),
+              );
+            }
+            return ViewOnceGate(
+              event: event,
+              child: EventVideoPlayer(
+                event,
+                textColor: textColor,
+                linkColor: linkColor,
+                timeline: timeline,
+              ),
             );
           case MessageTypes.File:
             return MessageDownloadContent(
@@ -134,28 +166,16 @@ class MessageContent extends StatelessWidget {
               linkColor: linkColor,
             );
           case MessageTypes.Location:
-            final geoUri = Uri.tryParse(
-              event.content.tryGet<String>('geo_uri')!,
+            final point = GeoUri.parse(event.content.tryGet<String>('geo_uri'));
+            if (point == null) continue textmessage;
+            return MapBubble(
+              onTap: () => UrlLauncher(
+                context,
+                GeoUri.format(point.lat, point.lon),
+              ).launchUrl(),
+              latitude: point.lat,
+              longitude: point.lon,
             );
-            if (geoUri != null && geoUri.scheme == 'geo') {
-              final latlong = geoUri.path
-                  .split(';')
-                  .first
-                  .split(',')
-                  .map(double.tryParse)
-                  .toList();
-              if (latlong.length == 2 &&
-                  latlong.first != null &&
-                  latlong.last != null) {
-                return MapBubble(
-                  onTap: () =>
-                      UrlLauncher(context, geoUri.toString()).launchUrl(),
-                  latitude: latlong.first!,
-                  longitude: latlong.last!,
-                );
-              }
-            }
-            continue textmessage;
           case MessageTypes.Text:
           case MessageTypes.Notice:
           case MessageTypes.Emote:
@@ -221,14 +241,19 @@ class MessageContent extends StatelessWidget {
           );
         }
         return PollWidget(event: event, timeline: timeline);
+      case BeaconNames.infoUnstable:
+      case BeaconNames.infoStable:
+        return LiveLocationBubble(event: event, textColor: textColor);
       case EventTypes.CallInvite:
         return FutureBuilder<User?>(
           future: event.fetchSenderUser(),
           builder: (context, snapshot) {
             return _ButtonContent(
               label: L10n.of(context).startedACall(
-                snapshot.data?.calcDisplayname() ??
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
+                inlineName(
+                  snapshot.data?.calcDisplayname() ??
+                      event.senderFromMemoryOrFallback.calcDisplayname(),
+                ),
               ),
               icon: '📞',
               textColor: buttonTextColor,
@@ -243,9 +268,11 @@ class MessageContent extends StatelessWidget {
           builder: (context, snapshot) {
             return _ButtonContent(
               label: L10n.of(context).userSentUnknownEvent(
-                snapshot.data?.calcDisplayname() ??
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
-                event.type,
+                inlineName(
+                  snapshot.data?.calcDisplayname() ??
+                      event.senderFromMemoryOrFallback.calcDisplayname(),
+                ),
+                visibleId(event.type),
               ),
               icon: 'ℹ️',
               textColor: buttonTextColor,
@@ -278,14 +305,17 @@ class RedactionWidget extends StatelessWidget {
       future: event.redactedBecause?.fetchSenderUser(),
       builder: (context, snapshot) {
         final reason = event.redactedBecause?.content.tryGet<String>('reason');
-        final redactedBy =
-            snapshot.data?.calcDisplayname() ??
-            event.redactedBecause?.senderId.localpart ??
-            L10n.of(context).user;
+        final redactedBy = inlineName(
+          snapshot.data?.calcDisplayname() ??
+              event.redactedBecause?.senderId.localpart ??
+              L10n.of(context).user,
+        );
         return _ButtonContent(
           label: reason == null
               ? L10n.of(context).redactedBy(redactedBy)
-              : L10n.of(context).redactedByBecause(redactedBy, reason),
+              : L10n.of(
+                  context,
+                ).redactedByBecause(redactedBy, inlineName(reason)),
           icon: '🗑️',
           textColor: buttonTextColor.withAlpha(128),
           onPressed: () => onInfoTab!(event),

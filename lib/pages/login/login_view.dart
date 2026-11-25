@@ -4,8 +4,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/l10n/l10n.dart';
+import 'package:odango/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:odango/widgets/layouts/login_scaffold.dart';
+import 'package:odango/widgets/settings/error_shake.dart';
+import 'package:odango/widgets/settings/settings_pill_button.dart';
 
 import 'login.dart';
 
@@ -16,127 +21,123 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
+    final l10n = L10n.of(context);
 
     final homeserver = controller.widget.client.homeserver
         ?.toString()
         .replaceFirst('https://', '');
     final title = homeserver == null
-        ? L10n.of(context).loginWithMatrixId
-        : L10n.of(context).logInTo(homeserver);
+        ? l10n.loginWithMatrixId
+        : l10n.logInTo(homeserver);
 
     return LoginScaffold(
-      appBar: AppBar(
-        leading: controller.loading ? null : const Center(child: BackButton()),
-        automaticallyImplyLeading: !controller.loading,
-        titleSpacing: !controller.loading ? 0 : null,
-        title: Text(title),
-      ),
-      body: Builder(
-        builder: (context) {
-          return AutofillGroup(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              children: <Widget>[
-                Center(
-                  child: Hero(
-                    tag: 'info-logo',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(128),
-                      child: Image.asset(
-                        './assets/logo/mini/logo_mini.png',
-                        width: 128,
-                        height: 128,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: TextField(
-                    readOnly: controller.loading,
-                    autocorrect: false,
-                    autofocus: true,
-                    onChanged: controller.checkWellKnownWithCoolDown,
-                    controller: controller.usernameController,
-                    textInputAction: TextInputAction.next,
-                    autofillHints: controller.loading
-                        ? null
-                        : [AutofillHints.username],
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.account_box_outlined),
-                      errorText: controller.usernameError,
-                      errorStyle: const TextStyle(color: Colors.orange),
-                      hintText: '@username:domain',
-                      labelText: L10n.of(context).matrixId,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: TextField(
-                    readOnly: controller.loading,
-                    autocorrect: false,
-                    autofillHints: controller.loading
-                        ? null
-                        : [AutofillHints.password],
-                    controller: controller.passwordController,
-                    textInputAction: TextInputAction.go,
-                    obscureText: !controller.showPassword,
-                    onSubmitted: (_) => controller.login(),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      errorText: controller.passwordError,
-                      errorStyle: const TextStyle(color: Colors.orange),
-                      suffixIcon: IconButton(
-                        onPressed: controller.toggleShowPassword,
-                        icon: Icon(
-                          controller.showPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: Colors.black,
-                        ),
-                      ),
-                      hintText: '******',
-                      labelText: L10n.of(context).password,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                    ),
-                    onPressed: controller.loading ? null : controller.login,
-                    child: controller.loading
-                        ? const LinearProgressIndicator()
-                        : Text(L10n.of(context).login),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (homeserver != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: TextButton(
-                      onPressed: controller.loading
-                          ? () {}
-                          : controller.passwordForgotten,
-                      style: TextButton.styleFrom(
-                        foregroundColor: theme.colorScheme.error,
-                      ),
-                      child: Text(L10n.of(context).passwordForgotten),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-              ],
+      title: title,
+      leading: controller.loading
+          ? null
+          : LoginHeaderButton(
+              icon: Icons.arrow_back_rounded,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: Navigator.of(context).maybePop,
             ),
-          );
-        },
+      body: AutofillGroup(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          children: [
+            Center(
+              child: Hero(
+                tag: 'info-logo',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    AppOnboarding.logoRadius * 96 / AppOnboarding.logoTile,
+                  ),
+                  child: Image.asset(
+                    './assets/logo/mini/logo_mini.png',
+                    width: 96,
+                    height: 96,
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.huge),
+            DialogTextField(
+              readOnly: controller.loading,
+              autocorrect: false,
+              autofocus: true,
+              onChanged: controller.checkWellKnownWithCoolDown,
+              controller: controller.usernameController,
+              textInputAction: TextInputAction.next,
+              autofillHints: controller.loading
+                  ? null
+                  : [AutofillHints.username],
+              prefixIcon: Icon(
+                Icons.alternate_email_rounded,
+                color: tokens.mut,
+              ),
+              errorText: controller.usernameError,
+              hintText: '@username:domain',
+              labelText: l10n.matrixId,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            ErrorShake(
+              trigger: controller.passwordError,
+              child: DialogTextField(
+                readOnly: controller.loading,
+                password: true,
+                obscureText: !controller.showPassword,
+                autofillHints: controller.loading
+                    ? null
+                    : [AutofillHints.password],
+                controller: controller.passwordController,
+                textInputAction: TextInputAction.go,
+                onSubmitted: (_) => controller.login(),
+                prefixIcon: Icon(Icons.lock_outline_rounded, color: tokens.mut),
+                suffixIcon: IconButton(
+                  tooltip: controller.showPassword
+                      ? l10n.hidePassword
+                      : l10n.showPassword,
+                  constraints: const BoxConstraints(
+                    minWidth: AppChat.tapTarget,
+                    minHeight: AppChat.tapTarget,
+                  ),
+                  onPressed: controller.toggleShowPassword,
+                  icon: Icon(
+                    controller.showPassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: tokens.mut,
+                  ),
+                ),
+                errorText: controller.passwordError,
+                hintText: '******',
+                labelText: l10n.password,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.huge),
+            SettingsPillButton(
+              label: l10n.login,
+              loading: controller.loading,
+              pressScale: true,
+              onPressed: controller.loading ? null : controller.login,
+            ),
+            if (homeserver != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.l),
+                child: TextButton(
+                  onPressed: controller.loading
+                      ? null
+                      : controller.passwordForgotten,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size.fromHeight(AppChat.tapTarget),
+                    foregroundColor: tokens.acc,
+                  ),
+                  child: Text(l10n.passwordForgotten),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

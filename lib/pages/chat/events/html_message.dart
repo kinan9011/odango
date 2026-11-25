@@ -285,7 +285,7 @@ class HtmlMessage extends StatelessWidget {
             return WidgetSpan(
               child: MatrixPill(
                 key: Key('user_pill_$matrixId'),
-                name: user.calcDisplayname(),
+                name: stripBidiOverrides(user.calcDisplayname()),
                 colorSeed: matrixId,
                 avatar: user.avatarUrl,
                 uri: href,
@@ -301,7 +301,7 @@ class HtmlMessage extends StatelessWidget {
                 : this.room.client.getRoomByAlias(matrixId);
             return WidgetSpan(
               child: MatrixPill(
-                name: room?.safeLocalizedDisplayname() ?? matrixId,
+                name: room?.safeLocalizedDisplayname() ?? visibleId(matrixId),
                 colorSeed: matrixId,
                 avatar: room?.avatar,
                 uri: href,

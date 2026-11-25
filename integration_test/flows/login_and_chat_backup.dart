@@ -15,6 +15,12 @@ Future<void> loginAndChatBackup(WidgetTester widgetTester) => widgetTester
     .startFluffyChatTest()
     .then((tester) => tester._loginAndChatBackup());
 
+/// The field of the open dialog: the page below may have fields of its own.
+final _dialogField = find.descendant(
+  of: find.byType(AlertDialog),
+  matching: find.byType(DialogTextField),
+);
+
 extension on FluffyChatTester {
   Future<void> _loginAndChatBackup() async {
     // Set up with only recovery key:
@@ -40,7 +46,7 @@ extension on FluffyChatTester {
     await enterText(TextField, passphrase1, index: 1);
     await tapOn('Continue', pumpAndSettle: false);
     await waitFor('Please enter your password');
-    await enterText(DialogTextField, user1Pw, pumpAndSettle: false);
+    await enterText(_dialogField, user1Pw, pumpAndSettle: false);
     await tapOn('Ok');
     await tapOn('Continue');
     AuthFlows.userPassphrases[user1Name] = passphrase1;
@@ -58,7 +64,7 @@ extension on FluffyChatTester {
     await enterText(TextField, passphrase1, index: 1);
     await tapOn('Continue', pumpAndSettle: false);
     await waitFor('Please enter your password');
-    await enterText(DialogTextField, user1Pw, pumpAndSettle: false);
+    await enterText(_dialogField, user1Pw, pumpAndSettle: false);
     await tapOn('Ok');
     await waitFor('You are ready to start!');
     await tapOn('Continue');

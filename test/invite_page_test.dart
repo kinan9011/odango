@@ -324,14 +324,11 @@ void main() {
     await show(tester, controller, [
       Profile.fromJson({
         'user_id': '@ev${rlo}il:example.org',
-        'display_name': 'Mal${rlo}ory',
+        'display_name': 'Mal${rlo}ory\u200F',
       }),
     ]);
-    debugPrint(
-      'TXT ${find.byType(Text).evaluate().map((e) => (e.widget as Text).data).toList()}',
-    );
     expect(find.textContaining(rlo), findsNothing);
-    expect(find.textContaining('Mal\u{FFFD}ory'), findsOneWidget);
+    expect(find.textContaining('Malory\u200F'), findsOneWidget);
     await h.finish(tester);
   });
 

@@ -2726,11 +2726,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Обрезать",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "accountsAndSettings": "Аккаунты и Настройки",
     "@accountsAndSettings": {
         "type": "String",

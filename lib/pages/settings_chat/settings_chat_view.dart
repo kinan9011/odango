@@ -17,6 +17,7 @@ import 'package:odango/widgets/settings/settings_scaffold.dart';
 import 'package:odango/widgets/settings/settings_segmented.dart';
 import 'package:odango/widgets/settings/settings_toggle_row.dart';
 
+import 'map_server_sheet.dart';
 import 'settings_chat.dart';
 
 class SettingsChatView extends StatelessWidget {
@@ -105,6 +106,52 @@ class SettingsChatView extends StatelessWidget {
                 ),
             ],
           ),
+          SettingsGroup(
+            header: l10n.mediaSettingsGroup,
+            rows: [
+              AppSettingToggleRow(
+                icon: Icons.location_off_outlined,
+                title: l10n.removeMediaMetadata,
+                subtitle: l10n.removeMediaMetadataDescription,
+                setting: AppSettings.stripMediaMetadata,
+              ),
+              ValueListenableBuilder(
+                valueListenable: AppSettings.mapTileServer.listenable,
+                builder: (context, _, _) => SettingsRow(
+                  key: const ValueKey('settings_map_tiles'),
+                  icon: Icons.map_outlined,
+                  title: l10n.mapTilesTitle,
+                  value: switch (MapServerChoice.of(
+                    AppSettings.mapTileServer.value,
+                  )) {
+                    MapServerChoice.off => l10n.mapTilesOff,
+                    MapServerChoice.osm => l10n.mapTilesOsm,
+                    MapServerChoice.custom => l10n.mapTilesCustom,
+                  },
+                  onTap: controller.pickMapServer,
+                ),
+              ),
+            ],
+          ),
+          if (PlatformInfos.platformCanRecord)
+            SettingsGroup(
+              header: l10n.voiceVideoGroup,
+              rows: [
+                AppSettingToggleRow(
+                  icon: Icons.mic_none_rounded,
+                  title: l10n.voiceMessagesTitle,
+                  subtitle: l10n.voiceMessagesDescription,
+                  setting: AppSettings.voiceMessagesEnabled,
+                ),
+                if (PlatformInfos.isMobile)
+                  AppSettingToggleRow(
+                    icon: Icons.videocam_outlined,
+                    title: l10n.videoMessagesTitle,
+                    subtitle: l10n.videoMessagesDescription,
+                    setting: AppSettings.videoMessagesEnabled,
+                  ),
+              ],
+            ),
           SettingsGroup(
             header: l10n.chatSettingsSectionWriting,
             footer: l10n.chatSettingsFooterWriting,

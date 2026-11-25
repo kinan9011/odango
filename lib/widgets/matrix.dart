@@ -26,8 +26,10 @@ import 'package:odango/utils/draft_store.dart';
 import 'package:odango/utils/hidden_topics_store.dart';
 import 'package:odango/utils/init_with_restore.dart';
 import 'package:odango/utils/launch_web_url.dart';
+import 'package:odango/utils/location/live_share_controller.dart';
 import 'package:odango/utils/logout_cleanup.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:odango/utils/matrix_sdk_extensions/matrix_live_share_ports.dart';
 import 'package:odango/utils/notification_background_handler.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/privacy/presence_policy.dart';
@@ -62,7 +64,11 @@ class Matrix extends StatefulWidget {
 
   final SharedPreferences store;
 
+  @visibleForTesting
+  final LiveSharePorts? liveSharePorts;
+
   const Matrix({
+    this.liveSharePorts,
     this.child,
     required this.clients,
     required this.store,
@@ -313,6 +319,10 @@ class MatrixState extends State<Matrix> {
   Client? _loginClientCandidate;
 
   AudioPlayer? audioPlayer;
+
+  late final LiveShareController liveShare = LiveShareController(
+    widget.liveSharePorts ?? MatrixLiveSharePorts(() => widget.clients),
+  );
   final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
 
   @visibleForTesting
@@ -396,6 +406,20 @@ class MatrixState extends State<Matrix> {
     initMatrix();
     _applyPresence();
     _clearDueStatuses();
+    unawaited(liveShare.endStaleShares());
+    liveShare.addListener(_showLiveShareError);
+  }
+
+  void _showLiveShareError() {
+    if (liveShare.error == null) return;
+    liveShare.error = null;
+    final snackbarContext =
+        FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+        context;
+    if (!snackbarContext.mounted) return;
+    ScaffoldMessenger.maybeOf(snackbarContext)?.showSnackBar(
+      SnackBar(content: Text(L10n.of(snackbarContext).liveSharingFailed)),
+    );
   }
 
   void _endCallWhenDisabled() {
@@ -474,7 +498,7 @@ class MatrixState extends State<Matrix> {
       if (userId != null) _lastUserId[name] = userId;
       if (state != LoginState.loggedOut) return;
       final loggedInWithMultipleClients = widget.clients.length > 1;
-
+      unawaited(liveShare.abandonFor(_lastUserId[name]));
       unawaited(MessageIndex.of(c).wipe());
       unawaited(
         LogoutCleanup.standard().run(
@@ -527,6 +551,14 @@ class MatrixState extends State<Matrix> {
         flutterLocalNotificationsPlugin,
       ),
     );
+  }
+
+  /// Ends a live share of [client] while its token still works, then signs
+  /// out. The SDK clears its rooms before it reports the logout, so the stop
+  /// cannot wait for that event.
+  Future<void> logoutClient(Client client) async {
+    await liveShare.stopFor(client.userID);
+    await client.logout();
   }
 
   void _cancelSubs(String name) {
@@ -646,6 +678,8 @@ class MatrixState extends State<Matrix> {
     onUiaRequest.clear();
 
     voiceMessageEventId.dispose();
+    liveShare.removeListener(_showLiveShareError);
+    liveShare.dispose();
     serverCapabilities.dispose();
     _activeClientRevision.dispose();
     for (final client in widget.clients) {

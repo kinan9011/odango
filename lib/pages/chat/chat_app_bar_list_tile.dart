@@ -5,6 +5,8 @@
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:odango/config/app_tokens.dart';
+import 'package:odango/config/design_constants.dart';
 import 'package:odango/utils/url_launcher.dart';
 
 class ChatAppBarListTile extends StatelessWidget {
@@ -13,7 +15,7 @@ class ChatAppBarListTile extends StatelessWidget {
   final Widget? trailing;
   final void Function()? onTap;
 
-  static const double fixedHeight = 44.0;
+  static const double fixedHeight = AppInChat.pinnedBar;
 
   const ChatAppBarListTile({
     super.key,
@@ -25,7 +27,7 @@ class ChatAppBarListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = AppTokens.of(context);
     final leading = this.leading;
     final trailing = this.trailing;
     return SizedBox(
@@ -45,15 +47,15 @@ class ChatAppBarListTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: tokens.mut,
                     overflow: TextOverflow.ellipsis,
                     fontSize: 14,
                   ),
                   linkStyle: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: tokens.mut,
                     fontSize: 14,
                     decoration: TextDecoration.underline,
-                    decorationColor: theme.colorScheme.onSurfaceVariant,
+                    decorationColor: tokens.mut,
                   ),
                   onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                 ),

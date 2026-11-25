@@ -267,6 +267,15 @@ jobs:
             fastlane release
           fi
         working-directory: ios
+      - name: Upload IPA to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ios/Runner.ipa
+          asset_name: odango.ipa
+          asset_content_type: application/octet-stream
 
   deploy_macos_appstore:
     runs-on: macos-15
@@ -295,5 +304,43 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.FASTLANE_MATCH_PASSWORD }}
           APP_STORE_API_KEY: ${{ secrets.APP_STORE_API_KEY }}
-        run: fastlane rc # Add `fastlane release` on release tags once the first release is out
+        run: |
+          if [[ $GITHUB_REF_NAME == rc* ]]; then
+            fastlane rc
+          else
+            fastlane release
+          fi
         working-directory: macos
+  deploy_msstore:
+    if: ${{ !startsWith(github.ref_name, 'rc') }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+      - uses: dtolnay/rust-toolchain@stable
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Package MSIX
+        run: |
+          dart pub global activate msix
+          dart pub global run msix:create --build-windows false --store `
+            --display-name Odango `
+            --identity-name "${{ secrets.MSSTORE_IDENTITY_NAME }}" `
+            --publisher "${{ secrets.MSSTORE_PUBLISHER }}" `
+            --publisher-display-name "${{ secrets.MSSTORE_PUBLISHER_DISPLAY_NAME }}" `
+            --logo-path assets/logo/img/logo.png `
+            --capabilities internetClient,microphone,webcam,location `
+            --output-path build/msix --output-name odango
+      - uses: microsoft/setup-msstore-cli@v1
+      - name: Publish to Microsoft Store
+        env:
+          MSSTORE_CLI_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
+          MSSTORE_CLI_SELLER_ID: ${{ secrets.MSSTORE_SELLER_ID }}
+          MSSTORE_CLI_CLIENT_ID: ${{ secrets.MSSTORE_CLIENT_ID }}
+          MSSTORE_CLI_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+        run: |
+          msstore reconfigure --tenantId $env:MSSTORE_CLI_TENANT_ID --sellerId $env:MSSTORE_CLI_SELLER_ID --clientId $env:MSSTORE_CLI_CLIENT_ID --clientSecret $env:MSSTORE_CLI_CLIENT_SECRET
+          msstore publish build/msix/odango.msix -id ${{ secrets.MSSTORE_PRODUCT_ID }}

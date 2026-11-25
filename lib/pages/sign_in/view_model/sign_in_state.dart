@@ -5,11 +5,13 @@
 
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:odango/utils/sign_in_flows/homeserver_input.dart';
 
 class SignInState {
   PublicHomeserverData? selectedHomeserver;
   AsyncSnapshot<List<PublicHomeserverData>> publicHomeservers =
       const AsyncSnapshot.nothing();
   List<PublicHomeserverData> filteredPublicHomeservers = [];
+  HomeserverProblem? typedProblem;
   AsyncSnapshot<bool> loginLoading = const AsyncSnapshot.nothing();
 }

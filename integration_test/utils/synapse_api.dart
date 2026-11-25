@@ -86,6 +86,57 @@ class SynapseUser {
   Future<String> sendText(String roomId, String text) =>
       _send(roomId, {'msgtype': 'm.text', 'body': text});
 
+  /// Lets everybody in the room send [eventType] as a state event (sets its
+  /// power level to 0), as clients do for live location.
+  Future<void> allowEventForEveryone(String roomId, String eventType) async {
+    final content = Map<String, Object?>.from(
+      await stateContent(roomId, 'm.room.power_levels') ?? {},
+    );
+    final events = Map<String, Object?>.from(
+      (content['events'] as Map?) ?? const {},
+    );
+    events[eventType] = 0;
+    content['events'] = events;
+    await _request(
+      'PUT',
+      '/rooms/${Uri.encodeComponent(roomId)}/state/m.room.power_levels',
+      token: _token,
+      body: content,
+    );
+  }
+
+  /// A message with arbitrary [content].
+  Future<String> sendContent(String roomId, Map<String, Object?> content) =>
+      _send(roomId, content);
+
+  /// The bytes of an `mxc://` file as the homeserver serves them to this
+  /// user (authenticated media first, then the older endpoint).
+  Future<List<int>> downloadMedia(String mxc) async {
+    final uri = Uri.parse(mxc);
+    final path = '${uri.host}${uri.path}';
+    for (final prefix in [
+      '/_matrix/client/v1/media/download/',
+      '/_matrix/media/v3/download/',
+    ]) {
+      final client = HttpClient();
+      try {
+        final request = await client.getUrl(
+          Uri.parse('http://$homeserver$prefix$path'),
+        );
+        request.headers.set('Authorization', 'Bearer $_token');
+        final response = await request.close();
+        final bytes = await response.fold<List<int>>(
+          [],
+          (all, chunk) => all..addAll(chunk),
+        );
+        if (response.statusCode == 200) return bytes;
+      } finally {
+        client.close(force: true);
+      }
+    }
+    throw Exception('download of $mxc failed');
+  }
+
   /// Synapse rate limits messages per user: back off and retry on a 429.
   Future<String> _send(String roomId, Map<String, Object?> body) async {
     for (var attempt = 0; ; attempt++) {

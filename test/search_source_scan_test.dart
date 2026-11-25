@@ -15,7 +15,10 @@ const _directories = [
   'lib/utils/links',
   'lib/utils/new_message',
   'lib/pages/new_private_chat',
+  'lib/pages/chat_search',
 ];
+
+const _files = ['lib/utils/chat/message_search_feed.dart'];
 
 /// The index and everything around search holds plaintext of encrypted rooms
 /// and the user's queries: it may only touch the encrypted database through
@@ -42,6 +45,8 @@ const _forbidden = [
 ];
 
 List<File> _sources() => [
+  for (final path in _files)
+    if (File(path).existsSync()) File(path),
   for (final directory in _directories)
     if (Directory(directory).existsSync())
       ...Directory(directory)

@@ -40,11 +40,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "crop": "Secare",
-    "@crop": {
-        "type": "String",
-        "placeholders": {}
-    },
     "repeatPassword": "Signum repetere",
     "notAnImage": "Pictura non est.",
     "remove": "Removere",

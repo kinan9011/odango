@@ -5,6 +5,7 @@
 
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/setting_keys.dart';
+import 'package:odango/utils/location/beacon_names.dart';
 import 'package:odango/utils/retention/retention_policy.dart';
 
 extension VisibleInGuiExtension on List<Event> {
@@ -47,11 +48,16 @@ extension IsStateExtension on Event {
       // event types to hide: redaction and reaction events
       // if a reaction has been redacted we also want it to be hidden in the timeline
       !{EventTypes.Reaction, EventTypes.Redaction}.contains(type) &&
+      // position updates of a live location are never shown, and only the
+      // start of a share is, not the event that stops it
+      !BeaconNames.isBeacon(type) &&
+      (!BeaconNames.isInfo(type) || content['live'] == true) &&
       // if we enabled to hide all redacted events, don't show those
       (!AppSettings.hideRedactedEvents.value || !redacted) &&
       // if we enabled to hide all unknown events, don't show those
       (!AppSettings.hideUnknownEvents.value ||
           isEventTypeKnown ||
+          BeaconNames.isInfo(type) ||
           type == RetentionPolicy.eventType);
 
   bool get isState => !{EventTypes.Message, EventTypes.Sticker}.contains(type);
@@ -63,6 +69,7 @@ extension IsStateExtension on Event {
         EventTypes.RoomCreate,
         EventTypes.RoomTombstone,
       }.contains(type) &&
+      !BeaconNames.isInfo(type) &&
       !isUndecryptable;
 
   /// Shown as a bubble ("Waiting for this message"), never folded away.
