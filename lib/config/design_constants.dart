@@ -395,6 +395,12 @@ abstract class AppInChat {
   static const Duration pinnedRetry = Duration(seconds: 15);
   static const int pinnedMax = 100;
   static const int pinnedSheetMax = 50;
+  static const double roundVideo = 132;
+  static const double roundRing = 4;
+  static const int albumMax = 10;
+  static const double viewOnceCover = 160;
+  static const double albumWidth = 256;
+  static const double albumGap = 2;
 }
 
 abstract class AppEncryption {

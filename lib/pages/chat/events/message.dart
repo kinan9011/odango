@@ -31,6 +31,7 @@ import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/matrix.dart';
 import 'package:odango/widgets/member_actions_popup_menu_button.dart';
 
+import 'bubble_event_types.dart';
 import 'deleted_bubble_content.dart';
 import 'message_bubble.dart';
 import 'message_content.dart';
@@ -111,13 +112,7 @@ class Message extends StatelessWidget {
   Widget build(BuildContext context) {
     final undecryptable = event.isUndecryptable;
     final menuEnabled = !longPressSelect && !event.redacted;
-    if (!undecryptable &&
-        !{
-          EventTypes.Message,
-          EventTypes.Sticker,
-          EventTypes.CallInvite,
-          PollEventContent.startType,
-        }.contains(event.type)) {
+    if (!undecryptable && !isBubbleEventType(event.type)) {
       if (event.type.startsWith('m.call.')) {
         return const SizedBox.shrink();
       }

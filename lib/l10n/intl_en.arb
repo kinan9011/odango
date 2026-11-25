@@ -1272,6 +1272,125 @@
         "type": "String",
         "placeholders": {}
     },
+    "mapsOffTitle": "Maps are off",
+    "mapsOffHint": "A map loads pictures from a map server, which sees roughly where you are looking and your IP address. Turn maps on in Settings if that is fine for you.",
+    "turnOnMaps": "Turn on maps",
+    "mediaSettingsGroup": "Photos, videos and maps",
+    "removeMediaMetadata": "Remove location and camera details",
+    "removeMediaMetadataDescription": "Cleans photos and videos before they are sent. A video that carries a location track is not sent. Files and other documents are sent as they are.",
+    "mapTilesTitle": "Maps",
+    "mapTilesOff": "Off",
+    "mapTilesOsm": "OpenStreetMap",
+    "mapTilesCustom": "Your own tile server",
+    "mapTilesCustomHint": "Tile server address",
+    "mapTilesInvalid": "Use an https address with the z, x and y placeholders in curly braces",
+    "mapTilesOptInHint": "Maps load pictures from the server you choose. That server sees roughly where you are looking and your IP address. It never gets your Matrix ID.",
+    "liveLocation": "Live location",
+    "shareLiveLocation": "Share live location",
+    "sendMyLocation": "Send my current location",
+    "liveLocationHint": "Everyone in this chat can see where you are until the time runs out or you stop. If this app is closed your phone stops updating, and others see your last spot until the time runs out.",
+    "liveFor15Min": "15 minutes",
+    "liveFor1Hour": "1 hour",
+    "liveFor8Hours": "8 hours",
+    "youAreSharingLocation": "You are sharing your location",
+    "updatedJustNow": "Updated just now",
+    "updatedMinutesAgo": "Updated {n} min ago",
+    "@updatedMinutesAgo": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "timeLeft": "{duration} left",
+    "@timeLeft": {
+        "placeholders": {
+            "duration": {
+                "type": "String"
+            }
+        }
+    },
+    "extendOneHour": "Extend by 1 hour",
+    "stopSharing": "Stop sharing",
+    "liveLocationEnded": "Live location ended",
+    "liveLocationUntil": "Live until {time}",
+    "@liveLocationUntil": {
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "distanceAway": "{distance} away",
+    "@distanceAway": {
+        "placeholders": {
+            "distance": {
+                "type": "String"
+            }
+        }
+    },
+    "sharingCount": "{n} sharing",
+    "@sharingCount": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "liveSharingFailed": "Your location could not be sent, so sharing stopped.",
+    "nobodyIsSharing": "Nobody is sharing right now",
+    "myLocation": "My location",
+    "shortMinutes": "{n} min",
+    "@shortMinutes": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "shortHours": "{n} h",
+    "@shortHours": {
+        "placeholders": {
+            "n": {
+                "type": "int"
+            }
+        }
+    },
+    "toolCrop": "Crop and rotate",
+    "toolDraw": "Draw",
+    "toolBlur": "Blur",
+    "toolText": "Text",
+    "toolSticker": "Sticker",
+    "editorTools": "Editing tools",
+    "blurStrength": "Blur strength",
+    "blurShapeCircle": "Round area",
+    "blurShapeRect": "Square area",
+    "addText": "Add text",
+    "addSticker": "Add sticker",
+    "textHint": "Type your text",
+    "sendAsFile": "Send as file",
+    "groupAsAlbum": "Group as album",
+    "viewOnce": "View once",
+    "viewOnceHint": "Apps that support this show it behind a cover until it is tapped. Other apps still show it.",
+    "highQuality": "High quality (HD)",
+    "highQualityDescription": "Keeps more detail and sends a bigger file.",
+    "viewOnceBadge": "View once",
+    "tapToView": "Tap to view",
+    "voiceMessagesTitle": "Voice messages",
+    "voiceMessagesDescription": "Show the record button for voice messages.",
+    "videoMessagesTitle": "Video messages",
+    "videoMessagesDescription": "Let the record button switch to round video messages.",
+    "voiceVideoGroup": "Voice and video messages",
+    "roundVideo": "Video message",
+    "switchToVideoMessage": "Tap to switch to video messages",
+    "switchToVoiceMessage": "Tap to switch to voice messages",
+    "recordTooShort": "Hold longer to record",
+    "recordVideoTooLong": "Video messages can be 1 minute long at most",
+    "slideToCancel": "Slide to cancel",
+    "lockRecording": "Slide up to lock",
+    "mediaCannotBeCleaned": "This photo or video cannot be cleaned of its location on this device, so it was not sent. Turn off \"Remove location and camera details\" in Settings to send it as it is.",
+    "liveLocationNotAllowed": "You cannot share your live location in this chat: its settings do not allow it.",
+    "longPressToRecordVideoMessage": "Long press to record a video message.",
     "link": "Link",
     "or": "Or",
     "@or": {

@@ -469,6 +469,12 @@ final c = visibleId(user.displayName!);
           'file name through visibleId, link title from the link',
       'lib/pages/chat/events/html_message.dart': 'the renderer strips',
       'lib/pages/chat/events/message_content.dart': 'goes into the renderer',
+      'lib/pages/chat/events/album_bubble.dart':
+          'screen reader label, safeDisplayText',
+      'lib/utils/media/album_grouper.dart':
+          'compared with the file name, never drawn here',
+      'lib/pages/chat/events/round_video_bubble.dart':
+          'screen reader label, safeDisplayText',
       'lib/pages/chat/events/message_download_content.dart':
           'file name through safeDisplayText',
       'lib/pages/chat_list/chat_list_item.dart': 'RowPreview strips',

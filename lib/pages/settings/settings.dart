@@ -99,7 +99,7 @@ class SettingsController extends State<Settings> {
     if (!mounted) return;
     await showFutureLoadingDialog(
       context: context,
-      future: () => matrix.client.logout(),
+      future: () => matrix.logoutClient(matrix.client),
     );
     if (!mounted) return;
     context.go('/');

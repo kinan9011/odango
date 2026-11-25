@@ -45,6 +45,7 @@ import 'package:odango/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:odango/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:odango/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:odango/utils/media/playback_temp_file.dart';
 import 'package:odango/utils/ogg_opus_remuxer.dart';
 import 'package:odango/utils/other_party_can_receive.dart';
 import 'package:odango/utils/platform_infos.dart';
@@ -76,8 +77,8 @@ import 'package:universal_html/universal_html.dart' as web;
 import '../../utils/account_bundles.dart';
 import '../../utils/chat/composer_text_edit.dart';
 import '../../utils/localized_exception_extension.dart';
+import 'live_location/share_location_flow.dart';
 import 'send_file_sheet.dart';
-import 'send_location_dialog.dart';
 
 class ChatPage extends StatelessWidget {
   final String roomId;
@@ -1416,6 +1417,19 @@ class ChatController extends State<ChatPageWithRoom>
     List<int> waveform,
     String fileName,
   ) async {
+    try {
+      await _sendVoiceMessage(path, duration, waveform, fileName);
+    } finally {
+      await deleteTempQuietly(path);
+    }
+  }
+
+  Future<void> _sendVoiceMessage(
+    String path,
+    int duration,
+    List<int> waveform,
+    String fileName,
+  ) async {
     final proceed = await showTrustUserInRoomDialog(context, room);
     if (!mounted || !proceed) return;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -1525,12 +1539,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  Future<void> sendLocationAction() async {
-    await showAdaptiveDialog(
-      context: context,
-      builder: (c) => SendLocationDialog(room: room),
-    );
-  }
+  Future<void> sendLocationAction() => shareLocationFlow(context, room);
 
   String _getSelectedEventString() {
     var copyString = '';
@@ -1606,7 +1615,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  Future<void> redactEventsAction() async {
+  Future<bool> redactEventsAction() async {
     final reasonInput = selectedEvents.any((event) => event.status.isSent)
         ? await showTextInputDialog(
             context: context,
@@ -1621,10 +1630,10 @@ class ChatController extends State<ChatPageWithRoom>
             cancelLabel: L10n.of(context).cancel,
           )
         : null;
-    if (reasonInput == null) return;
+    if (reasonInput == null) return false;
     final reason = reasonInput.isEmpty ? null : reasonInput;
-    if (!mounted) return;
-    await showFutureLoadingDialog(
+    if (!mounted) return false;
+    final result = await showFutureLoadingDialog(
       context: context,
       futureWithProgress: (onProgress) async {
         final count = selectedEvents.length;
@@ -1653,10 +1662,12 @@ class ChatController extends State<ChatPageWithRoom>
         }
       },
     );
+    if (!mounted) return !result.isError;
     setState(() {
       showEmojiPicker = false;
       selectedEvents.clear();
     });
+    return !result.isError;
   }
 
   List<Client?> get currentRoomBundle {

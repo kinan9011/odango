@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:odango/config/design_constants.dart';
+import 'package:odango/config/setting_keys.dart';
 import 'package:odango/pages/chat/chat.dart';
 import 'package:odango/pages/chat/send_file_dialog.dart';
 import 'package:odango/pages/chat/send_file_sheet.dart';
@@ -21,6 +22,7 @@ import 'package:odango/widgets/settings/settings_toggle_row.dart';
 import 'utils/chat_page_harness.dart';
 import 'utils/details_fixtures.dart';
 import 'utils/golden.dart';
+import 'utils/media_fixtures.dart';
 import 'utils/recording_api.dart';
 
 final _png = base64Decode(
@@ -294,6 +296,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  Future<String> uploadedBody(WidgetTester tester) async {
+    await drop(tester, [
+      _Item.fromData(
+        jpegWith([exifApp1(tiffWithGps())]),
+        name: 'gps.jpg',
+        mime: 'image/jpeg',
+      ),
+    ]);
+    await tester.ensureVisible(find.byKey(SendFileDialog.asFileKey));
+    await tester.tap(find.byKey(SendFileDialog.asFileKey));
+    await h.settle(tester, rounds: 2);
+    await tester.tap(find.byKey(SendFileDialog.sendKey));
+    for (var i = 0; i < 30 && api.requests('/upload').isEmpty; i++) {
+      await h.settle(tester, rounds: 1);
+    }
+    final body = api.requests('/upload', method: 'POST').first.body;
+    for (
+      var i = 0;
+      i < 40 && api.requests('/send/', method: 'PUT').isEmpty;
+      i++
+    ) {
+      await h.settle(tester, rounds: 1);
+    }
+    for (var i = 0; i < 40; i++) {
+      final sending = find.textContaining('Sending 1 files');
+      if (sending.evaluate().isEmpty && i > 2) break;
+      await h.settle(tester, rounds: 1);
+    }
+    await h.finish(tester);
+    return body;
+  }
+
+  testWidgets('T-2 a photo with a GPS position is uploaded without it', (
+    tester,
+  ) async {
+    final body = await uploadedBody(tester);
+    expect(body, isNotEmpty);
+    expect(body.contains('Exif'), isFalse);
+  });
+
+  testWidgets('T-2 control: with the setting off the position goes along', (
+    tester,
+  ) async {
+    await AppSettings.stripMediaMetadata.setItem(false);
+    addTearDown(() => AppSettings.stripMediaMetadata.setItem(true));
+    final body = await uploadedBody(tester);
+    expect(body.contains('Exif'), isTrue);
+  });
+
   testWidgets('the system back button closes the sheet and sends nothing', (
     tester,
   ) async {
@@ -383,13 +434,73 @@ void main() {
     );
     for (var attempt = 1; attempt <= 2; attempt++) {
       await tester.runAsync(() async {
-        final failed = Function.apply(send.onPressed!, []) as Future<void>;
-        await expectLater(failed, throwsA(isA<Object>()));
+        await (Function.apply(send.onPressed!, []) as Future<void>);
       });
+      await h.settle(tester, rounds: 2);
       expect(api.requests('/members'), hasLength(attempt));
+      expect(find.byType(SnackBar), findsOneWidget, reason: 'told, not silent');
     }
     expect(find.byType(AppSheet), findsOneWidget);
     expect(api.requests('/upload', method: 'POST'), isEmpty);
+    await h.finish(tester);
+  });
+
+  testWidgets('a refused send tells the user and sends nothing', (
+    tester,
+  ) async {
+    final damaged = u8([
+      ...box('ftyp', [...'heic'.codeUnits, 0, 0, 0, 0, ...'heic'.codeUnits]),
+      ...box('mdat', List.filled(40, 1)),
+    ]);
+    await drop(tester, [
+      _Item.fromData(damaged, name: 'x.heic', mime: 'image/heic'),
+    ]);
+    await tester.tap(find.byKey(SendFileDialog.sendKey));
+    for (var i = 0; i < 10 && find.byType(SnackBar).evaluate().isEmpty; i++) {
+      await h.settle(tester, rounds: 1);
+    }
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(api.requests('/upload', method: 'POST'), isEmpty);
+    expect(api.requests('/send/', method: 'PUT'), isEmpty);
+    await h.finish(tester);
+  });
+
+  Future<List<Map<String, Object?>>> sentContents(
+    WidgetTester tester, {
+    required bool album,
+  }) async {
+    await AppSettings.showThumbnailsInTimeline.setItem(false);
+    addTearDown(() => AppSettings.showThumbnailsInTimeline.setItem(true));
+    await drop(tester, [image('a.png'), image('b.png')]);
+    if (!album) await tester.tap(find.byKey(SendFileDialog.albumKey));
+    await h.settle(tester, rounds: 2);
+    await tester.tap(find.byKey(SendFileDialog.sendKey));
+    await untilSent(tester, sends: 2);
+    return [
+      for (final r in api.requests('/send/', method: 'PUT'))
+        (jsonDecode(r.body) as Map).cast<String, Object?>(),
+    ];
+  }
+
+  testWidgets('two pictures with the album switch on carry one album mark', (
+    tester,
+  ) async {
+    final sent = await sentContents(tester, album: true);
+    expect(sent, hasLength(2));
+    final marks = sent.map((c) => c['org.odango.album']).toList();
+    expect(marks.every((m) => m is Map), isTrue);
+    expect((marks[0] as Map)['id'], (marks[1] as Map)['id']);
+    expect(sent.any((c) => c.containsKey('org.odango.not_album')), isFalse);
+    await h.finish(tester);
+  });
+
+  testWidgets('with the album switch off every picture is marked not-album', (
+    tester,
+  ) async {
+    final sent = await sentContents(tester, album: false);
+    expect(sent, hasLength(2));
+    expect(sent.every((c) => c['org.odango.not_album'] == true), isTrue);
+    expect(sent.any((c) => c.containsKey('org.odango.album')), isFalse);
     await h.finish(tester);
   });
 

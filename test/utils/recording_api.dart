@@ -202,7 +202,7 @@ class RecordingApi extends FakeMatrixApi {
         request.method != 'GET' && _accept.hasMatch(request.url.path);
     if (!unstubbed) return super.send(copy);
     final response = switch (request.url.path) {
-      final path when path.contains('/send/') => {
+      final path when path.contains('/send/') || path.contains('/state/') => {
         'event_id': '\$recorded${_counter++}:fakeserver.notexisting',
       },
       final path when path.contains('/upload') => {

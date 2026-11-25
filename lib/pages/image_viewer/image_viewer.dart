@@ -7,7 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:odango/config/design_constants.dart';
+import 'package:odango/pages/chat/chat.dart';
+import 'package:odango/pages/chat/events/view_once.dart';
+import 'package:odango/pages/chat/message_action_runner.dart';
 import 'package:odango/pages/image_viewer/image_viewer_view.dart';
+import 'package:odango/utils/chat/message_actions.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/show_scaffold_dialog.dart';
@@ -115,6 +119,47 @@ class ImageViewerController extends State<ImageViewer>
     builder: (context) =>
         ShareScaffoldDialog(items: [ContentShareItem(currentEvent.content)]),
   );
+
+  /// The chat the viewer was opened from; null when it was opened from the
+  /// shared media list, where replying and deleting are not offered.
+  ChatController? get chat =>
+      widget.outerContext.findAncestorStateOfType<ChatController>();
+
+  bool get canReply {
+    final c = chat;
+    return c != null && messageActionContext(c, currentEvent).canReply;
+  }
+
+  bool get canDelete {
+    final c = chat;
+    return c != null && messageActionContext(c, currentEvent).canRedact;
+  }
+
+  bool get viewOnce => isViewOnce(currentEvent.content);
+
+  /// A received view once picture is not offered for forwarding, saving or
+  /// sharing from here: the sender asked for it to be seen, not kept. This is
+  /// as far as this app can honour it.
+  bool get keepOnlyHere =>
+      viewOnce && currentEvent.senderId != currentEvent.room.client.userID;
+
+  void replyAction() {
+    final c = chat;
+    if (c == null) return;
+    final event = currentEvent;
+    Navigator.of(context, rootNavigator: false).pop();
+    runMessageAction(c, MessageAction.reply, event);
+  }
+
+  Future<void> deleteAction() async {
+    final c = chat;
+    if (c == null) return;
+    c.selectOnly(currentEvent);
+    final deleted = await c.redactEventsAction();
+    if (c.mounted) c.clearSelectedEvents();
+    if (!mounted || !deleted) return;
+    Navigator.of(context, rootNavigator: false).pop();
+  }
 
   /// Save this file with a system call.
   void saveFileAction(BuildContext context) => currentEvent.saveFile(context);

@@ -8,12 +8,14 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 /// The only files that may blur what is behind them. Every one of them asks
-/// `glassIsSolid` (or is a user chosen wallpaper blur on one image).
+/// `glassIsSolid` (or is a user chosen blur on one image: the wallpaper, or the
+/// blur tool of the media editor, which re-draws the pixels it covers).
 const _blurFiles = {
   'lib/widgets/glass_surface.dart',
   'lib/pages/chat/scheduling/send_options_menu.dart',
   'lib/pages/chat_list/peek_sheet.dart',
   'lib/pages/chat/chat_wallpaper.dart',
+  'lib/pages/media_editor/editor_render.dart',
 };
 
 void main() {

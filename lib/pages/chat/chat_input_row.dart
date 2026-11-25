@@ -13,8 +13,10 @@ import 'package:odango/config/setting_keys.dart';
 import 'package:odango/l10n/l10n.dart';
 import 'package:odango/pages/chat/composer/composer_panel_model.dart';
 import 'package:odango/pages/chat/composer/rich_text_editing_controller.dart';
+import 'package:odango/pages/chat/record_button.dart';
 import 'package:odango/pages/chat/recording_input_row.dart';
 import 'package:odango/pages/chat/recording_view_model.dart';
+import 'package:odango/pages/chat/round_video/round_video_capture.dart';
 import 'package:odango/pages/chat/scheduling/send_button.dart';
 import 'package:odango/utils/motion.dart';
 import 'package:odango/utils/other_party_can_receive.dart';
@@ -22,7 +24,6 @@ import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/rich_text/format_range.dart';
 import 'package:odango/widgets/avatar.dart';
 import 'package:odango/widgets/glass_surface.dart';
-import 'package:odango/widgets/hover_builder.dart';
 import 'package:odango/widgets/matrix.dart';
 
 import '../../config/themes.dart';
@@ -66,12 +67,65 @@ class ChatInputRow extends StatelessWidget {
       foregroundColor: theme.colorScheme.onTertiaryContainer,
     );
 
+    final voiceOn = AppSettings.voiceMessagesEnabled.value;
+    final videoOn =
+        AppSettings.videoMessagesEnabled.value && PlatformInfos.isMobile;
+    final canSwitch = voiceOn && videoOn;
+    final showMic =
+        PlatformInfos.platformCanRecord &&
+        !controller.sendController.text.isNotEmpty &&
+        controller.editEvent == null &&
+        (voiceOn || videoOn);
+
     return RecordingViewModel(
       builder: (context, recordingViewModel) {
+        if (voiceOn != videoOn &&
+            recordingViewModel.mode !=
+                (videoOn ? RecordMode.video : RecordMode.voice)) {
+          recordingViewModel.mode = videoOn
+              ? RecordMode.video
+              : RecordMode.voice;
+        }
+        recordingViewModel.bind(
+          room: controller.room,
+          onSend: controller.onVoiceMessageSend,
+          onVideo: () => recordRoundVideo(
+            context,
+            controller.room,
+            threadRootEventId: controller.activeThreadId,
+            threadLastEventId: controller.threadLastEventId,
+          ),
+          onTap: () => canSwitch
+              ? recordingViewModel.toggleMode()
+              : PlatformInfos.isMobile
+              ? ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    margin: EdgeInsetsDirectional.only(
+                      bottom: height + 16,
+                      start: 16,
+                      end: 16,
+                      top: 16,
+                    ),
+                    showCloseIcon: true,
+                    content: Text(
+                      recordingViewModel.mode == RecordMode.video
+                          ? L10n.of(context).longPressToRecordVideoMessage
+                          : L10n.of(context).longPressToRecordVoiceMessage,
+                    ),
+                  ),
+                )
+              : recordingViewModel.startRecording(controller.room),
+          onTooShort: () => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(L10n.of(context).recordTooShort)),
+          ),
+        );
         if (recordingViewModel.isRecording) {
-          return RecordingInputRow(
-            state: recordingViewModel,
-            onSend: controller.onVoiceMessageSend,
+          return RecordGestureListener(
+            model: recordingViewModel,
+            child: RecordingInputRow(
+              state: recordingViewModel,
+              onSend: controller.onVoiceMessageSend,
+            ),
           );
         }
         final row = Row(
@@ -313,56 +367,24 @@ class ChatInputRow extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: AppElevation.glass(tokens.shadow),
                     ),
-                    child:
-                        PlatformInfos.platformCanRecord &&
-                            !controller.sendController.text.isNotEmpty &&
-                            controller.editEvent == null
-                        ? HoverBuilder(
-                            builder: (context, hovered) => IconButton(
-                              tooltip: L10n.of(context).voiceMessage,
-                              onPressed: hovered
-                                  ? () => recordingViewModel.startRecording(
-                                      controller.room,
-                                    )
-                                  : () => ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                          SnackBar(
-                                            margin: EdgeInsetsDirectional.only(
-                                              bottom: height + 16,
-                                              start: 16,
-                                              end: 16,
-                                              top: 16,
-                                            ),
-                                            showCloseIcon: true,
-                                            content: Text(
-                                              L10n.of(
-                                                context,
-                                              ).longPressToRecordVoiceMessage,
-                                            ),
-                                          ),
-                                        ),
-                              onLongPress: () => recordingViewModel
-                                  .startRecording(controller.room),
-                              style: IconButton.styleFrom(
-                                backgroundColor: tokens.acc,
-                                foregroundColor: tokens.onacc,
-                                fixedSize: const Size.square(height),
-                              ),
-                              icon: Icon(
-                                hovered
-                                    ? Icons.mic_rounded
-                                    : Icons.mic_none_rounded,
-                              ),
-                            ),
+                    child: showMic
+                        ? RecordButton(
+                            model: recordingViewModel,
+                            size: height,
+                            canSwitch: canSwitch,
                           )
                         : SendButton(controller: controller, size: height),
                   ),
                 ],
         );
-        if (!controller.selectMode) return row;
-        return GlassSurface(
-          borderRadius: BorderRadius.circular(AppRadius.composer),
-          child: row,
+        return RecordGestureListener(
+          model: recordingViewModel,
+          child: controller.selectMode
+              ? GlassSurface(
+                  borderRadius: BorderRadius.circular(AppRadius.composer),
+                  child: row,
+                )
+              : row,
         );
       },
     );

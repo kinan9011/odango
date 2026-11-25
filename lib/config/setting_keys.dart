@@ -16,6 +16,7 @@ import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:odango/utils/appearance/chat_appearance.dart';
 import 'package:odango/utils/branding/repo_links.dart';
 import 'package:odango/utils/branding/support_links.dart';
+import 'package:odango/utils/media/map_tile_config.dart';
 import 'package:odango/utils/oklch.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,11 @@ enum AppSettings<T> {
   audioRecordingNoiseSuppress<bool>('audioRecordingNoiseSuppress', true),
   audioRecordingBitRate<int>('audioRecordingBitRate', 64000),
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 48000),
+  stripMediaMetadata<bool>('com.swovo.odango.strip_media_metadata', true),
+  mediaHd<bool>('com.swovo.odango.media_hd', false),
+  mapTileServer<String>('com.swovo.odango.map_tile_server', ''),
+  voiceMessagesEnabled<bool>('com.swovo.odango.voice_messages_enabled', true),
+  videoMessagesEnabled<bool>('com.swovo.odango.video_messages_enabled', true),
   showNoGoogle<bool>('com.swovo.odango.show_no_google', false),
   unifiedPushRegistered<bool>('com.swovo.odango.unifiedpush.registered', false),
   unifiedPushEndpoint<String>('com.swovo.odango.unifiedpush.endpoint', ''),
@@ -327,6 +333,9 @@ final webValidatedSettings = <AppSettings<Object?>, bool Function(Object?)>{
   AppSettings.sendTypingNotifications: (value) => value == false,
   AppSettings.sendPublicReadReceipts: (value) => value == false,
   AppSettings.shareOnlineStatus: (value) => value == false,
+  AppSettings.stripMediaMetadata: (value) => value == true,
+  AppSettings.mapTileServer: (value) =>
+      value is String && (value.isEmpty || MapTileConfig.parse(value) != null),
   AppSettings.appearOffline: (value) => value == true,
   AppSettings.autoSendErrorReports: (value) => value == false,
   AppSettings.shareKeysWith: (value) =>
@@ -387,6 +396,9 @@ const webAllowedSettings = <AppSettings<Object?>>{
   AppSettings.showTopicBarInThread,
   AppSettings.doubleTapToReact,
   AppSettings.doubleTapReaction,
+  AppSettings.mediaHd,
+  AppSettings.voiceMessagesEnabled,
+  AppSettings.videoMessagesEnabled,
 };
 
 Map<String, Object?> filterPlatformConfiguration(

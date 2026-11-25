@@ -15,6 +15,7 @@ import 'flows/conversation_flows.dart';
 import 'flows/dialog_flows.dart';
 import 'flows/direct_chat_flows.dart';
 import 'flows/login_and_chat_backup.dart';
+import 'flows/media_flows.dart';
 import 'flows/multi_account.dart';
 import 'flows/odango_flows.dart';
 import 'flows/onboarding_flows.dart';
@@ -86,6 +87,9 @@ void main() {
     flow('Settings blocked users', settingsBlockedUsersFlow);
     flow('Settings double-tap reaction', settingsDoubleTapReactionFlow);
     flow('Settings homeserver features', settingsHomeserverFlow);
+    flow('Media metadata removed on send', mediaMetadataFlow);
+    flow('Live location start and stop', liveLocationFlow);
+    flow('Maps off by default', mapsOffFlow);
     // Signs out every other session of the user: keep it after the flows that
     // use sessions of their own.
     flow('Settings linked devices', settingsLinkedDevicesFlow);

@@ -20,6 +20,10 @@ import 'package:odango/widgets/mxc_image.dart';
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatelessWidget {
+  static const replyKey = ValueKey('viewer_reply');
+  static const deleteKey = ValueKey('viewer_delete');
+  static const viewOnceKey = ValueKey('viewer_view_once');
+
   final ImageViewerController controller;
 
   const ImageViewerView(this.controller, {super.key});
@@ -366,6 +370,18 @@ class _BottomBlock extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (controller.viewOnce)
+              Padding(
+                key: ImageViewerView.viewOnceKey,
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 18,
+                  vertical: 8,
+                ),
+                child: Text(
+                  l10n.viewOnceHint,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12.5),
+                ),
+              ),
             if (caption != null)
               Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
@@ -417,36 +433,61 @@ class _BottomBlock extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    IconButton(
-                      style: iconStyle,
-                      tooltip: l10n.forward,
-                      icon: const Icon(
-                        Icons.forward_rounded,
-                        size: AppViewer.actionIcon,
-                      ),
-                      onPressed: controller.forwardAction,
-                    ),
-                    IconButton(
-                      style: iconStyle,
-                      tooltip: l10n.downloadFile,
-                      icon: const Icon(
-                        Icons.download_rounded,
-                        size: AppViewer.actionIcon,
-                      ),
-                      onPressed: () => controller.saveFileAction(context),
-                    ),
-                    if (PlatformInfos.isMobile)
-                      // Use builder context to correctly position the share dialog on iPad
-                      Builder(
-                        builder: (context) => IconButton(
-                          style: iconStyle,
-                          tooltip: l10n.share,
-                          icon: Icon(
-                            Icons.adaptive.share,
-                            size: AppViewer.actionIcon,
-                          ),
-                          onPressed: () => controller.shareFileAction(context),
+                    if (controller.canReply)
+                      IconButton(
+                        key: ImageViewerView.replyKey,
+                        style: iconStyle,
+                        tooltip: l10n.reply,
+                        icon: const Icon(
+                          Icons.reply_rounded,
+                          size: AppViewer.actionIcon,
                         ),
+                        onPressed: controller.replyAction,
+                      ),
+                    if (!controller.keepOnlyHere) ...[
+                      IconButton(
+                        style: iconStyle,
+                        tooltip: l10n.forward,
+                        icon: const Icon(
+                          Icons.forward_rounded,
+                          size: AppViewer.actionIcon,
+                        ),
+                        onPressed: controller.forwardAction,
+                      ),
+                      IconButton(
+                        style: iconStyle,
+                        tooltip: l10n.downloadFile,
+                        icon: const Icon(
+                          Icons.download_rounded,
+                          size: AppViewer.actionIcon,
+                        ),
+                        onPressed: () => controller.saveFileAction(context),
+                      ),
+                      if (PlatformInfos.isMobile)
+                        // Use builder context to correctly position the share dialog on iPad
+                        Builder(
+                          builder: (context) => IconButton(
+                            style: iconStyle,
+                            tooltip: l10n.share,
+                            icon: Icon(
+                              Icons.adaptive.share,
+                              size: AppViewer.actionIcon,
+                            ),
+                            onPressed: () =>
+                                controller.shareFileAction(context),
+                          ),
+                        ),
+                    ],
+                    if (controller.canDelete)
+                      IconButton(
+                        key: ImageViewerView.deleteKey,
+                        style: iconStyle,
+                        tooltip: l10n.delete,
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: AppViewer.actionIcon,
+                        ),
+                        onPressed: controller.deleteAction,
                       ),
                   ],
                 ),

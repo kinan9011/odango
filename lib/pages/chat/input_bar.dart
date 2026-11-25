@@ -17,8 +17,10 @@ import 'package:odango/pages/chat/trust_user_key_dialog.dart';
 import 'package:odango/utils/capped_text.dart';
 import 'package:odango/utils/chat/room_mention.dart';
 import 'package:odango/utils/chat/text_direction.dart';
+import 'package:odango/utils/localized_exception_extension.dart';
 import 'package:odango/utils/markdown_context_builder.dart';
 import 'package:odango/utils/matrix_sdk_extensions/safe_room_name.dart';
+import 'package:odango/utils/media/media_send_pipeline.dart';
 import 'package:odango/utils/platform_infos.dart';
 import 'package:odango/utils/visible_id.dart';
 import 'package:odango/widgets/mxc_image.dart';
@@ -459,7 +461,19 @@ class InputBar extends StatelessWidget {
                   bytes: data,
                   name: content.uri.split('/').last,
                 );
-                room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+                try {
+                  await MediaSendPipeline.forRoom(room).send(
+                    file,
+                    MediaSendOptions(
+                      stripMetadata: AppSettings.stripMediaMetadata.value,
+                    ),
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toLocalizedString(context))),
+                  );
+                }
               },
             ),
             minLines: minLines,

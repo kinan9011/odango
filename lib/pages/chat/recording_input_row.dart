@@ -41,11 +41,14 @@ class RecordingInputRow extends StatelessWidget {
       tween: Tween(begin: 1, end: 0),
       duration: motionDuration(context, AppMotion.recordEnter),
       curve: AppMotion.standard,
-      builder: (context, t, child) => Opacity(
-        opacity: 1 - t,
-        child: Transform.translate(
-          offset: Offset((rtl ? -1 : 1) * AppInChat.recordShift * t, 0),
-          child: child,
+      builder: (context, t, child) => ValueListenableBuilder(
+        valueListenable: state.driver.slide,
+        builder: (context, slide, _) => Opacity(
+          opacity: (1 - t) * slide.cancel,
+          child: Transform.translate(
+            offset: Offset((rtl ? -1 : 1) * AppInChat.recordShift * t, 0),
+            child: child,
+          ),
         ),
       ),
       child: SizedBox(

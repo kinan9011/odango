@@ -15,6 +15,7 @@ import 'package:odango/l10n/l10n.dart';
 import 'package:odango/utils/archive_guard.dart';
 import 'package:odango/utils/backup_dump_validator.dart';
 import 'package:odango/utils/chat_list/folder_store.dart';
+import 'package:odango/utils/media/media_send_pipeline.dart';
 import 'package:odango/utils/other_party_can_receive.dart';
 import 'package:odango/utils/sign_in_flows/homeserver_input.dart';
 import 'package:odango/utils/sign_in_flows/homeserver_problem_text.dart';
@@ -45,6 +46,9 @@ extension LocalizedExceptionExtension on Object {
       return L10n.of(
         context,
       ).fileIsTooBigForServer(_formatFileSize(exception.maxFileSize));
+    }
+    if (this is MediaCleanException) {
+      return L10n.of(context).mediaCannotBeCleaned;
     }
     if (this is ArchiveGuardException) {
       final l10n = L10n.of(context);
